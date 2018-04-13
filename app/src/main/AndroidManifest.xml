@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".reader.ReaderActivity"/>
+        <activity android:name=".reader.ReaderActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
     </application>
 
