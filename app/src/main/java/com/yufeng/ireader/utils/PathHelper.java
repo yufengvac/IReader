@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.Chapter;
+import com.yufeng.ireader.ui.beans.Book;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -49,6 +51,31 @@ public class PathHelper {
             }
         }
         return "";
+    }
+
+    /**
+     * 获取根目录下"ireader"下的后缀为txt的文件
+     * @return List<Book>
+     */
+    public static List<Book> getBooksInDirectory(){
+        ArrayList<Book> bookList = new ArrayList<>();
+        if (ensurePath()){
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), APP_PATH);
+            File[] files  = file.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return getExensionByName(pathname.getName()).toLowerCase().equals("txt");
+                }
+            });
+            for (File bookFile:files){
+                String bookName = getBookNameByPath(bookFile.getAbsolutePath());
+                Book book = Book.createBook(bookName,"", bookFile.getAbsolutePath());
+                if (book != null){
+                    bookList.add(book);
+                }
+            }
+        }
+        return bookList;
     }
 
     private static String getExensionByName(String name){

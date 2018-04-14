@@ -10,17 +10,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name="com.yufeng.ireader.base.MainActivity">
+        android:theme="@style/BaseTheme">
+
+        <activity android:name="com.yufeng.ireader.ui.home.activity.MainActivity"
+            android:theme="@style/BaseTheme"/>
+
+        <activity android:name=".reader.ReaderActivity"
+            android:theme="@style/BaseTheme"/>
+
+        <activity android:name=".ui.splash.SplashActivity"
+            android:theme="@style/BaseTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".reader.ReaderActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
     </application>
 
