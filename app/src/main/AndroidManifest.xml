@@ -13,10 +13,10 @@
         android:theme="@style/BaseTheme">
 
         <activity android:name="com.yufeng.ireader.ui.home.activity.MainActivity"
-            android:theme="@style/BaseTheme"/>
+            android:theme="@style/mainTheme"/>
 
-        <activity android:name=".reader.ReaderActivity"
-            android:theme="@style/BaseTheme"/>
+        <activity android:name=".reader.activity.ReadActivity"
+            android:theme="@style/mainTheme"/>
 
         <activity android:name=".ui.splash.SplashActivity"
             android:theme="@style/BaseTheme">

@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.Chapter;
+import com.yufeng.ireader.reader.utils.CharacterUtil;
 import com.yufeng.ireader.ui.beans.Book;
 
 import java.io.BufferedInputStream;
@@ -91,6 +92,7 @@ public class PathHelper {
     }
 
     public static ArrayList<String> getContentByPath(String path){
+        BufferedReader bufferedReader = null;
         try {
             ArrayList<Chapter> chapterList = new ArrayList<>();
             if (TextUtils.isEmpty(path)){
@@ -100,42 +102,47 @@ public class PathHelper {
             File file = new File(path);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
             InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream,"UTF-8");
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            bufferedReader = new BufferedReader(inputStreamReader);
             String line;
 
             ArrayList<String> contentList = new ArrayList<>();
-            int startIndex = 0;
+            int curIndex = 0;
             StringBuilder chapterSb = new StringBuilder();
+            ArrayList<String> paragraphList = new ArrayList<>();
             while ((line = bufferedReader.readLine())!=null){
-
+//                line = CharacterUtil.ToDBC(line);
                 if (BookHelper.isChapterParagraph(line)){
 
                     Chapter chapter = new Chapter();
                     chapter.setChapterName(line);
-                    chapter.setChapterIndex(startIndex);
+                    chapter.setChapterIndex(curIndex);
                     chapter.setType(Chapter.Type.NORMAL);
                     if (chapterList.size() > 0){
                         chapterList.get(chapterList.size()-1).setTotalContent(chapterSb.toString());
+                        chapterList.get(chapterList.size()-1).setParagraphList(paragraphList);
                     }
                     chapterList.add(chapter);
                     chapterSb = new StringBuilder();
+                    paragraphList.clear();
                 }else {
                     chapterSb.append(line).append("\n");
+                    paragraphList.add(line);
                 }
 
-                if (startIndex == 0 && !BookHelper.isChapterParagraph(line)){//文章第一段落不是标题，那都视作简介引言等
+                if (curIndex == 0 && !BookHelper.isChapterParagraph(line)){//文章第一段落不是标题，那都视作简介引言等
                     Chapter chapter = new Chapter();
                     chapter.setChapterName(getBookNameByPath(path));
                     chapter.setType(Chapter.Type.INTRODUCE);
                     chapterList.add(chapter);
                 }
 
-                startIndex++;
+                curIndex++;
                 contentList.add(line);
 
             }
             if (chapterList.size() > 1){
                 chapterList.get(chapterList.size()-1).setTotalContent(chapterSb.toString());
+                chapterList.get(chapterList.size()-1).setParagraphList(paragraphList);
             }
             Log.e("PathHelper","共有"+chapterList.size()+"章节");
             for (int i = 0 ; i < chapterList.size(); i++){
@@ -144,6 +151,14 @@ public class PathHelper {
             return contentList;
         }catch (Exception e){
             e.printStackTrace();
+        }finally {
+            if (bufferedReader != null){
+                try {
+                    bufferedReader.close();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }

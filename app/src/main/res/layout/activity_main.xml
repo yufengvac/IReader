@@ -1,13 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.yufeng.ireader.ui.home.activity.MainActivity"
-    android:background="@color/white">
+    android:background="@color/gray_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/common_padding"
+        android:background="@color/white">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/main_book_shelf"
+            style="@style/title_text_style"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/icon_search"
+                android:contentDescription="@string/app_name"/>
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/icon_option"
+                android:contentDescription="@string/app_name"
+                android:layout_marginLeft="@dimen/common_padding"
+                android:layout_marginStart="@dimen/common_padding"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/divider_line"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/book_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-</android.support.constraint.ConstraintLayout>
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/common_padding"
+        android:background="@color/white"/>
+</LinearLayout>

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ireader</string>
+
+    <string name="main_book_shelf">书架</string>
 </resources>

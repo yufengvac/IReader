@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.ui.beans.Book;
+import com.yufeng.ireader.ui.home.callback.onItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 
 public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.ViewHolder>{
     private List<Book> mData ;
+    private onItemClickListener listener;
     public BookShelfAdapter(){
         if (mData == null){
             mData = new ArrayList<>();
@@ -34,6 +36,10 @@ public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.View
             mData.addAll(list);
         }
         notifyDataSetChanged();
+    }
+
+    public Book getItem(int position){
+        return mData.get(position);
     }
 
     @Override
@@ -52,13 +58,25 @@ public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.View
         return mData != null ? mData.size():0;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder{
         private TextView bookNameTv;
         private TextView bookDescTv;
         private ViewHolder(View itemView) {
             super(itemView);
             bookNameTv = itemView.findViewById(R.id.item_book_shelf_book_name_tv);
             bookDescTv = itemView.findViewById(R.id.item_book_shelf_book_desc_tv);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null){
+                        listener.onItemClick(getLayoutPosition());
+                    }
+                }
+            });
         }
+    }
+
+    public void setOnItemClickListener(onItemClickListener listener){
+        this.listener = listener;
     }
 }
