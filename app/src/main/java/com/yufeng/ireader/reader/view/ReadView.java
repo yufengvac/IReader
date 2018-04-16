@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ReadView extends View{
 
-    private static Paint contentPaint;
+    private Paint contentPaint;
 
     private static final int DEFAULT_TEXT_SIZE = 18;
     private static final String DEFAULT_TEXT_COLOR = "#000000";
@@ -67,7 +67,7 @@ public class ReadView extends View{
         contentPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
     }
 
-    public static Paint getContentPaint(){
+    public Paint getContentPaint(){
         return contentPaint;
     }
 

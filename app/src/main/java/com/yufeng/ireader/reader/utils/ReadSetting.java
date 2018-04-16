@@ -1,5 +1,7 @@
 package com.yufeng.ireader.reader.utils;
 
+import android.graphics.Paint;
+
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 /**
@@ -8,6 +10,10 @@ import com.yufeng.ireader.reader.viewinterface.IReadSetting;
  */
 
 public class ReadSetting implements IReadSetting {
+
+    /**画内容的 画笔 区分画标题的画笔*/
+    private Paint contentPaint;
+
     @Override
     public int getPaddingLeft() {
         return 45;
@@ -36,5 +42,20 @@ public class ReadSetting implements IReadSetting {
     @Override
     public int getHorizontalExtra() {
         return 10;
+    }
+
+    @Override
+    public int getIndentCount() {
+        return 2;
+    }
+
+    @Override
+    public void setContentPaint(Paint paint){
+        this.contentPaint = paint;
+    }
+
+    @Override
+    public Paint getContentPaint(){
+        return contentPaint;
     }
 }

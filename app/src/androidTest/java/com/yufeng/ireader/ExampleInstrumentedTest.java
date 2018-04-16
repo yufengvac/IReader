@@ -4,6 +4,9 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.yufeng.ireader.reader.utils.CharCalculator;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,5 +25,10 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("com.yufeng.demo", appContext.getPackageName());
+    }
+
+    @Test
+    void testFirstIndexNotBlank(){
+        Assert.assertEquals(CharCalculator.getFirstIndexNotBlank("  你好世界"),2);
     }
 }

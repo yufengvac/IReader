@@ -20,7 +20,6 @@ public class CodeUtil {
     private static final int UTF16_BE = 4;
     private static final int BIG5 = 5;
 
-    @SuppressWarnings("InjectedReferences")
     public static final String[] ENCODINGS = new String[]{"", "gb2312", "UTF16-LE", "utf-8", "UTF16-BE", "Big5"};
     /**
      转半角的函数(DBC case)<br/><br/>
@@ -221,5 +220,9 @@ public class CodeUtil {
             code = ANSI;// GEnCodeTextLittle;
         }
         return code;
+    }
+
+    public static String getEncodingByCode(int code){
+        return ENCODINGS[code];
     }
 }

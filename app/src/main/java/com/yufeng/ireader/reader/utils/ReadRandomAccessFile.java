@@ -20,6 +20,9 @@ public class ReadRandomAccessFile extends RandomAccessFile{
     private String realPath;
     private long curPosition;
 
+    /**字符编码*/
+    private int code;
+
     public ReadRandomAccessFile(String name, String mode) throws IOException{
         super(name, mode);
         realPath = name;
@@ -67,5 +70,25 @@ public class ReadRandomAccessFile extends RandomAccessFile{
      */
     public long getLocation() throws IOException{
         return getAbsoluteFilePointer();
+    }
+
+    /**
+     * 记录一下当前的pointer位置
+     * @param position 读完之后pointer的位置
+     */
+    public void setCurPosition(long position){
+        this.curPosition = position;
+    }
+
+    public long getCurPosition(){
+        return this.curPosition;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 }

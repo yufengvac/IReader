@@ -10,7 +10,9 @@ import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.utils.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
+import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.ui.base.BaseActivity;
+import com.yufeng.ireader.utils.DisPlayUtil;
 
 import java.io.IOException;
 
@@ -25,6 +27,7 @@ public class ReadActivity extends BaseActivity{
     private static final String KEY_PATH = "path";
 
     private ReadView readView;
+    private IReadSetting readSetting;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -45,7 +48,10 @@ public class ReadActivity extends BaseActivity{
     @Override
     public void initListener() {
         path = getIntent().getStringExtra(KEY_PATH);
-        readView.setReadSetting(new ReadSetting());
+
+        readSetting = new ReadSetting();
+        readSetting.setContentPaint(readView.getContentPaint());
+        readView.setReadSetting(readSetting);
     }
 
     @Override
@@ -70,9 +76,11 @@ public class ReadActivity extends BaseActivity{
                 try {
                     ReadRandomAccessFile randomAccessFile = new ReadRandomAccessFile(path,"r");
                     int code = CodeUtil.regCode(path);
-                    while (true){
-                        TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(randomAccessFile);
-                    }
+                    Log.i(TAG,"字符编码是："+ CodeUtil.getEncodingByCode(code));
+//                    while (true){
+                    randomAccessFile.setCode(code);
+                        TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(randomAccessFile, DisPlayUtil.getDisplayWidth(ReadActivity.this), readSetting);
+//                    }
                 }catch (IOException e){
                     e.printStackTrace();
                 }
