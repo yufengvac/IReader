@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class ReadView extends View{
     private int displayHeight;
     private int baseLineY = 0;
     private boolean isStop = false;
+
+    private IReadSetting readSetting;
 
     private List<String> paragraphList;
     private List<Integer> baseLineYList = new ArrayList<>();
@@ -66,6 +69,10 @@ public class ReadView extends View{
 
     public static Paint getContentPaint(){
         return contentPaint;
+    }
+
+    public void setReadSetting(IReadSetting readSetting){
+        this.readSetting  = readSetting;
     }
 
     @Override

@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.bean.TxtParagraph;
+import com.yufeng.ireader.reader.utils.CodeUtil;
+import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
+import com.yufeng.ireader.reader.utils.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.ui.base.BaseActivity;
-import com.yufeng.ireader.utils.PathHelper;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -42,6 +45,7 @@ public class ReadActivity extends BaseActivity{
     @Override
     public void initListener() {
         path = getIntent().getStringExtra(KEY_PATH);
+        readView.setReadSetting(new ReadSetting());
     }
 
     @Override
@@ -50,19 +54,29 @@ public class ReadActivity extends BaseActivity{
             @Override
             public void run() {
                 Log.e(TAG,"realPath="+path);
-                final ArrayList<String> contentList = PathHelper.getContentByPath(path);
-                if (contentList != null && contentList.size() > 0){
-                    for (int i = 0 ; i < 20 ; i++){
-                        Log.e(TAG,contentList.get(i));
+//                final ArrayList<String> contentList = PathHelper.getContentByPath(path);
+//                if (contentList != null && contentList.size() > 0){
+//                    for (int i = 0 ; i < 20 ; i++){
+//                        Log.e(TAG,contentList.get(i));
+//                    }
+//                    Log.e(TAG,"大小是："+contentList.size());
+//                }
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        readView.setParagraphList(contentList);
+//                    }
+//                });
+                try {
+                    ReadRandomAccessFile randomAccessFile = new ReadRandomAccessFile(path,"r");
+                    int code = CodeUtil.regCode(path);
+                    while (true){
+                        TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(randomAccessFile);
                     }
-                    Log.e(TAG,"大小是："+contentList.size());
+                }catch (IOException e){
+                    e.printStackTrace();
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        readView.setParagraphList(contentList);
-                    }
-                });
+
             }
         }.start();
     }

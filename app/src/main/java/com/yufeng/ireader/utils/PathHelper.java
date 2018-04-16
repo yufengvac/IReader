@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.Chapter;
-import com.yufeng.ireader.reader.utils.CharacterUtil;
 import com.yufeng.ireader.ui.beans.Book;
 
 import java.io.BufferedInputStream;
@@ -13,10 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +106,7 @@ public class PathHelper {
             StringBuilder chapterSb = new StringBuilder();
             ArrayList<String> paragraphList = new ArrayList<>();
             while ((line = bufferedReader.readLine())!=null){
-//                line = CharacterUtil.ToDBC(line);
+//                line = CodeUtil.ToDBC(line);
                 if (BookHelper.isChapterParagraph(line)){
 
                     Chapter chapter = new Chapter();
