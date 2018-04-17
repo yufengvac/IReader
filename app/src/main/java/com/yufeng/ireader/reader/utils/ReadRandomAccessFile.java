@@ -69,7 +69,7 @@ public class ReadRandomAccessFile extends RandomAccessFile{
      * @throws IOException
      */
     public long getLocation() throws IOException{
-        return getAbsoluteFilePointer();
+        return getFilePointer();
     }
 
     /**

@@ -2,6 +2,7 @@ package com.yufeng.ireader.reader.utils;
 
 import android.graphics.Paint;
 
+import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 import java.util.ArrayList;
@@ -21,18 +22,15 @@ public class CharCalculator {
     public static final char ILLEGAL_CHAR  = '\ufeff'; //表示非法字符
     public static final char BLANK_CHAR    = ' ';      //表示空格
 
-    public static void calcCharOffsetX(String paragrah, int displayWidth, IReadSetting readSetting, float[] offsetXArr, List<Integer> headIndexList){
+    public static void calcCharOffsetX(String paragrah, int displayWidth, IReadSetting readSetting, TxtParagraph txtParagraph){
 
         //行首的首个字符索引
-        if (headIndexList == null){
-            headIndexList = new ArrayList<>();
-        }
+
+        List<Integer>  headIndexList = new ArrayList<>();
 
         char[] blankChar = new char[]{' '};
 
-        if (offsetXArr == null){
-            offsetXArr = new float[paragrah.length()];
-        }
+        float[] offsetXArr = new float[paragrah.length()];
 
         int indentCount = readSetting.getIndentCount();
         Paint contentPaint = readSetting.getContentPaint();
@@ -57,6 +55,8 @@ public class CharCalculator {
             char desChar = paragrah.charAt(i);
 
             if (desChar == NEW_LINE_CHAR){//表示结束
+                txtParagraph.setHeadIndexList(headIndexList);
+                txtParagraph.setOffsetX(offsetXArr);
                 return;
             }
 
@@ -71,10 +71,11 @@ public class CharCalculator {
                     int curLineStartIndex = headIndexList.get(headIndexList.size()-1);
                     int curLineEndIndex = i - 1;
                     int curLineCount = curLineEndIndex - curLineStartIndex + 1;
-                    float oneLineRemainingAvgWidth = ( desCharWidth - totalOffsetX - readSetting.getPaddingRight() +readSetting.getHorizontalExtra() )/curLineCount;
+//                    float oneLineRemainingAvgWidth = ( desCharWidth - totalOffsetX - readSetting.getPaddingRight() +readSetting.getHorizontalExtra() )/curLineCount;
+                    float oneLineRemainingAvgWidth = (  displayWidth - totalOffsetX - readSetting.getPaddingRight() )/curLineCount;
                     int step = 0;
                     for (int j = curLineStartIndex ; j < curLineEndIndex ; j++){
-                        offsetXArr[j] += oneLineRemainingAvgWidth * step;
+                        offsetXArr[j] += oneLineRemainingAvgWidth ;
                         step++;
                     }
                 }else {
@@ -113,8 +114,18 @@ public class CharCalculator {
 
     }
 
-    public static float calcParagraphOffsetY(){
-        return 0;
+    public static int calcParagraphOffsetY( List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting){
+        Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
+        float baseCharHeight = fontMetrics.bottom - fontMetrics.top;
+        float oneLineHeight = baseCharHeight + readSetting.getLineSpaceExtra();
+        float totalLineHeight = 0;
+        for (int i = 0 ; i < headIndexList.size(); i ++){
+            totalLineHeight += (startOffsetY + oneLineHeight);
+            if (totalLineHeight > displayHeight- readSetting.getPaddingBottom()){
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**

@@ -17,6 +17,8 @@ import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.utils.DisPlayUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -84,14 +86,22 @@ public class ReadActivity extends BaseActivity{
 
                     Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
                     float startOffsetY = readSetting.getPaddingTop() + fontMetrics.bottom - fontMetrics.top;
+                    List<TxtParagraph> drawTxtParaList = new ArrayList<>();
                     while (true){
                         TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(randomAccessFile, DisPlayUtil.getDisplayWidth(ReadActivity.this), readSetting);
-                        float paragraphOffsetY = txtParagraph.calculatorOffsetY(readSetting, startOffsetY);
-                        if (paragraphOffsetY >= displayHeight){
+                        drawTxtParaList.add(txtParagraph);
+                        float resultOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight, readView);
+                        if (resultOffsetY == -1){
+                            Log.e(TAG,"第一个页面已经全部获取完了 resultOffsetY==-1");
+                            break;
+                        }
+                        startOffsetY += resultOffsetY;
+                        if (startOffsetY >= displayHeight - readSetting.getPaddingBottom()){
+                            Log.e(TAG,"第一个页面已经全部获取完了");
                             break;
                         }
                     }
-
+                    readView.setTxtParagraphList(drawTxtParaList);
                 }catch (IOException e){
                     e.printStackTrace();
                 }

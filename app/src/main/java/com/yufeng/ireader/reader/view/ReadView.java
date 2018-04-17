@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
 
@@ -21,6 +22,7 @@ import java.util.List;
  */
 
 public class ReadView extends View{
+    private static final String TAG = ReadView.class.getSimpleName();
 
     private Paint contentPaint;
 
@@ -38,6 +40,8 @@ public class ReadView extends View{
 
     private List<String> paragraphList;
     private List<Integer> baseLineYList = new ArrayList<>();
+    private int curLineCut = -1;
+    private List<TxtParagraph> txtParagraphList = new ArrayList<>();
 
     public ReadView(Context context) {
        this(context, null);
@@ -78,12 +82,6 @@ public class ReadView extends View{
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        double height = measureLineHeight();
-        if (paragraphList != null){
-            for (int i = 0; i < paragraphList.size(); i++){
-                canvas.drawText(paragraphList.get(i),0, (int)(i *(height + lineSpaceExtra) + height * 0.6) ,contentPaint);
-            }
-        }
 
     }
 
@@ -98,84 +96,19 @@ public class ReadView extends View{
     }
 
 
-    private int getMaxLine(){
-        double lines = displayHeight / (measureLineHeight() + lineSpaceExtra);
-        return (int) lines;
+    public int getCurLineCut() {
+        return curLineCut;
     }
 
+    public void setCurLineCut(int curLineCut) {
+        this.curLineCut = curLineCut;
+    }
 
-
-    public void setParagraphList(List<String> list){
-        int curLine = 0;
-        int maxLines = getMaxLine();
-        if (paragraphList == null){
-            paragraphList = new ArrayList<>();
-        }else {
-            paragraphList.clear();
+    public void setTxtParagraphList(List<TxtParagraph> list){
+        this.txtParagraphList = list;
+        for (int i = 0; i < list.size() ; i++){
+            Log.e(TAG, "content="+list.get(i).toString() );
         }
-
-        for (int i = 0; i < list.size() && curLine < maxLines; i ++){
-            String desStr = list.get(i).trim();
-            float width = contentPaint.measureText(desStr);
-            if (width <= displayWidth){
-                curLine ++;
-                paragraphList.add(desStr);
-            }else {
-                int line =(int) Math.ceil((double) (width / displayWidth));
-                curLine +=line;
-//                paragraphList.add(desStr);
-                getString(line,desStr);
-            }
-        }
-
         postInvalidate();
-        requestLayout();
-    }
-
-    public void getString(int line, String desStr){
-        char[] desStrs = desStr.toCharArray();
-        int firstCount = desStr.length() / line;
-        int tryCount = firstCount;
-        int start = 0;
-        boolean isAdd ;
-        int totalTryCount = 0;
-        do {
-            isAdd = check(desStrs,start,tryCount);
-            if (isAdd){
-                totalTryCount +=tryCount;
-                start = totalTryCount + 1;
-                tryCount = firstCount;
-            }else {
-                tryCount ++;
-            }
-
-        }while (start + firstCount < desStrs.length);
-
-        if (desStrs.length - start >0){
-            paragraphList.add(new String(desStrs,start,desStrs.length - start ) );
-        }
-
-//            if (!check(desStrs,start,tryCount)){
-//                tryCount ++;
-//                check(desStrs,start, tryCount);
-//            }else {
-//                start = tryCount + 1;
-//                if (start + firstCount >= desStrs.length){
-//                    check(desStrs,start, firstCount);
-//                }else {
-//                    paragraphList.add(new String(desStrs,start,desStrs.length - start ) );
-//                }
-//            }
-
-
-    }
-
-    private boolean check(char[] chars,int start, int count){
-        if (contentPaint.measureText(chars,start,count) > displayWidth){
-            Log.e("ReadView","h->"+new String(chars,start,count));
-            paragraphList.add(new String(chars,start,count));
-            return true;
-        }
-        return false;
     }
 }

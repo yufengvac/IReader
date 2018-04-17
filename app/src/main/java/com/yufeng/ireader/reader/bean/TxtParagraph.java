@@ -1,13 +1,16 @@
 package com.yufeng.ireader.reader.bean;
 
+import android.graphics.Paint;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.utils.CharCalculator;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
+import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,7 +26,11 @@ public class TxtParagraph {
 
     private float[] offsetX;
     private List<Integer> headIndexList;
+    private String paragraph;
 
+    private TxtParagraph(String contentPara){
+        this.paragraph = contentPara;
+    }
 
     public static TxtParagraph createTxtParagraph(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting){
         TxtParagraph txtParagraph = null;
@@ -32,8 +39,8 @@ public class TxtParagraph {
             String paragraphStr = getParagraphString(readRandomAccessFile, tempBuf);
             Log.e(TAG,"段落为="+paragraphStr);
 
-            txtParagraph = new TxtParagraph();
-            CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph.getOffsetX(), txtParagraph.getHeadIndexList());
+            txtParagraph = new TxtParagraph(paragraphStr);
+            CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -53,18 +60,29 @@ public class TxtParagraph {
                 break;
             }
         }
-        readRandomAccessFile.setCurPosition( readRandomAccessFile.getLocation() + count);
+        readRandomAccessFile.setCurPosition( readRandomAccessFile.getCurPosition() + count);
         readRandomAccessFile.seek(readRandomAccessFile.getCurPosition());
         return new String(bytes,0,count, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
     }
 
 
-    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY){
+    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight, ReadView readView){
         if (offsetX == null || headIndexList == null){
-            return 0;
+            return -1f;
         }
-
-        return CharCalculator.calcParagraphOffsetY();
+        Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
+        float baseLineHeight = fontMetrics.bottom - fontMetrics.top;
+        int calcResult = CharCalculator.calcParagraphOffsetY(headIndexList, startOffsetY, displayHeight, readSetting);
+        readView.setCurLineCut(calcResult);
+        if (calcResult == -1){
+            return headIndexList.size() * ( baseLineHeight + readSetting.getLineSpaceExtra());
+        }else if (calcResult == 0){
+            return -1;
+        }else if (calcResult > 0){
+            return calcResult * (baseLineHeight + readSetting.getLineSpaceExtra());
+        }else {
+            return -1;
+        }
     }
 
     public float[] getOffsetX() {
@@ -75,11 +93,35 @@ public class TxtParagraph {
         this.offsetX = offsetX;
     }
 
+    public void setHeadIndexList(List<Integer> headIndexList) {
+        this.headIndexList = headIndexList;
+    }
+
     public List<Integer> getHeadIndexList() {
         return headIndexList;
     }
 
-    public void setHeadIndexList(List<Integer> headIndexList) {
-        this.headIndexList = headIndexList;
+    public String getParagraph() {
+        return paragraph;
+    }
+
+    @Override
+    public String toString() {
+        return "TxtParagraph{" +
+                "offsetX=" + Arrays.toString(offsetX) +
+                ", headIndexList=" + getHeadIndexListToString() +
+                ", paragraph='" + paragraph + '\'' +
+                '}';
+    }
+
+    private String getHeadIndexListToString(){
+        if (headIndexList != null){
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Integer index : headIndexList){
+                stringBuilder.append(index).append(",");
+            }
+            return stringBuilder.toString();
+        }
+        return "";
     }
 }
