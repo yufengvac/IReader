@@ -2,6 +2,8 @@ package com.yufeng.ireader.reader.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
+import android.support.v4.graphics.PaintCompat;
 import android.util.Log;
 
 import com.yufeng.ireader.R;
@@ -77,10 +79,19 @@ public class ReadActivity extends BaseActivity{
                     ReadRandomAccessFile randomAccessFile = new ReadRandomAccessFile(path,"r");
                     int code = CodeUtil.regCode(path);
                     Log.i(TAG,"字符编码是："+ CodeUtil.getEncodingByCode(code));
-//                    while (true){
                     randomAccessFile.setCode(code);
+                    int displayHeight = DisPlayUtil.getDisplayHeight(ReadActivity.this);
+
+                    Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
+                    float startOffsetY = readSetting.getPaddingTop() + fontMetrics.bottom - fontMetrics.top;
+                    while (true){
                         TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(randomAccessFile, DisPlayUtil.getDisplayWidth(ReadActivity.this), readSetting);
-//                    }
+                        float paragraphOffsetY = txtParagraph.calculatorOffsetY(readSetting, startOffsetY);
+                        if (paragraphOffsetY >= displayHeight){
+                            break;
+                        }
+                    }
+
                 }catch (IOException e){
                     e.printStackTrace();
                 }
