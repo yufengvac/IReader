@@ -21,7 +21,7 @@ public class ReadSetting implements IReadSetting {
 
     @Override
     public int getPaddingTop() {
-        return 45;
+        return 90;
     }
 
     @Override
@@ -31,17 +31,17 @@ public class ReadSetting implements IReadSetting {
 
     @Override
     public int getPaddingBottom() {
-        return 45;
+        return 90;
     }
 
     @Override
     public int getLineSpaceExtra() {
-        return 10;
+        return 30;
     }
 
     @Override
     public int getHorizontalExtra() {
-        return 10;
+        return 6;
     }
 
     @Override

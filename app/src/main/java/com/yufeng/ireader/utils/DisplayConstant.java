@@ -1,0 +1,15 @@
+package com.yufeng.ireader.utils;
+
+/**
+ * Created by yufeng on 2018/4/18-0018.
+ *
+ */
+
+public class DisplayConstant {
+    public static int DISPLAY_WIDTH = 0;
+    public static int DISPLAY_HEIGHT = 0;
+    public static void init(int width, int height){
+        DISPLAY_WIDTH = width;
+        DISPLAY_HEIGHT = height;
+    }
+}

@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.yufeng.ireader.reader.bean.PagerManager;
 import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
@@ -28,20 +29,9 @@ public class ReadView extends View{
 
     private static final int DEFAULT_TEXT_SIZE = 18;
     private static final String DEFAULT_TEXT_COLOR = "#000000";
+    private static final String DEFAULT_BG_COLOR = "#B3AFA7";
     private static final int DEFAULT_STROKE_WIDTH = 2;
 
-    private int lineSpaceExtra = 30;
-    private int displayWidth;
-    private int displayHeight;
-    private int baseLineY = 0;
-    private boolean isStop = false;
-
-    private IReadSetting readSetting;
-
-    private List<String> paragraphList;
-    private List<Integer> baseLineYList = new ArrayList<>();
-    private int curLineCut = -1;
-    private List<TxtParagraph> txtParagraphList = new ArrayList<>();
 
     public ReadView(Context context) {
        this(context, null);
@@ -58,8 +48,6 @@ public class ReadView extends View{
 
     private void init(Context context){
         initDefaultContentPaint(context);
-        displayWidth = DisPlayUtil.getDisplayWidth(context);
-        displayHeight = DisPlayUtil.getDisplayHeight(context);
     }
 
     private void initDefaultContentPaint(Context context){
@@ -75,40 +63,27 @@ public class ReadView extends View{
         return contentPaint;
     }
 
-    public void setReadSetting(IReadSetting readSetting){
-        this.readSetting  = readSetting;
-    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        drawBg(canvas);
 
+        drawCurrentContent(canvas);
     }
 
-    private double measureLineHeight(){
-        if (contentPaint != null){
-             Paint.FontMetrics fontMetrics = contentPaint.getFontMetrics();
-             double height = fontMetrics.bottom - fontMetrics.top;
-             baseLineY = (int)(height * 0.6);
-             return height;
-        }
-        return 0;
+    private void drawBg(Canvas canvas){
+        canvas.drawColor(Color.parseColor(DEFAULT_BG_COLOR));
     }
 
 
-    public int getCurLineCut() {
-        return curLineCut;
+    private void drawCurrentContent(Canvas canvas){
+
     }
 
-    public void setCurLineCut(int curLineCut) {
-        this.curLineCut = curLineCut;
+
+    public void prepare(IReadSetting readSetting, String path){
+        PagerManager.getInstance().initPagers(readSetting, path);
     }
 
-    public void setTxtParagraphList(List<TxtParagraph> list){
-        this.txtParagraphList = list;
-        for (int i = 0; i < list.size() ; i++){
-            Log.e(TAG, "content="+list.get(i).toString() );
-        }
-        postInvalidate();
-    }
 }

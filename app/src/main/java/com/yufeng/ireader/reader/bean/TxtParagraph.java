@@ -1,5 +1,6 @@
 package com.yufeng.ireader.reader.bean;
 
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
@@ -24,9 +25,12 @@ public class TxtParagraph {
     private static final int MAX_TEMP_BYTE_SIZE = 1<<17;
     private static byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
 
-    private float[] offsetX;
-    private List<Integer> headIndexList;
-    private String paragraph;
+    private float[] offsetX;//每个字符的x偏移量
+    private float[] offsetY;//每行的y偏移量
+    private List<Integer> headIndexList;//段落中的首行的在段落中的索引
+    private String paragraph;//段落完整内容
+    private int firstCanDrawLine = 0;//在该页面下，该段落可以绘制的第一行索引
+    private int lastCanDrawLine = -1;//在改页面下，改段落可以绘制的最后一行索引
 
     private TxtParagraph(String contentPara){
         this.paragraph = contentPara;
@@ -66,22 +70,37 @@ public class TxtParagraph {
     }
 
 
-    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight, ReadView readView){
+    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight){
         if (offsetX == null || headIndexList == null){
-            return -1f;
+            return startOffsetY;
         }
-        Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
-        float baseLineHeight = fontMetrics.bottom - fontMetrics.top;
-        int calcResult = CharCalculator.calcParagraphOffsetY(headIndexList, startOffsetY, displayHeight, readSetting);
-        readView.setCurLineCut(calcResult);
-        if (calcResult == -1){
-            return headIndexList.size() * ( baseLineHeight + readSetting.getLineSpaceExtra());
-        }else if (calcResult == 0){
-            return -1;
-        }else if (calcResult > 0){
-            return calcResult * (baseLineHeight + readSetting.getLineSpaceExtra());
-        }else {
-            return -1;
+
+        float[] offsetY = new float[headIndexList.size()];
+        setOffsetY(offsetY);
+
+        return CharCalculator.calcParagraphOffsetY(headIndexList, startOffsetY, displayHeight, readSetting, this);
+    }
+
+    public void drawTxtParagraph(Canvas canvas, Paint contentPaint){
+        float[] offsetX = getOffsetX();
+        float[] offsetY = getOffsetY();
+        List<Integer> headIndexList = getHeadIndexList();
+        for (int i = firstCanDrawLine ;i <= lastCanDrawLine; i++){
+            int startIndex = headIndexList.get(i);
+            int endIndex;
+            if ( i+1 <= lastCanDrawLine){
+                endIndex = headIndexList.get(i+1);
+            }else {
+                if (lastCanDrawLine+1 < headIndexList.size()){
+                    endIndex = headIndexList.get(lastCanDrawLine + 1);
+                }else {
+                    endIndex = getParagraph().length() ;
+                }
+            }
+            float drawBaseLineY = offsetY[i];
+            for (int j = startIndex; j < endIndex; j++){
+                canvas.drawText(this.getParagraph(), j, j+1, offsetX[j],drawBaseLineY,contentPaint);
+            }
         }
     }
 
@@ -91,6 +110,14 @@ public class TxtParagraph {
 
     public void setOffsetX(float[] offsetX) {
         this.offsetX = offsetX;
+    }
+
+    public float[] getOffsetY() {
+        return offsetY;
+    }
+
+    public void setOffsetY(float[] offsetY) {
+        this.offsetY = offsetY;
     }
 
     public void setHeadIndexList(List<Integer> headIndexList) {
@@ -105,12 +132,29 @@ public class TxtParagraph {
         return paragraph;
     }
 
+    public int getFirstCanDrawLine() {
+        return firstCanDrawLine;
+    }
+
+    public void setFirstCanDrawLine(int firstCanDrawLine) {
+        this.firstCanDrawLine = firstCanDrawLine;
+    }
+
+    public int getLastCanDrawLine() {
+        return lastCanDrawLine;
+    }
+
+    public void setLastCanDrawLine(int lastCanDrawLine) {
+        this.lastCanDrawLine = lastCanDrawLine;
+    }
+
     @Override
     public String toString() {
         return "TxtParagraph{" +
                 "offsetX=" + Arrays.toString(offsetX) +
                 ", headIndexList=" + getHeadIndexListToString() +
                 ", paragraph='" + paragraph + '\'' +
+                ", offsetY='" + Arrays.toString(offsetY) + '\'' +
                 '}';
     }
 

@@ -64,15 +64,6 @@ public class ReadRandomAccessFile extends RandomAccessFile{
     }
 
     /**
-     * 得到当前指针的位置
-     * @return
-     * @throws IOException
-     */
-    public long getLocation() throws IOException{
-        return getFilePointer();
-    }
-
-    /**
      * 记录一下当前的pointer位置
      * @param position 读完之后pointer的位置
      */

@@ -28,7 +28,7 @@ public class CharCalculator {
 
         List<Integer>  headIndexList = new ArrayList<>();
 
-        char[] blankChar = new char[]{' '};
+        char[] blankChar = new char[]{'　'};
 
         float[] offsetXArr = new float[paragrah.length()];
 
@@ -114,18 +114,31 @@ public class CharCalculator {
 
     }
 
-    public static int calcParagraphOffsetY( List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting){
+    public static float calcParagraphOffsetY( List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting, TxtParagraph txtParagraph){
         Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
         float baseCharHeight = fontMetrics.bottom - fontMetrics.top;
+
         float oneLineHeight = baseCharHeight + readSetting.getLineSpaceExtra();
-        float totalLineHeight = 0;
-        for (int i = 0 ; i < headIndexList.size(); i ++){
-            totalLineHeight += (startOffsetY + oneLineHeight);
-            if (totalLineHeight > displayHeight- readSetting.getPaddingBottom()){
-                return i;
+
+        float[] offsetY = txtParagraph.getOffsetY();
+        int lastCanDrawLine ;
+        int firstCanDrawLine = txtParagraph.getFirstCanDrawLine();
+
+        lastCanDrawLine = headIndexList.size() - 1;
+        offsetY[firstCanDrawLine] = startOffsetY;
+
+        for (int i = firstCanDrawLine+1 ; i < headIndexList.size(); i ++){
+
+            float nextDrawLine = offsetY[i - 1] +oneLineHeight;
+            if (nextDrawLine > displayHeight - readSetting.getPaddingBottom()){
+                lastCanDrawLine = i - 1;
+                txtParagraph.setLastCanDrawLine(lastCanDrawLine);
+                return nextDrawLine;
             }
+            offsetY[i] = nextDrawLine;
         }
-        return -1;
+        txtParagraph.setLastCanDrawLine(lastCanDrawLine);
+        return offsetY[lastCanDrawLine] + oneLineHeight;
     }
 
     /**
@@ -186,7 +199,7 @@ public class CharCalculator {
         int prevIndex = -1;
         int nextIndex = -1;
         for (int i = index - 1; i > (index - MAX_OFFSET) && i > startIndex; i--){
-            if (isInvalidHeadChar(paragrah.charAt(i)) &&(i -1 == startIndex || isInvalidEndChar(paragrah.charAt(i-1)))){
+            if (isInvalidEndChar(paragrah.charAt(i)) &&(i -1 == startIndex || isInvalidHeadChar(paragrah.charAt(i+1)))){
                 prevIndex = i;
                 break;
             }
@@ -206,7 +219,7 @@ public class CharCalculator {
         int replaceCharCount = 0;
         if (nextIndex != -1){
 
-            for (int i = index; i < nextIndex ; i++){
+            for (int i = startIndex; i <= nextIndex ; i++){
 
                 //计算从index到nextIndex字符还需要的宽度空间
                 if (nextIndex > index){
@@ -245,7 +258,7 @@ public class CharCalculator {
             charAddWidth = (displayWidth - offsetXArr[realEndIndex + 1] - readSetting.getPaddingRight()) / (realEndIndex - startIndex);
         }
         int firstIndexNotBlank = getFirstIndexNotBlank(paragrah);
-        for (int i = startIndex; i < realEndIndex; i++){
+        for (int i = startIndex; i <= realEndIndex; i++){
             if (type == 3) {
                 offsetXArr[i] += (i - startIndex) * charAddWidth;
             } else {
