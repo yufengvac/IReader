@@ -85,6 +85,7 @@ public class TxtParagraph {
         float[] offsetX = getOffsetX();
         float[] offsetY = getOffsetY();
         List<Integer> headIndexList = getHeadIndexList();
+        Log.e(TAG,"绘制段落->"+getParagraph()+"，firstCanDrawLine="+firstCanDrawLine+",lastCanDrawLine="+lastCanDrawLine+"，该段落最多有"+headIndexList.size()+"行");
         for (int i = firstCanDrawLine ;i <= lastCanDrawLine; i++){
             int startIndex = headIndexList.get(i);
             int endIndex;

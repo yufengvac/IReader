@@ -45,7 +45,6 @@ public class Pager {
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
         try {
 
-
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() + fontMetrics.bottom - fontMetrics.top;
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();

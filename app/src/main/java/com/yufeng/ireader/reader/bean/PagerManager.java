@@ -1,11 +1,16 @@
 package com.yufeng.ireader.reader.bean;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.utils.DisplayConstant;
 
 import java.io.IOException;
 
@@ -18,6 +23,7 @@ public class PagerManager {
     private static final String TAG = PagerManager.class.getSimpleName();
     private SparseArray<Pager> pagerSparseArray ;
     private ReadRandomAccessFile readRandomAccessFile;
+    private IReadSetting readSetting;
 
     private PagerManager(){
         if (pagerSparseArray == null){
@@ -46,14 +52,34 @@ public class PagerManager {
         }
         if (pagerSparseArray.get(0) == null){
             initReadRandomAccessFile(path);
-
-            pagerSparseArray.setValueAt(0,Pager.createNextPager(readSetting, readRandomAccessFile));
+            this.readSetting = readSetting;
+            pagerSparseArray.put(0,Pager.createNextPager(this.readSetting, readRandomAccessFile));
 
         }
     }
 
-    public void drawNextPager(){
+    public void drawPagerOne(Canvas canvas, Paint paint){
+        if (pagerSparseArray == null){
+            return;
+        }
+        if (pagerSparseArray.size() > 0){
+            Pager curPage = pagerSparseArray.get(0);
+            curPage.drawTxtParagraph(canvas,paint);
+        }
+    }
 
+    public void drawPagerTwo(Canvas canvas, Paint paint){
+        if (pagerSparseArray == null){
+            return;
+        }
+        Pager nextPage = Pager.createNextPager(readSetting, readRandomAccessFile);
+        pagerSparseArray.put(1, nextPage);
+        canvas.save();
+        canvas.translate(DisplayConstant.DISPLAY_WIDTH, 0);
+        nextPage.drawTxtParagraph(canvas, paint);
+        RectF rectF = new RectF(0,0,DisplayConstant.DISPLAY_WIDTH,DisplayConstant.DISPLAY_HEIGHT);
+        canvas.drawRect(rectF,paint);
+        canvas.restore();
     }
 
     private void initReadRandomAccessFile(String path) {
