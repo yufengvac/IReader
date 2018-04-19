@@ -61,10 +61,16 @@ public class PagerManager {
             }
             return INSTANCE;
         }
+        private static void destroy(){
+            INSTANCE = null;
+        }
     }
 
     public static PagerManager getInstance(){
         return PagerManagerHolder.getINSTANCE();
+    }
+    public static void destroy(){
+        PagerManagerHolder.destroy();
     }
 
 
@@ -84,29 +90,17 @@ public class PagerManager {
         if (pagerSparseArray.size() > 0){
             Pager curPage = pagerSparseArray.get(0);
 
-            int code = curPage.drawTxtParagraph(canvas,paint);
-            setLastCanDrawLineAndTxtParagraph(curPage, code);
+           int code = curPage.drawTxtParagraph(canvas,paint);
+           setLastCanDrawLineAndTxtParagraph(curPage, code);
         }
     }
 
-    public void prepareNextBitmap(Paint paint){
+    public void prepareNextBitmap(){
         if (pagerSparseArray == null){
             return;
         }
         Pager nextPage = Pager.createPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile);
         pagerSparseArray.put(1, nextPage);
-
-        if (nextCacheBitmap != null){
-
-            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
-
-            int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
-            setLastCanDrawLineAndTxtParagraph(nextPage,code);
-            PathHelper.saveBitmapToSDCard(nextCacheBitmap, System.currentTimeMillis()+"_1");
-        }else {
-            Log.e(TAG,"cacheBitmap == null");
-        }
     }
 
     private void setLastCanDrawLineAndTxtParagraph(Pager pager,int code){
@@ -117,12 +111,23 @@ public class PagerManager {
         }else {
             curPageTxtParagraph = curPagerTxtParagraphList.get(curPagerTxtParagraphList.size()-1);
         }
+
     }
 
     public void turnNextPage(Canvas canvas, Paint paint){
-        canvas.drawBitmap(nextCacheBitmap,0,0,paint);
-        PathHelper.saveBitmapToSDCard(nextCacheBitmap, System.currentTimeMillis()+"_2");
+        if (nextCacheBitmap != null){
+            Pager nextPage = pagerSparseArray.get(1);
+            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+            cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
 
+            int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
+            setLastCanDrawLineAndTxtParagraph(nextPage,code);
+
+            canvas.drawBitmap(nextCacheBitmap,0,0,paint);
+            prepareNextBitmap();
+        }else {
+            Log.e(TAG,"cacheBitmap == null");
+        }
     }
 
     public void turnPrePage(Canvas canvas, Paint paint){
@@ -167,6 +172,8 @@ public class PagerManager {
             pagerSparseArray.clear();
             pagerSparseArray = null;
             System.gc();
+
+            destroy();
 
         }catch (Exception e){
             e.printStackTrace();

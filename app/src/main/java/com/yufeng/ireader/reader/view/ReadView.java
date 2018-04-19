@@ -122,7 +122,7 @@ public class ReadView extends View{
      * 准备下一页的内容，之所以做个区分，是因为drawCurrentContent这方法里面已经setLastCanDrawLine了
      */
     private void prepareNextContent(){
-        PagerManager.getInstance().prepareNextBitmap( contentPaint);
+        PagerManager.getInstance().prepareNextBitmap();
     }
 
     private void turnNextPage(Canvas canvas){

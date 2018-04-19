@@ -49,9 +49,9 @@ public class Pager {
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
         try {
-
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
-            float startOffsetY = readSetting.getPaddingTop() + fontMetrics.bottom - fontMetrics.top;
+            float startOffsetY = readSetting.getPaddingTop() -  fontMetrics.ascent ;
+            Log.e(TAG,"startOffsetY="+startOffsetY);
 
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();
             boolean needCalcNewTxtParagraph = true;
@@ -73,7 +73,7 @@ public class Pager {
                 needCalcNewTxtParagraph = true;
 
                 Log.i(TAG,"startOffsetY = "+startOffsetY);
-                if (startOffsetY >= displayHeight - readSetting.getPaddingBottom()){
+                if (startOffsetY >= displayHeight - readSetting.getPaddingBottom() -( fontMetrics.descent- fontMetrics.ascent)){
                     Log.e(TAG,"页面已经全部获取完了");
                     break;
                 }

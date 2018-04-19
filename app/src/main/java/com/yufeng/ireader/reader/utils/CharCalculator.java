@@ -130,7 +130,7 @@ public class CharCalculator {
         for (int i = firstCanDrawLine+1 ; i < headIndexList.size(); i ++){
 
             float nextDrawLine = offsetY[i - 1] +oneLineHeight;
-            if (nextDrawLine > displayHeight - readSetting.getPaddingBottom()){
+            if (nextDrawLine > displayHeight - readSetting.getPaddingBottom() - (fontMetrics.descent- fontMetrics.ascent)){
                 lastCanDrawLine = i - 1;
                 txtParagraph.setLastCanDrawLine(lastCanDrawLine);
                 return nextDrawLine;
