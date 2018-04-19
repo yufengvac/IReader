@@ -7,7 +7,6 @@ import android.util.Log;
 import com.yufeng.ireader.reader.utils.CharCalculator;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
-import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 import java.io.IOException;

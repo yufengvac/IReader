@@ -66,4 +66,9 @@ public class ReadActivity extends BaseActivity{
         readView.refresh();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        readView.onDestroy();
+    }
 }

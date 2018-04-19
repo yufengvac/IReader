@@ -1,5 +1,6 @@
 package com.yufeng.ireader.utils;
 
+import android.graphics.Bitmap;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,38 +13,57 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/11.
- *
  */
 
 public class PathHelper {
     private static final String TAG = PathHelper.class.getSimpleName();
     private static final String APP_PATH = "ireader";
-    public static boolean ensurePath(){
+    private static final String IMG_PATH = "img";
 
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+    public static boolean ensurePath() {
+
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            File rootDirectory = new File(rootPath,APP_PATH);
+            File rootDirectory = new File(rootPath, APP_PATH);
             return rootDirectory.exists() || rootDirectory.mkdirs();
         }
         return false;
     }
 
-    public static String getBookPath(){
-        if (ensurePath()){
+    public static boolean ensureImgPath() {
+        if (ensurePath()) {
+            String imgRootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + APP_PATH;
+            File imgDirectory = new File(imgRootPath, IMG_PATH);
+            return imgDirectory.exists() || imgDirectory.mkdirs();
+        }
+        return false;
+    }
+
+    public static String getImgPath() {
+        if (ensureImgPath()) {
+            return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator
+                    + APP_PATH + File.separator + IMG_PATH + File.separator;
+        }
+        return "";
+    }
+
+    public static String getBookPath() {
+        if (ensurePath()) {
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), APP_PATH);
-            File[] files  = file.listFiles(new FileFilter() {
+            File[] files = file.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
                     return getExensionByName(pathname.getName()).toLowerCase().equals("txt");
                 }
             });
-            if (files.length > 0){
+            if (files.length > 0) {
                 return files[0].getAbsolutePath();
             }
         }
@@ -52,22 +72,23 @@ public class PathHelper {
 
     /**
      * 获取根目录下"ireader"下的后缀为txt的文件
+     *
      * @return List<Book>
      */
-    public static List<Book> getBooksInDirectory(){
+    public static List<Book> getBooksInDirectory() {
         ArrayList<Book> bookList = new ArrayList<>();
-        if (ensurePath()){
+        if (ensurePath()) {
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), APP_PATH);
-            File[] files  = file.listFiles(new FileFilter() {
+            File[] files = file.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
                     return getExensionByName(pathname.getName()).toLowerCase().equals("txt");
                 }
             });
-            for (File bookFile:files){
+            for (File bookFile : files) {
                 String bookName = getBookNameByPath(bookFile.getAbsolutePath());
-                Book book = Book.createBook(bookName,"", bookFile.getAbsolutePath());
-                if (book != null){
+                Book book = Book.createBook(bookName, "", bookFile.getAbsolutePath());
+                if (book != null) {
                     bookList.add(book);
                 }
             }
@@ -75,29 +96,30 @@ public class PathHelper {
         return bookList;
     }
 
-    private static String getExensionByName(String name){
-        if (!TextUtils.isEmpty(name)&&name.contains(".")){
-            return name.substring(name.lastIndexOf(".")+1);
+    private static String getExensionByName(String name) {
+        if (!TextUtils.isEmpty(name) && name.contains(".")) {
+            return name.substring(name.lastIndexOf(".") + 1);
         }
         return "";
     }
-    private static String getBookNameByPath(String path){
+
+    private static String getBookNameByPath(String path) {
         int firstIndex = path.lastIndexOf("/");
         int lastIndex = path.lastIndexOf(".");
-        return path.substring(firstIndex+1,lastIndex);
+        return path.substring(firstIndex + 1, lastIndex);
     }
 
-    public static ArrayList<String> getContentByPath(String path){
+    public static ArrayList<String> getContentByPath(String path) {
         BufferedReader bufferedReader = null;
         try {
             ArrayList<Chapter> chapterList = new ArrayList<>();
-            if (TextUtils.isEmpty(path)){
-                Log.e("PathHelper","path 为 null");
+            if (TextUtils.isEmpty(path)) {
+                Log.e("PathHelper", "path 为 null");
                 return null;
             }
             File file = new File(path);
             BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
-            InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream,"UTF-8");
+            InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream, "UTF-8");
             bufferedReader = new BufferedReader(inputStreamReader);
             String line;
 
@@ -105,27 +127,27 @@ public class PathHelper {
             int curIndex = 0;
             StringBuilder chapterSb = new StringBuilder();
             ArrayList<String> paragraphList = new ArrayList<>();
-            while ((line = bufferedReader.readLine())!=null){
+            while ((line = bufferedReader.readLine()) != null) {
 //                line = CodeUtil.ToDBC(line);
-                if (BookHelper.isChapterParagraph(line)){
+                if (BookHelper.isChapterParagraph(line)) {
 
                     Chapter chapter = new Chapter();
                     chapter.setChapterName(line);
                     chapter.setChapterIndex(curIndex);
                     chapter.setType(Chapter.Type.NORMAL);
-                    if (chapterList.size() > 0){
-                        chapterList.get(chapterList.size()-1).setTotalContent(chapterSb.toString());
-                        chapterList.get(chapterList.size()-1).setParagraphList(paragraphList);
+                    if (chapterList.size() > 0) {
+                        chapterList.get(chapterList.size() - 1).setTotalContent(chapterSb.toString());
+                        chapterList.get(chapterList.size() - 1).setParagraphList(paragraphList);
                     }
                     chapterList.add(chapter);
                     chapterSb = new StringBuilder();
                     paragraphList.clear();
-                }else {
+                } else {
                     chapterSb.append(line).append("\n");
                     paragraphList.add(line);
                 }
 
-                if (curIndex == 0 && !BookHelper.isChapterParagraph(line)){//文章第一段落不是标题，那都视作简介引言等
+                if (curIndex == 0 && !BookHelper.isChapterParagraph(line)) {//文章第一段落不是标题，那都视作简介引言等
                     Chapter chapter = new Chapter();
                     chapter.setChapterName(getBookNameByPath(path));
                     chapter.setType(Chapter.Type.INTRODUCE);
@@ -136,26 +158,48 @@ public class PathHelper {
                 contentList.add(line);
 
             }
-            if (chapterList.size() > 1){
-                chapterList.get(chapterList.size()-1).setTotalContent(chapterSb.toString());
-                chapterList.get(chapterList.size()-1).setParagraphList(paragraphList);
+            if (chapterList.size() > 1) {
+                chapterList.get(chapterList.size() - 1).setTotalContent(chapterSb.toString());
+                chapterList.get(chapterList.size() - 1).setParagraphList(paragraphList);
             }
-            Log.e("PathHelper","共有"+chapterList.size()+"章节");
-            for (int i = 0 ; i < chapterList.size(); i++){
-                Log.e(TAG,chapterList.get(i).toString());
+            Log.e("PathHelper", "共有" + chapterList.size() + "章节");
+            for (int i = 0; i < chapterList.size(); i++) {
+                Log.e(TAG, chapterList.get(i).toString());
             }
             return contentList;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if (bufferedReader != null){
+        } finally {
+            if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
         return null;
+    }
+
+    public static boolean saveBitmapToSDCard(Bitmap bitmap, String fileName) {
+        String path = getImgPath() + fileName + ".jpg";
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(path);
+
+            return bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return false;
     }
 }

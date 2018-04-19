@@ -4,12 +4,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
-import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,17 +27,24 @@ public class Pager {
      * @param canvas canvas
      * @param paint  画笔
      */
-    public void drawTxtParagraph(Canvas canvas, Paint paint){
+    public int drawTxtParagraph(Canvas canvas, Paint paint){
         if (txtParagraphList != null && txtParagraphList.size() > 0){
             for (int i =0 ; i < txtParagraphList.size(); i++){
                 TxtParagraph txtParagraph = txtParagraphList.get(i);
                 txtParagraph.drawTxtParagraph(canvas, paint);
             }
+            TxtParagraph lastTxtParagraph = txtParagraphList.get(txtParagraphList.size()-1);
+            if (lastTxtParagraph.getLastCanDrawLine() + 1 >= lastTxtParagraph.getHeadIndexList().size()){//表示该段落可以绘制完
+                return -1;
+            }else {
+                return txtParagraphList.get(txtParagraphList.size()-1).getLastCanDrawLine();//表示该段落不能完全绘制完，返回最后那个段落的绘制的最后一行
+            }
         }
+        return -1;
     }
 
 
-    static Pager createNextPager(IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
+    static Pager createPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
         Pager pager = new Pager();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
@@ -47,12 +52,25 @@ public class Pager {
 
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() + fontMetrics.bottom - fontMetrics.top;
+
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();
+            boolean needCalcNewTxtParagraph = true;
+
+            if (lastPagerTxtParagraph != null){
+                lastPagerTxtParagraph.setFirstCanDrawLine(lastCanDrawLine+1);
+                needCalcNewTxtParagraph = false;
+            }
+
+            TxtParagraph txtParagraph = lastPagerTxtParagraph;
             while (true){
-                TxtParagraph txtParagraph = TxtParagraph.createTxtParagraph(readRandomAccessFile, displayWidth, readSetting);
+                if ( needCalcNewTxtParagraph ){
+                     txtParagraph = TxtParagraph.createTxtParagraph(readRandomAccessFile, displayWidth, readSetting);
+                }
+
                 drawTxtParaList.add(txtParagraph);
 
                 startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight);
+                needCalcNewTxtParagraph = true;
 
                 Log.i(TAG,"startOffsetY = "+startOffsetY);
                 if (startOffsetY >= displayHeight - readSetting.getPaddingBottom()){
@@ -71,5 +89,9 @@ public class Pager {
         }
 
         return pager;
+    }
+
+    public List<TxtParagraph> getTxtParagraphList() {
+        return txtParagraphList;
     }
 }
