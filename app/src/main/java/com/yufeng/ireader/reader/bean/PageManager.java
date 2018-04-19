@@ -1,12 +1,13 @@
 package com.yufeng.ireader.reader.bean;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.Toast;
 
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
@@ -15,6 +16,7 @@ import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.PathHelper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,19 +24,29 @@ import java.util.List;
  *
  */
 
-public class PagerManager {
-    private static final String TAG = PagerManager.class.getSimpleName();
-    private SparseArray<Pager> pagerSparseArray ;
+public class PageManager {
+    private static final String TAG = PageManager.class.getSimpleName();
+    private SparseArray<Page> pagerSparseArray ;
+    private List<Page> pageList;
     private ReadRandomAccessFile readRandomAccessFile;
     private IReadSetting readSetting;
     private Bitmap nextCacheBitmap;
     private Bitmap preCacheBitmap;
     private int lastCanDrawLine = -1;
     private TxtParagraph curPageTxtParagraph;
+    private int curPageIndex = -1;
 
-    private PagerManager(){
+    public static class PageType{
+        private static final int PAGE_CURRENT = 0;
+        private static final int PAGE_NEXT = 1;
+    }
+
+    private PageManager(){
         if (pagerSparseArray == null){
             pagerSparseArray = new SparseArray<>();
+        }
+        if (pageList == null){
+            pageList = new ArrayList<>();
         }
         try {
             nextCacheBitmap = Bitmap.createBitmap(DisplayConstant.DISPLAY_WIDTH, DisplayConstant.DISPLAY_HEIGHT, Bitmap.Config.ARGB_4444);
@@ -54,10 +66,10 @@ public class PagerManager {
     }
 
     private static class PagerManagerHolder {
-        private static PagerManager INSTANCE  = null;
-        private static PagerManager getINSTANCE(){
+        private static PageManager INSTANCE  = null;
+        private static PageManager getINSTANCE(){
             if (INSTANCE == null){
-                INSTANCE = new PagerManager();
+                INSTANCE = new PageManager();
             }
             return INSTANCE;
         }
@@ -66,7 +78,7 @@ public class PagerManager {
         }
     }
 
-    public static PagerManager getInstance(){
+    public static PageManager getInstance(){
         return PagerManagerHolder.getINSTANCE();
     }
     public static void destroy(){
@@ -80,7 +92,12 @@ public class PagerManager {
         }
         initReadRandomAccessFile(path);
         this.readSetting = readSetting;
-        pagerSparseArray.put(0,Pager.createPager(curPageTxtParagraph, lastCanDrawLine,this.readSetting, readRandomAccessFile));
+
+        Page currentPage = Page.createPager(curPageTxtParagraph, lastCanDrawLine,this.readSetting, readRandomAccessFile);
+        pagerSparseArray.put(PageType.PAGE_CURRENT, currentPage);
+
+        pageList.add(currentPage);
+        curPageIndex = pageList.size() - 1;
     }
 
     public void drawPager(Canvas canvas, Paint paint){
@@ -88,7 +105,7 @@ public class PagerManager {
             return;
         }
         if (pagerSparseArray.size() > 0){
-            Pager curPage = pagerSparseArray.get(0);
+            Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
            int code = curPage.drawTxtParagraph(canvas,paint);
            setLastCanDrawLineAndTxtParagraph(curPage, code);
@@ -99,11 +116,14 @@ public class PagerManager {
         if (pagerSparseArray == null){
             return;
         }
-        Pager nextPage = Pager.createPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile);
-        pagerSparseArray.put(1, nextPage);
+        Page nextPage = Page.createPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile);
+        pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
     }
 
-    private void setLastCanDrawLineAndTxtParagraph(Pager pager,int code){
+    public void preparePreBitmap(){
+    }
+
+    private void setLastCanDrawLineAndTxtParagraph(Page pager, int code){
         lastCanDrawLine = code;
         List<TxtParagraph> curPagerTxtParagraphList = pager.getTxtParagraphList();
         if (lastCanDrawLine == -1){
@@ -116,22 +136,58 @@ public class PagerManager {
 
     public void turnNextPage(Canvas canvas, Paint paint){
         if (nextCacheBitmap != null){
-            Pager nextPage = pagerSparseArray.get(1);
-            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+            if (curPageIndex < pageList.size()-1){
 
-            int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
-            setLastCanDrawLineAndTxtParagraph(nextPage,code);
+                curPageIndex++;
 
-            canvas.drawBitmap(nextCacheBitmap,0,0,paint);
-            prepareNextBitmap();
+                Page nextPage = pageList.get(curPageIndex);
+                Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+                cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+
+                nextPage.drawTxtParagraph(cacheCanvas, paint);
+
+                canvas.drawBitmap(nextCacheBitmap,0,0,paint);
+
+
+            }else if (curPageIndex == pageList.size() - 1){
+
+                Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
+                Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+                cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+
+                int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
+                setLastCanDrawLineAndTxtParagraph(nextPage,code);
+
+                canvas.drawBitmap(nextCacheBitmap,0,0,paint);
+
+                pageList.add(nextPage);
+                curPageIndex = pageList.size() - 1;
+
+                prepareNextBitmap();
+            }
         }else {
             Log.e(TAG,"cacheBitmap == null");
         }
     }
 
-    public void turnPrePage(Canvas canvas, Paint paint){
-        canvas.drawBitmap(preCacheBitmap,0,0, paint);
+    public void turnPrePage(Canvas canvas, Paint paint, Context context){
+        if (preCacheBitmap != null){
+            if (curPageIndex > 0){
+                curPageIndex --;
+                Page prePage = pageList.get(curPageIndex);
+                Canvas cacheCanvas = new Canvas(preCacheBitmap);
+                cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+
+                prePage.drawTxtParagraph(cacheCanvas, paint);
+                canvas.drawBitmap(preCacheBitmap,0,0,paint);
+
+            }else {
+                Toast.makeText(context,"已经是第一章了~",Toast.LENGTH_LONG).show();
+                curPageIndex = 0;
+            }
+        }else {
+            Log.e(TAG,"cacheBitmap == null");
+        }
     }
 
     private void initReadRandomAccessFile(String path) {

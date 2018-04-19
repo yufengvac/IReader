@@ -16,8 +16,8 @@ import java.util.List;
  *
  */
 
-public class Pager {
-    private static final String TAG = Pager.class.getSimpleName();
+public class Page {
+    private static final String TAG = Page.class.getSimpleName();
 
     private List<TxtParagraph> txtParagraphList = new ArrayList<>();
 
@@ -44,8 +44,8 @@ public class Pager {
     }
 
 
-    static Pager createPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
-        Pager pager = new Pager();
+    static Page createPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
+        Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
         try {
@@ -84,6 +84,7 @@ public class Pager {
                 pager.txtParagraphList.clear();
             }
             pager.txtParagraphList.addAll(drawTxtParaList);
+
         }catch (Exception e){
             e.printStackTrace();
         }

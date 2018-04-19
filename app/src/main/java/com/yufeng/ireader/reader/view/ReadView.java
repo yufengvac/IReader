@@ -4,21 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.yufeng.ireader.reader.bean.PagerManager;
-import com.yufeng.ireader.reader.bean.TxtParagraph;
+import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/15.
@@ -36,6 +30,7 @@ public class ReadView extends View{
     private static final int DEFAULT_STROKE_WIDTH = 2;
     private boolean isTurnNext = false;
     private boolean isTurnPre = false;
+    private Context context;
 
 
     public ReadView(Context context) {
@@ -52,6 +47,7 @@ public class ReadView extends View{
     }
 
     private void init(Context context){
+        this.context = context;
         initDefaultContentPaint(context);
     }
 
@@ -84,6 +80,7 @@ public class ReadView extends View{
         }else {
             drawCurrentContent(canvas);
             prepareNextContent();
+            preparePreContent();
         }
 
     }
@@ -115,27 +112,28 @@ public class ReadView extends View{
     }
 
     private void drawCurrentContent(Canvas canvas){
-        PagerManager.getInstance().drawPager(canvas, contentPaint);
+        PageManager.getInstance().drawPager(canvas, contentPaint);
     }
 
-    /**
-     * 准备下一页的内容，之所以做个区分，是因为drawCurrentContent这方法里面已经setLastCanDrawLine了
-     */
     private void prepareNextContent(){
-        PagerManager.getInstance().prepareNextBitmap();
+        PageManager.getInstance().prepareNextBitmap();
+    }
+
+    private void preparePreContent(){
+        PageManager.getInstance().preparePreBitmap();
     }
 
     private void turnNextPage(Canvas canvas){
-        PagerManager.getInstance().turnNextPage(canvas,contentPaint);
+        PageManager.getInstance().turnNextPage(canvas,contentPaint);
     }
 
     private void turnPrePage(Canvas canvas){
-        PagerManager.getInstance().turnPrePage(canvas, contentPaint);
+        PageManager.getInstance().turnPrePage(canvas, contentPaint, context);
     }
 
 
     public void prepare(IReadSetting readSetting, String path){
-        PagerManager.getInstance().initPagers(readSetting, path);
+        PageManager.getInstance().initPagers(readSetting, path);
     }
 
     public void refresh(){
@@ -143,7 +141,7 @@ public class ReadView extends View{
     }
 
     public void onDestroy(){
-        PagerManager.getInstance().onDestroy();
+        PageManager.getInstance().onDestroy();
     }
 
 }
