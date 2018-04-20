@@ -30,19 +30,28 @@ public class TxtParagraph {
     private String paragraph;//段落完整内容
     private int firstCanDrawLine = 0;//在该页面下，该段落可以绘制的第一行索引
     private int lastCanDrawLine = -1;//在改页面下，改段落可以绘制的最后一行索引
+    private long seekStart = 0;
+    private long seekEnd = 0;
+    private boolean isCanDrawCompleted;//能否被完全绘制完
 
-    private TxtParagraph(String contentPara){
+    private TxtParagraph(String contentPara, long seekStart, long seekEnd){
         this.paragraph = contentPara;
+        this.seekStart = seekStart;
+        this.seekEnd = seekEnd;
     }
 
-    public static TxtParagraph createTxtParagraph(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting){
+    public static TxtParagraph createTxtParagraph(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting, long seekStart){
         TxtParagraph txtParagraph = null;
         try {
-            readRandomAccessFile.read(tempBuf);
-            String paragraphStr = getParagraphString(readRandomAccessFile, tempBuf);
-            Log.e(TAG,"段落为="+paragraphStr);
 
-            txtParagraph = new TxtParagraph(paragraphStr);
+            readRandomAccessFile.setCurPosition(seekStart);
+            readRandomAccessFile.seek(readRandomAccessFile.getCurPosition());
+
+            readRandomAccessFile.read(tempBuf);
+            String paragraphStr = getParagraphString(readRandomAccessFile,seekStart, tempBuf);
+
+            txtParagraph = new TxtParagraph(paragraphStr, seekStart, readRandomAccessFile.getCurPosition());
+            Log.e(TAG,"段落为="+txtParagraph.toString());
             CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph);
 
         }catch (Exception e){
@@ -52,7 +61,7 @@ public class TxtParagraph {
         return txtParagraph;
     }
 
-    private static String getParagraphString(ReadRandomAccessFile readRandomAccessFile, byte[] bytes) throws IOException{
+    private static String getParagraphString(ReadRandomAccessFile readRandomAccessFile,long seekStart, byte[] bytes) throws IOException{
         int count = 0;
 
         for (int i= 0; i < bytes.length; i++){
@@ -63,19 +72,20 @@ public class TxtParagraph {
                 break;
             }
         }
-        readRandomAccessFile.setCurPosition( readRandomAccessFile.getCurPosition() + count);
+        readRandomAccessFile.setCurPosition( seekStart + count);
         readRandomAccessFile.seek(readRandomAccessFile.getCurPosition());
         return new String(bytes,0,count, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
     }
 
 
-    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight){
+    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight, float[] offsetY){
         if (offsetX == null || headIndexList == null){
             return startOffsetY;
         }
-
-        float[] offsetY = new float[headIndexList.size()];
-        setOffsetY(offsetY);
+        if (offsetY == null){
+            offsetY = new float[headIndexList.size()];
+            setOffsetY(offsetY);
+        }
 
         return CharCalculator.calcParagraphOffsetY(headIndexList, startOffsetY, displayHeight, readSetting, this);
     }
@@ -148,6 +158,18 @@ public class TxtParagraph {
         this.lastCanDrawLine = lastCanDrawLine;
     }
 
+    public long getSeekEnd() {
+        return seekEnd;
+    }
+
+    public boolean isCanDrawCompleted() {
+        return isCanDrawCompleted;
+    }
+
+    public void setCanDrawCompleted(boolean canDrawCompleted) {
+        isCanDrawCompleted = canDrawCompleted;
+    }
+
     @Override
     public String toString() {
         return "TxtParagraph{" +
@@ -155,6 +177,8 @@ public class TxtParagraph {
                 ", headIndexList=" + getHeadIndexListToString() +
                 ", paragraph='" + paragraph + '\'' +
                 ", offsetY='" + Arrays.toString(offsetY) + '\'' +
+                ", seekStart='" + seekStart + '\'' +
+                ", seekEnd='" + seekEnd + '\'' +
                 '}';
     }
 

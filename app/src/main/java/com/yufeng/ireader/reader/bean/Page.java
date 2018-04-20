@@ -40,7 +40,7 @@ public class Page {
                 return txtParagraphList.get(txtParagraphList.size()-1).getLastCanDrawLine();//表示该段落不能完全绘制完，返回最后那个段落的绘制的最后一行
             }
         }
-        return -1;
+        return -2;
     }
 
 
@@ -55,21 +55,24 @@ public class Page {
 
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();
             boolean needCalcNewTxtParagraph = true;
+            long startSeek = 0;
 
             if (lastPagerTxtParagraph != null){
                 lastPagerTxtParagraph.setFirstCanDrawLine(lastCanDrawLine+1);
                 needCalcNewTxtParagraph = false;
+                startSeek = lastPagerTxtParagraph.getSeekEnd();
             }
 
             TxtParagraph txtParagraph = lastPagerTxtParagraph;
             while (true){
                 if ( needCalcNewTxtParagraph ){
-                     txtParagraph = TxtParagraph.createTxtParagraph(readRandomAccessFile, displayWidth, readSetting);
+                     txtParagraph = TxtParagraph.createTxtParagraph(readRandomAccessFile, displayWidth, readSetting, startSeek);
                 }
 
+                startSeek = txtParagraph.getSeekEnd();
                 drawTxtParaList.add(txtParagraph);
 
-                startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight);
+                startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight, txtParagraph.getOffsetY());
                 needCalcNewTxtParagraph = true;
 
                 Log.i(TAG,"startOffsetY = "+startOffsetY);
