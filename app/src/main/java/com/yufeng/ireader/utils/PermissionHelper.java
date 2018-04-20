@@ -22,7 +22,7 @@ import java.util.List;
 public class PermissionHelper {
     private WeakReference<BaseActivity> weakReference;
     private static final int REQUEST_CODE = 0x1000;
-    public static final String PERMISSION_WRITE = Manifest.permission.ACCESS_COARSE_LOCATION;
+    public static final String PERMISSION_WRITE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private permissionCallback callback;
 
     private PermissionHelper(BaseActivity activity) {
@@ -33,9 +33,7 @@ public class PermissionHelper {
         private static PermissionHelper instance = null;
 
         private static PermissionHelper getPermissionHelper(BaseActivity activity) {
-            if (instance == null) {
-                instance = new PermissionHelper(activity);
-            }
+            instance = new PermissionHelper(activity);
             return instance;
         }
     }
@@ -53,7 +51,7 @@ public class PermissionHelper {
         callback = (permissionCallback)activity;
 
         if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+            ActivityCompat.requestPermissions(activity, new String[]{permission}, REQUEST_CODE);
         } else {
             callback.grantedAll();
         }

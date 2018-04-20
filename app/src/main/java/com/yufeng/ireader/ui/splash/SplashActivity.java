@@ -3,12 +3,11 @@ package com.yufeng.ireader.ui.splash;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.Window;
 import android.view.WindowManager;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.ui.home.activity.MainActivity;
 import com.yufeng.ireader.ui.base.BaseActivity;
+import com.yufeng.ireader.ui.home.activity.MainActivity;
 
 import java.util.concurrent.TimeUnit;
 

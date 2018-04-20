@@ -21,13 +21,12 @@ public abstract class BaseActivity extends AppCompatActivity implements Permissi
         setContentView(getLayoutRes());
         initView();
         initListener();
-        initData();
+        PermissionHelper.getInstance(this).checkOnePermission(PermissionHelper.PERMISSION_WRITE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        PermissionHelper.getInstance(this).checkOnePermission(PermissionHelper.PERMISSION_WRITE);
     }
 
     @Override
@@ -38,6 +37,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Permissi
 
     @Override
     public void grantedAll() {
+        initData();
     }
 
     @Override
