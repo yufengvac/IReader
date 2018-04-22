@@ -120,7 +120,7 @@ public class ReadView extends View{
     }
 
     private void preparePreContent(){
-        PageManager.getInstance().preparePreBitmap();
+//        PageManager.getInstance().preparePreBitmap();
     }
 
     private void turnNextPage(Canvas canvas){

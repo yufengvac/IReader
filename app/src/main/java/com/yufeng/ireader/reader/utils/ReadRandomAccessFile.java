@@ -67,8 +67,11 @@ public class ReadRandomAccessFile extends RandomAccessFile{
      * 记录一下当前的pointer位置
      * @param position 读完之后pointer的位置
      */
-    public void setCurPosition(long position){
+    public void setCurPosition(long position) throws IOException{
         this.curPosition = position;
+        if (curPosition >= 0){
+            seek(curPosition);
+        }
     }
 
     public long getCurPosition(){

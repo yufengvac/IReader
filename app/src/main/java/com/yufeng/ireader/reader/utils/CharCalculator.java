@@ -116,7 +116,7 @@ public class CharCalculator {
 
     public static float calcParagraphOffsetY( List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting, TxtParagraph txtParagraph){
         Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
-        float baseCharHeight = fontMetrics.bottom - fontMetrics.top;
+        float baseCharHeight = fontMetrics.descent - fontMetrics.ascent;
 
         float oneLineHeight = baseCharHeight + readSetting.getLineSpaceExtra();
 
@@ -139,6 +139,38 @@ public class CharCalculator {
         }
         txtParagraph.setLastCanDrawLine(lastCanDrawLine);
         return offsetY[lastCanDrawLine] + oneLineHeight;
+    }
+
+    public static float calcParagraphOffsetYReserve(List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting, TxtParagraph txtParagraph){
+        Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
+        float baseCharHeight = fontMetrics.descent - fontMetrics.ascent;
+
+        float oneLineHeight = baseCharHeight + readSetting.getLineSpaceExtra();
+
+        float[] offsetY = txtParagraph.getOffsetY();
+
+        int lastCanDrawLine = txtParagraph.getLastCanDrawLine();
+        if (txtParagraph.getLastCanDrawLine() < 0){
+            lastCanDrawLine = headIndexList.size() - 1;
+            txtParagraph.setLastCanDrawLine(lastCanDrawLine);
+        }
+
+        int firstCanDrawLine = 0;
+
+        offsetY[lastCanDrawLine] = startOffsetY;
+
+        for (int i = lastCanDrawLine -1 ; i >= 0; i --){
+
+            float preDrawLine = offsetY[i + 1] - oneLineHeight;
+            if (preDrawLine <= readSetting.getPaddingTop()){
+                firstCanDrawLine = i + 1;
+                txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
+                return preDrawLine;
+            }
+            offsetY[i] = preDrawLine;
+        }
+        txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
+        return offsetY[firstCanDrawLine] - oneLineHeight;
     }
 
     /**

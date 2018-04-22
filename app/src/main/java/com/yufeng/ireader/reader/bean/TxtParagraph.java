@@ -22,7 +22,6 @@ public class TxtParagraph {
 
     private static final String TAG = TxtParagraph.class.getSimpleName();
     private static final int MAX_TEMP_BYTE_SIZE = 1<<17;
-    private static byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
 
     private float[] offsetX;//每个字符的x偏移量
     private float[] offsetY;//每行的y偏移量
@@ -40,17 +39,25 @@ public class TxtParagraph {
         this.seekEnd = seekEnd;
     }
 
-    public static TxtParagraph createTxtParagraph(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting, long seekStart){
+    /**
+     * 正序进行文件的读取
+     * @param readRandomAccessFile readRandomAccessFile
+     * @param displayWidth         view宽度
+     * @param readSetting          设置信息
+     * @param seekStart            开始读取的位置
+     * @return                     TxtParagraph
+     */
+    public static TxtParagraph createTxtParagraphBySeekStart(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting, long seekStart){
         TxtParagraph txtParagraph = null;
         try {
 
             readRandomAccessFile.setCurPosition(seekStart);
-            readRandomAccessFile.seek(readRandomAccessFile.getCurPosition());
 
+            byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
             readRandomAccessFile.read(tempBuf);
             String paragraphStr = getParagraphString(readRandomAccessFile,seekStart, tempBuf);
 
-            txtParagraph = new TxtParagraph(paragraphStr, seekStart, readRandomAccessFile.getCurPosition());
+            txtParagraph = new TxtParagraph(paragraphStr, seekStart, readRandomAccessFile.getCurPosition()-1);
             Log.e(TAG,"段落为="+txtParagraph.toString());
             CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph);
 
@@ -58,6 +65,28 @@ public class TxtParagraph {
             e.printStackTrace();
         }
 
+        return txtParagraph;
+    }
+
+    /**
+     * 倒序进行文件的读取，所以传的为下一段落的头读取位置
+     * @param readRandomAccessFile readRandomAccessFile
+     * @param displayWidth         view宽度
+     * @param readSetting          设置信息
+     * @param seekEnd              下一段落的头读取位置，即这一段落读取的结束位置
+     * @return                      txtParagraph
+     */
+    public static TxtParagraph createTxtParagraphBySeekEnd(ReadRandomAccessFile readRandomAccessFile, int displayWidth, IReadSetting readSetting, long seekEnd){
+        TxtParagraph txtParagraph = null;
+        try {
+            byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
+            String paragraphStr = getParagraphStringReverse(readRandomAccessFile, seekEnd, tempBuf);
+            Log.e(TAG,"逆序读取字节，段落为="+paragraphStr);
+            txtParagraph = new TxtParagraph(paragraphStr, readRandomAccessFile.getCurPosition() + 2, seekEnd);
+            CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return txtParagraph;
     }
 
@@ -73,8 +102,41 @@ public class TxtParagraph {
             }
         }
         readRandomAccessFile.setCurPosition( seekStart + count);
-        readRandomAccessFile.seek(readRandomAccessFile.getCurPosition());
         return new String(bytes,0,count, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
+    }
+
+    private static String getParagraphStringReverse(ReadRandomAccessFile readRandomAccessFile, long seekEnd, byte[] bytes) throws IOException{
+//        int startSeek = 0;
+//        for (int i = bytes.length -1; i >=0 ; i --){
+//            if (bytes[i] == CharCalculator.RETURN_CHAR){
+//                bytes[i] = CharCalculator.BLANK_CHAR;
+//            }else if (bytes[i] == CharCalculator.NEW_LINE_CHAR){
+//                startSeek = i + 1;
+//                break;
+//            }
+//        }
+//
+//        readRandomAccessFile.setCurPosition(startSeek);
+//        return new String(bytes, startSeek, bytes.length - startSeek, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
+        int count = bytes.length -1;
+        readRandomAccessFile.setCurPosition(seekEnd);
+        byte curChar = 0;
+
+        int num = 0;
+
+        while ((curChar != CharCalculator.NEW_LINE_CHAR || num <= 1 ) && seekEnd >=0){
+            curChar = (byte) readRandomAccessFile.read();
+
+            seekEnd -- ;
+            readRandomAccessFile.setCurPosition(seekEnd);
+            if (curChar == CharCalculator.RETURN_CHAR){
+                curChar = CharCalculator.BLANK_CHAR;
+            }
+            bytes[count] = curChar;
+            count--;
+            num ++;
+        }
+        return new String(bytes, count+2, num -1, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
     }
 
 
@@ -89,6 +151,18 @@ public class TxtParagraph {
 
         return CharCalculator.calcParagraphOffsetY(headIndexList, startOffsetY, displayHeight, readSetting, this);
     }
+
+    public float calculatorOffsetYReserve(IReadSetting readSetting, float startOffsetY, int displayHeight, float[] offsetY){
+        if (offsetX == null || headIndexList == null){
+            return startOffsetY;
+        }
+        if (offsetY == null){
+            offsetY = new float[headIndexList.size()];
+            setOffsetY(offsetY);
+        }
+        return CharCalculator.calcParagraphOffsetYReserve(headIndexList, startOffsetY, displayHeight, readSetting, this);
+    }
+
 
     public void drawTxtParagraph(Canvas canvas, Paint contentPaint){
         float[] offsetX = getOffsetX();
@@ -162,6 +236,10 @@ public class TxtParagraph {
         return seekEnd;
     }
 
+    public long getSeekStart() {
+        return seekStart;
+    }
+
     public boolean isCanDrawCompleted() {
         return isCanDrawCompleted;
     }
@@ -179,6 +257,8 @@ public class TxtParagraph {
                 ", offsetY='" + Arrays.toString(offsetY) + '\'' +
                 ", seekStart='" + seekStart + '\'' +
                 ", seekEnd='" + seekEnd + '\'' +
+                ", firstCanDrawLine='" + firstCanDrawLine + '\'' +
+                ", lastCanDrawLine='" + lastCanDrawLine + '\'' +
                 '}';
     }
 
