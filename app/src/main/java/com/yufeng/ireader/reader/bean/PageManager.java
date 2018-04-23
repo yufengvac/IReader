@@ -197,7 +197,14 @@ public class PageManager {
                     preparePreBitmap();
                 }
             } else {
-                Toast.makeText(context, "已经是第一章了~", Toast.LENGTH_LONG).show();
+                Canvas cacheCanvas = new Canvas(preCacheBitmap);
+                cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+                Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+                int code = curPage.drawTxtParagraph(cacheCanvas, paint);
+                setLastCanDrawLineAndTxtParagraph(curPage, code);
+                canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
+
+                Toast.makeText(context, "已经是第一章了~", Toast.LENGTH_SHORT).show();
             }
 
         } else {
