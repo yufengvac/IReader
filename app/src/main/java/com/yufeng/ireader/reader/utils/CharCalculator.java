@@ -182,7 +182,7 @@ public class CharCalculator {
         for (int i = lastCanDrawLine -1 ; i >= 0; i --){
 
             float preDrawLine = offsetY[i + 1] - oneLineHeight;
-            if (preDrawLine <= readSetting.getPaddingTop()){
+            if (preDrawLine < (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent)){
                 firstCanDrawLine = i + 1;
                 txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
                 return preDrawLine;

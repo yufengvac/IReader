@@ -141,7 +141,7 @@ public class Page {
                 needCalcNewTxtParagraph = false;
 
                 Log.i(TAG,"startOffsetYReserve = "+startOffsetY);
-                if (startOffsetY <= readSetting.getPaddingTop() || endSeek <= 0){
+                if (startOffsetY <= (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent) || endSeek <= 0){
                     Log.e(TAG,"前一页面已经全部获取完了");
                     break;
                 }
@@ -153,8 +153,19 @@ public class Page {
             }
             Collections.reverse(drawTxtParaList);
             page.txtParagraphList.addAll(drawTxtParaList);
+
+            //重新对前一页的y轴偏移量进行计算，使得第一行始终保持相同
+            int firstTxtCanDrawLine = page.getFirstTxtParagraph().getFirstCanDrawLine();
+            float[] pageFirstStartOffsetYArray = page.getFirstTxtParagraph().getOffsetY();
+            float pageFirstStartOffsetY = pageFirstStartOffsetYArray[firstTxtCanDrawLine];
+            float deviation = pageFirstStartOffsetY - (readSetting.getPaddingTop() + fontMetrics.descent - fontMetrics.ascent);
             for (TxtParagraph txtParagraph1: page.txtParagraphList){
                 Log.i(TAG,"最终该前个页面page的所有内容为："+txtParagraph1.toString());
+                float[] oneOffsetY = txtParagraph1.getOffsetY();
+                for (int i = txtParagraph1.getFirstCanDrawLine() ; i <= txtParagraph1.getLastCanDrawLine(); i++){
+                    oneOffsetY[i] -= deviation;
+                }
+                txtParagraph1.setOffsetY(oneOffsetY);
             }
 
         }catch (Exception e){

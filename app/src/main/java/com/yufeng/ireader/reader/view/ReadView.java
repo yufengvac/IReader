@@ -24,7 +24,7 @@ public class ReadView extends View{
 
     private Paint contentPaint;
 
-    private static final int DEFAULT_TEXT_SIZE = 23;
+    private static final int DEFAULT_TEXT_SIZE = 22;
     private static final String DEFAULT_TEXT_COLOR = "#000000";
     private static final String DEFAULT_BG_COLOR = "#B3AFA7";
     private static final int DEFAULT_STROKE_WIDTH = 2;
