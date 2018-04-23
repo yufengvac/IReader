@@ -2,9 +2,11 @@ package com.yufeng.ireader.reader.bean;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -154,7 +156,7 @@ public class PageManager {
 
             Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
             Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+            drawCanvasBg(cacheCanvas, paint);
 
             int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
             setLastCanDrawLineAndTxtParagraph(nextPage, code);
@@ -182,7 +184,7 @@ public class PageManager {
                 if (txtParagraph != null){
 
                     Canvas cacheCanvas = new Canvas(preCacheBitmap);
-                    cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+                    drawCanvasBg(cacheCanvas, paint);
 
                     int code = prePage.drawTxtParagraph(cacheCanvas, paint);
                     setLastCanDrawLineAndTxtParagraph(prePage, code);
@@ -198,7 +200,7 @@ public class PageManager {
                 }
             } else {
                 Canvas cacheCanvas = new Canvas(preCacheBitmap);
-                cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
+                drawCanvasBg(cacheCanvas, paint);
                 Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
                 int code = curPage.drawTxtParagraph(cacheCanvas, paint);
                 setLastCanDrawLineAndTxtParagraph(curPage, code);
@@ -210,6 +212,10 @@ public class PageManager {
         } else {
             Log.e(TAG, "cacheBitmap == null");
         }
+    }
+
+    public void drawCanvasBg(Canvas canvas, Paint paint){
+//        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), readSetting.getCanvasBgRes()),null,new RectF(0,0,DisplayConstant.DISPLAY_WIDTH,DisplayConstant.DISPLAY_HEIGHT),paint);
     }
 
     private void initReadRandomAccessFile(String path) {

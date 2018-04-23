@@ -2,6 +2,7 @@ package com.yufeng.ireader.reader.utils;
 
 import android.graphics.Paint;
 
+import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 /**
@@ -57,5 +58,15 @@ public class ReadSetting implements IReadSetting {
     @Override
     public Paint getContentPaint(){
         return contentPaint;
+    }
+
+    @Override
+    public int getCanvasBgRes() {
+        return R.drawable.read_skin_gray_bg;
+    }
+
+    @Override
+    public String getCanvasBgColor() {
+        return "#B3AFA7";
     }
 }

@@ -1,15 +1,18 @@
 package com.yufeng.ireader.reader.view;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
@@ -106,7 +109,7 @@ public class ReadView extends View{
     }
 
     private void drawBg(Canvas canvas){
-        canvas.drawColor(Color.parseColor(DEFAULT_BG_COLOR));
+        PageManager.getInstance().drawCanvasBg(canvas);
     }
 
     @Override
