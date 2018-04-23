@@ -21,6 +21,7 @@ public class CharCalculator {
     public static final char NEW_LINE_CHAR = '\n';     //表示换行，视作文段结束标识
     public static final char ILLEGAL_CHAR  = '\ufeff'; //表示非法字符
     public static final char BLANK_CHAR    = ' ';      //表示空格
+    public static final char BLANK_CHINESE_CHAR    = '　';//表示全角空格
 
     public static void calcCharOffsetX(String paragrah, int displayWidth, IReadSetting readSetting, TxtParagraph txtParagraph){
 
@@ -55,6 +56,7 @@ public class CharCalculator {
             char desChar = paragrah.charAt(i);
 
             if (desChar == NEW_LINE_CHAR){//表示结束
+                handleHeadIndexList(headIndexList, paragrah);
                 txtParagraph.setHeadIndexList(headIndexList);
                 txtParagraph.setOffsetX(offsetXArr);
                 return;
@@ -114,6 +116,15 @@ public class CharCalculator {
 
     }
 
+    /**
+     * 计算TxtParagraph里面的每行的Y轴偏移量
+     * @param headIndexList    每行的头部索引集合
+     * @param startOffsetY     该段落可绘制在屏幕的第一行的y坐标
+     * @param displayHeight    View高度
+     * @param readSetting      设置信息
+     * @param txtParagraph     要计算的段落TxtParagraph
+     * @return                 下一个可以绘制的屏幕的y坐标
+     */
     public static float calcParagraphOffsetY( List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting, TxtParagraph txtParagraph){
         Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
         float baseCharHeight = fontMetrics.descent - fontMetrics.ascent;
@@ -141,6 +152,15 @@ public class CharCalculator {
         return offsetY[lastCanDrawLine] + oneLineHeight;
     }
 
+    /**
+     * 同样是计算TxtParagraph里面的每行的y坐标，只不过是从底下往上计算
+     * @param headIndexList     每行的头部索引集合
+     * @param startOffsetY      该段落可绘制在屏幕的最后一行的y坐标
+     * @param displayHeight     View高度
+     * @param readSetting       设置信息
+     * @param txtParagraph      要计算的TxtParagraph
+     * @return                  y方向上还剩余的空间
+     */
     public static float calcParagraphOffsetYReserve(List<Integer> headIndexList, float startOffsetY, int displayHeight, IReadSetting readSetting, TxtParagraph txtParagraph){
         Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
         float baseCharHeight = fontMetrics.descent - fontMetrics.ascent;
@@ -171,6 +191,45 @@ public class CharCalculator {
         }
         txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
         return offsetY[firstCanDrawLine] - oneLineHeight;
+    }
+
+    /**
+     * 处理段落是空行的情况下
+     * @param headIndexList 段落里面的头部索引
+     */
+    private static void handleHeadIndexList(List<Integer> headIndexList, String paragraph){
+        if (headIndexList != null && headIndexList.size() > 1){
+            int startIndex ;
+            int endIndex = 0;
+            for (int i = 0; i < headIndexList.size() ; i++){
+
+                if (i == -1){
+                    continue;
+                }
+
+                startIndex = (i == 0 ? headIndexList.get(0) : endIndex);
+                if (i +1 < headIndexList.size()){
+                    endIndex = headIndexList.get(i +1);
+                }else {
+                    endIndex = paragraph.length() - 1;
+                }
+
+                boolean isEmptyLine = true;
+                for (int j = startIndex ; j < endIndex; j ++){
+                    char curChar = paragraph.charAt(j);
+                    if (curChar != BLANK_CHAR && curChar != NEW_LINE_CHAR && curChar != RETURN_CHAR && curChar != 0 && curChar != BLANK_CHINESE_CHAR){
+                        isEmptyLine = false;
+                        break;
+                    }
+                }
+
+                if (isEmptyLine){
+                    headIndexList.remove(i);
+                    i--;
+                }
+
+            }
+        }
     }
 
     /**
