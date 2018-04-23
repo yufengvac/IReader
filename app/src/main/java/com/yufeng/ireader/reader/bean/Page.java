@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
+import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
@@ -141,7 +142,7 @@ public class Page {
                 needCalcNewTxtParagraph = false;
 
                 Log.i(TAG,"startOffsetYReserve = "+startOffsetY);
-                if (startOffsetY <= (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent) || endSeek <= 0){
+                if (startOffsetY <= (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent) || endSeek <= CodeUtil.getBeginOffset(readRandomAccessFile.getCode())){
                     Log.e(TAG,"前一页面已经全部获取完了");
                     break;
                 }

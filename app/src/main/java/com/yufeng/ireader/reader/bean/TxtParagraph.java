@@ -107,25 +107,13 @@ public class TxtParagraph {
     }
 
     private static String getParagraphStringReverse(ReadRandomAccessFile readRandomAccessFile, long seekEnd, byte[] bytes) throws IOException{
-//        int startSeek = 0;
-//        for (int i = bytes.length -1; i >=0 ; i --){
-//            if (bytes[i] == CharCalculator.RETURN_CHAR){
-//                bytes[i] = CharCalculator.BLANK_CHAR;
-//            }else if (bytes[i] == CharCalculator.NEW_LINE_CHAR){
-//                startSeek = i + 1;
-//                break;
-//            }
-//        }
-//
-//        readRandomAccessFile.setCurPosition(startSeek);
-//        return new String(bytes, startSeek, bytes.length - startSeek, CodeUtil.getEncodingByCode(readRandomAccessFile.getCode()));
         int count = bytes.length -1;
         readRandomAccessFile.setCurPosition(seekEnd);
         byte curChar = 0;
 
         int num = 0;
 
-        while ((curChar != CharCalculator.NEW_LINE_CHAR || num <= 1 ) && seekEnd >=0){
+        while ((curChar != CharCalculator.NEW_LINE_CHAR || num <= 1 ) && seekEnd >= -1){
             curChar = (byte) readRandomAccessFile.read();
 
             seekEnd -- ;

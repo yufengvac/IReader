@@ -261,4 +261,12 @@ public class CodeUtil {
     public static String getEncodingByCode(int code){
         return ENCODINGS[code];
     }
+
+    public static int getBeginOffset(int code){
+        if (code == UTF8){
+            return 0;
+        }else {
+            return 0;
+        }
+    }
 }
