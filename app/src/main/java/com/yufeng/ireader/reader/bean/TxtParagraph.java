@@ -10,6 +10,7 @@ import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -246,6 +247,35 @@ public class TxtParagraph {
 
     public void setCanDrawCompleted(boolean canDrawCompleted) {
         isCanDrawCompleted = canDrawCompleted;
+    }
+
+    /**
+     * 复制完全相同的一个TxtParagraph对象，目的用于区分于两页中共用一个TxtParagraph的情况
+     * @param txtParagraph  模板TxtParagraph对象
+     * @return              复制出来的TxtParagraph对象
+     */
+    public static TxtParagraph copyTxtParagraph(TxtParagraph txtParagraph){
+        TxtParagraph newTxtParagraph = new TxtParagraph(txtParagraph.paragraph, txtParagraph.seekStart, txtParagraph.seekEnd);
+        if (txtParagraph.getOffsetX() != null){
+            float[] newOffsetX = new float[txtParagraph.getOffsetX().length];
+            System.arraycopy(txtParagraph.getOffsetX(), 0, newOffsetX,0,newOffsetX.length);
+            newTxtParagraph.setOffsetX(newOffsetX);
+        }
+
+        if (txtParagraph.getOffsetY() != null){
+            float[] newOffsetY = new float[txtParagraph.getOffsetY().length];
+            System.arraycopy(txtParagraph.getOffsetY(), 0 , newOffsetY, 0 , newOffsetY.length);
+            newTxtParagraph.setOffsetY(newOffsetY);
+        }
+        if (txtParagraph.getHeadIndexList() != null){
+            List<Integer> newHeadIndexList = new ArrayList<>();
+            newHeadIndexList.addAll(txtParagraph.getHeadIndexList());
+            newTxtParagraph.setHeadIndexList(newHeadIndexList);
+        }
+        newTxtParagraph.setFirstCanDrawLine(txtParagraph.getFirstCanDrawLine());
+        newTxtParagraph.setLastCanDrawLine(txtParagraph.getLastCanDrawLine());
+        newTxtParagraph.setCanDrawCompleted(txtParagraph.isCanDrawCompleted);
+        return newTxtParagraph;
     }
 
     @Override

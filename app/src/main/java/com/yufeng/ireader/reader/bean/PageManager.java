@@ -123,16 +123,19 @@ public class PageManager {
             return;
         }
         Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-        Page prePage = Page.createPrePager(curPage.getFirstTxtParagraph(), curPage.getFirstTxtParagraph().getFirstCanDrawLine(), readSetting, readRandomAccessFile);
-        if (prePage != null){
-            prePage.setCachePage(false);
-        }
+
+        TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
+        firstTxtParagraph = TxtParagraph.copyTxtParagraph(firstTxtParagraph);
+
+        Page prePage = Page.createPrePager(firstTxtParagraph, firstTxtParagraph.getFirstCanDrawLine(), readSetting, readRandomAccessFile);
+
         pagerSparseArray.put(PageType.PAGE_PREIVIOUS, prePage);
     }
 
     private void setLastCanDrawLineAndTxtParagraph(Page pager, int code) {
         lastCanDrawLine = code;
         curPageTxtParagraph = pager.getLastTxtParagraph();
+
         if (curPageTxtParagraph != null){
             if (lastCanDrawLine == -1) {//可以被完全绘制完成
                 curPageTxtParagraph.setCanDrawCompleted(true);
@@ -142,6 +145,7 @@ public class PageManager {
                 curPageTxtParagraph.setCanDrawCompleted(false);
             }
         }
+        curPageTxtParagraph = TxtParagraph.copyTxtParagraph(curPageTxtParagraph);
 
     }
 
@@ -152,14 +156,6 @@ public class PageManager {
             Canvas cacheCanvas = new Canvas(nextCacheBitmap);
             cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
 
-            if (nextPage.isCachePage()){
-                TxtParagraph firstTxtParagraph = nextPage.getFirstTxtParagraph();
-
-                if (!firstTxtParagraph.isCanDrawCompleted()){
-                    firstTxtParagraph.setFirstCanDrawLine(firstTxtParagraph.getLastCanDrawLine() + 1);
-                    firstTxtParagraph.setLastCanDrawLine(firstTxtParagraph.getHeadIndexList().size()-1);
-                }
-            }
             int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
             setLastCanDrawLineAndTxtParagraph(nextPage, code);
 
@@ -167,7 +163,6 @@ public class PageManager {
 
 
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-            curPage.setCachePage(true);
             pagerSparseArray.put(PageType.PAGE_PREIVIOUS, curPage);
             pagerSparseArray.put(PageType.PAGE_CURRENT, nextPage);
 
@@ -186,13 +181,6 @@ public class PageManager {
                 TxtParagraph txtParagraph = prePage.getLastTxtParagraph();
                 if (txtParagraph != null){
 
-                    if (prePage.isCachePage() ){
-                        if (!txtParagraph.isCanDrawCompleted()){
-                            txtParagraph.setLastCanDrawLine(txtParagraph.getFirstCanDrawLine() > 0 ? txtParagraph.getFirstCanDrawLine() - 1 : 0);
-                            txtParagraph.setFirstCanDrawLine(0);
-                        }
-                    }
-
                     Canvas cacheCanvas = new Canvas(preCacheBitmap);
                     cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
 
@@ -202,12 +190,7 @@ public class PageManager {
                     canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
 
                     Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-                    nextPage.setCachePage(true);
-                    TxtParagraph txtParagraph1 = nextPage.getLastTxtParagraph();
-                    if (!txtParagraph1.isCanDrawCompleted()){
-                        txtParagraph1.setLastCanDrawLine(txtParagraph1.getFirstCanDrawLine() -1);
-                        txtParagraph1.setFirstCanDrawLine(0);
-                    }
+
                     pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
 

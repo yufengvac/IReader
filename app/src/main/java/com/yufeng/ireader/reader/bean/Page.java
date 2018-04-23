@@ -22,8 +22,6 @@ public class Page {
 
     private List<TxtParagraph> txtParagraphList = new ArrayList<>();
 
-    private boolean isCachePage = false;
-
 
     /***
      * 画出当前Pager里面的txtParagraphList段落
@@ -186,15 +184,5 @@ public class Page {
         }
         return null;
     }
-    public List<TxtParagraph> getTxtParagraphList() {
-        return txtParagraphList;
-    }
 
-    public boolean isCachePage() {
-        return isCachePage;
-    }
-
-    public void setCachePage(boolean cachePage) {
-        isCachePage = cachePage;
-    }
 }
