@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -89,12 +90,14 @@ public class ReadView extends View{
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN){
             float touchX = event.getX();
-            if (touchX > DisplayConstant.DISPLAY_WIDTH / 2){
+            if (touchX > DisplayConstant.DISPLAY_WIDTH * (2.0 / 3)){
                 isTurnNext = true;
                 invalidate();
-            }else if (touchX < DisplayConstant.DISPLAY_WIDTH / 2){
+            }else if (touchX < DisplayConstant.DISPLAY_WIDTH *( 1.0 / 3)){
                 isTurnPre = true;
                 invalidate();
+            }else {
+                Log.e(TAG,"showMainMenu");
             }
         }else if (event.getAction() == MotionEvent.ACTION_UP){
             performClick();
