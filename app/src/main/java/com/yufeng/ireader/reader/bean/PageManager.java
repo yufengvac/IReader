@@ -203,6 +203,11 @@ public class PageManager {
 
                     Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
                     nextPage.setCachePage(true);
+                    TxtParagraph txtParagraph1 = nextPage.getLastTxtParagraph();
+                    if (!txtParagraph1.isCanDrawCompleted()){
+                        txtParagraph1.setLastCanDrawLine(txtParagraph1.getFirstCanDrawLine() -1);
+                        txtParagraph1.setFirstCanDrawLine(0);
+                    }
                     pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
 
