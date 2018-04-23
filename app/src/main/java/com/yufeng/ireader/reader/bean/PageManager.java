@@ -152,10 +152,19 @@ public class PageManager {
             Canvas cacheCanvas = new Canvas(nextCacheBitmap);
             cacheCanvas.drawColor(Color.parseColor("#B3AFA7"));
 
+            if (nextPage.isCachePage()){
+                TxtParagraph firstTxtParagraph = nextPage.getFirstTxtParagraph();
+
+                if (!firstTxtParagraph.isCanDrawCompleted()){
+                    firstTxtParagraph.setFirstCanDrawLine(firstTxtParagraph.getLastCanDrawLine() + 1);
+                    firstTxtParagraph.setLastCanDrawLine(firstTxtParagraph.getHeadIndexList().size()-1);
+                }
+            }
             int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
             setLastCanDrawLineAndTxtParagraph(nextPage, code);
 
             canvas.drawBitmap(nextCacheBitmap, 0, 0, paint);
+
 
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
             curPage.setCachePage(true);
@@ -178,8 +187,10 @@ public class PageManager {
                 if (txtParagraph != null){
 
                     if (prePage.isCachePage() ){
-                        txtParagraph.setLastCanDrawLine(txtParagraph.getFirstCanDrawLine() > 0 ? txtParagraph.getFirstCanDrawLine() - 1 : 0);
-                        txtParagraph.setFirstCanDrawLine(0);
+                        if (!txtParagraph.isCanDrawCompleted()){
+                            txtParagraph.setLastCanDrawLine(txtParagraph.getFirstCanDrawLine() > 0 ? txtParagraph.getFirstCanDrawLine() - 1 : 0);
+                            txtParagraph.setFirstCanDrawLine(0);
+                        }
                     }
 
                     Canvas cacheCanvas = new Canvas(preCacheBitmap);
@@ -190,7 +201,9 @@ public class PageManager {
 
                     canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
 
-                    pagerSparseArray.put(PageType.PAGE_NEXT, pagerSparseArray.get(PageType.PAGE_CURRENT));
+                    Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+                    nextPage.setCachePage(true);
+                    pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
 
                     preparePreBitmap();

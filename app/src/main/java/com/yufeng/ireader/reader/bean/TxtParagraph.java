@@ -58,7 +58,7 @@ public class TxtParagraph {
             String paragraphStr = getParagraphString(readRandomAccessFile,seekStart, tempBuf);
 
             txtParagraph = new TxtParagraph(paragraphStr, seekStart, readRandomAccessFile.getCurPosition()-1);
-            Log.e(TAG,"段落为="+txtParagraph.toString());
+            Log.e(TAG,"段落为="+txtParagraph);
             CharCalculator.calcCharOffsetX(paragraphStr, displayWidth, readSetting, txtParagraph);
 
         }catch (Exception e){
