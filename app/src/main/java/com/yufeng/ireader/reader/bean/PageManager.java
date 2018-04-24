@@ -8,6 +8,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.yufeng.ireader.reader.db.ReadTxtParagraph;
+import com.yufeng.ireader.reader.db.ReadTxtParagraphDatabase;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
@@ -15,6 +17,11 @@ import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
 
 import java.io.IOException;
+
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by yufeng on 2018/4/18-0018.
@@ -30,11 +37,12 @@ public class PageManager {
     private Bitmap preCacheBitmap;
     private int lastCanDrawLine = -1;
     private TxtParagraph curPageTxtParagraph;
+    private ReadTxtParagraphDatabase readBookHistoryDb;
 
     private static class PageType {
         private static final int PAGE_CURRENT = 0;
         private static final int PAGE_NEXT = 1;
-        private static final int PAGE_PREIVIOUS = 2;
+        private static final int PAGE_PREVIOUS = 2;
     }
 
     private PageManager() {
@@ -57,6 +65,7 @@ public class PageManager {
         }
 
         curPageTxtParagraph = null;
+        readBookHistoryDb = ReadTxtParagraphDatabase.getInstance();
     }
 
     private static class PagerManagerHolder {
@@ -111,7 +120,7 @@ public class PageManager {
         pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
     }
 
-    public void preparePreBitmap() {
+    private void preparePreBitmap() {
         if (pagerSparseArray == null) {
             return;
         }
@@ -122,7 +131,7 @@ public class PageManager {
 
         Page prePage = Page.createPrePager(firstTxtParagraph, firstTxtParagraph.getFirstCanDrawLine(), readSetting, readRandomAccessFile);
 
-        pagerSparseArray.put(PageType.PAGE_PREIVIOUS, prePage);
+        pagerSparseArray.put(PageType.PAGE_PREVIOUS, prePage);
     }
 
     private void setLastCanDrawLineAndTxtParagraph(Page pager, int code) {
@@ -156,7 +165,7 @@ public class PageManager {
 
 
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-            pagerSparseArray.put(PageType.PAGE_PREIVIOUS, curPage);
+            pagerSparseArray.put(PageType.PAGE_PREVIOUS, curPage);
             pagerSparseArray.put(PageType.PAGE_CURRENT, nextPage);
 
             prepareNextBitmap();
@@ -168,7 +177,7 @@ public class PageManager {
 
     public void turnPrePage(Canvas canvas, Paint paint, Context context) {
         if (preCacheBitmap != null) {
-            Page prePage = pagerSparseArray.get(PageType.PAGE_PREIVIOUS);
+            Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
 
             if (prePage != null) {
                 TxtParagraph txtParagraph = prePage.getLastTxtParagraph();
@@ -216,11 +225,39 @@ public class PageManager {
                 int code = CodeUtil.regCode(path);
                 Log.i(TAG, "字符编码是：" + CodeUtil.getEncodingByCode(code));
                 readRandomAccessFile.setCode(code);
+                readRandomAccessFile.setSize(readRandomAccessFile.length());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    public void saveReadHistory(){
+        Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+        if (curPage != null){
+            final TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
+            final String bookName = readRandomAccessFile.getRealPath();
+            if (firstTxtParagraph != null){
+//                try {
+//                    Single.create(new SingleOnSubscribe<Void>() {
+//                        @Override
+//                        public void subscribe(SingleEmitter<Void> e) throws Exception {
+//
+//                            float percent = firstTxtParagraph.getSeekEnd() *1.0f / readRandomAccessFile.getSize();
+//
+//                            ReadTxtParagraph readTxtParagraph = ReadTxtParagraph.createReadTxtParagraph(bookName,readRandomAccessFile.getRealPath(),
+//                                    readRandomAccessFile.getSize(),percent,firstTxtParagraph);
+//                            long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
+//                            Log.e(TAG,"result="+result);
+//                        }
+//                    }).subscribeOn(Schedulers.io()).toFuture().get();
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }
+
+            }
+        }
     }
 
     public void onDestroy() {

@@ -15,7 +15,6 @@ import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.FileHelper;
 import com.yufeng.ireader.utils.PathHelper;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -76,6 +75,11 @@ public class ReadExteriorHelper {
         }
     }
 
+    /**
+     * 设置canvas的背景颜色或者图片
+     * @param canvas 需要设置背景颜色或者图片的画步
+     * @param paint  画笔
+     */
     public void drawReadBackground(Canvas canvas, Paint paint){
         if (readSetting == null){
             return;
@@ -92,6 +96,10 @@ public class ReadExteriorHelper {
         }
     }
 
+    /**
+     * 根据文件路径生成一个canvas背景的bitmap对象
+     * @param filePath 文件路径
+     */
     private void createBgBitmap(String filePath){
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -102,10 +110,16 @@ public class ReadExteriorHelper {
         }
     }
 
+    /**
+     * 初始化背景绘画区域
+     */
     private void initBgRectF(){
         bgRectF = new RectF(0, 0 , DisplayConstant.DISPLAY_WIDTH, DisplayConstant.DISPLAY_HEIGHT);
     }
 
+    /**
+     * 回收资源
+     */
     public void destroy(){
         if (bgBitmap != null && !bgBitmap.isRecycled()){
             bgBitmap.recycle();

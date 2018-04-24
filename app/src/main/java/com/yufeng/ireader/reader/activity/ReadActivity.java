@@ -52,9 +52,14 @@ public class ReadActivity extends BaseActivity{
 
     @Override
     public void initData() {
-        ReadExteriorHelper.init(this, readSetting);
-        readView.prepare(readSetting,path);
+        readView.prepare(this,readSetting,path);
         readView.refresh();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        readView.saveHistory();
     }
 
     @Override

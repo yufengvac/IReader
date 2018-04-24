@@ -19,6 +19,7 @@ public class ReadRandomAccessFile extends RandomAccessFile{
 
     private String realPath;
     private long curPosition;
+    private long size;
 
     /**字符编码*/
     private int code;
@@ -84,5 +85,17 @@ public class ReadRandomAccessFile extends RandomAccessFile{
 
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public String getRealPath() {
+        return realPath;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 }

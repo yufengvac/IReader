@@ -1,5 +1,6 @@
 package com.yufeng.ireader.reader.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -139,12 +140,17 @@ public class ReadView extends View{
     }
 
 
-    public void prepare(IReadSetting readSetting, String path){
+    public void prepare(Activity activity, IReadSetting readSetting, String path){
         PageManager.getInstance().initPagers(readSetting, path);
+        ReadExteriorHelper.init(activity, readSetting);
     }
 
     public void refresh(){
         invalidate();
+    }
+
+    public void saveHistory(){
+        PageManager.getInstance().saveReadHistory();
     }
 
     public void onDestroy(){
