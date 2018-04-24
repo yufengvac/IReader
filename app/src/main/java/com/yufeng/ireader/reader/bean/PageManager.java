@@ -13,14 +13,19 @@ import com.yufeng.ireader.reader.db.ReadTxtParagraphDatabase;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
+import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.PathHelper;
 
 import java.io.IOException;
+import java.util.List;
 
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -38,6 +43,7 @@ public class PageManager {
     private int lastCanDrawLine = -1;
     private TxtParagraph curPageTxtParagraph;
     private ReadTxtParagraphDatabase readBookHistoryDb;
+    private ReadView readView;
 
     private static class PageType {
         private static final int PAGE_CURRENT = 0;
@@ -95,9 +101,36 @@ public class PageManager {
         initReadRandomAccessFile(path);
         this.readSetting = readSetting;
 
-        Page currentPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, this.readSetting, readRandomAccessFile);
-        pagerSparseArray.put(PageType.PAGE_CURRENT, currentPage);
+        Single<List<ReadTxtParagraph>> single = readBookHistoryDb.getReadTxtParagraphDao().getAllReadBookHistory();
+        single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<ReadTxtParagraph>>() {
+                    @Override
+                    public void accept(List<ReadTxtParagraph> readTxtParagraphList) throws Exception {
+                        initPageFromHistory(readTxtParagraphList);
+                    }
+                });
 
+    }
+
+    private void initPageFromHistory(List<ReadTxtParagraph> readTxtParagraphList){
+        if (readTxtParagraphList !=null && readTxtParagraphList.size() > 0){
+            TxtParagraph firstTxtParagraph = ReadTxtParagraph.backToTxtParagraph(readTxtParagraphList.get(0));
+            if (firstTxtParagraph != null){
+                curPageTxtParagraph = firstTxtParagraph;
+                lastCanDrawLine = firstTxtParagraph.getLastCanDrawLine();
+            }
+        }
+        if (curPageTxtParagraph != null){
+            Log.e(TAG,"历史记录:"+curPageTxtParagraph.toString());
+        }
+        Page currentPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, this.readSetting, readRandomAccessFile, true);
+        pagerSparseArray.put(PageType.PAGE_CURRENT, currentPage);
+        if (readView != null){
+            readView.postInvalidate();
+        }
+        if (curPageTxtParagraph != null){
+            preparePreBitmap();
+        }
     }
 
     public void drawPager(Canvas canvas, Paint paint) {
@@ -107,16 +140,18 @@ public class PageManager {
         if (pagerSparseArray.size() > 0) {
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
-            int code = curPage.drawTxtParagraph(canvas, paint);
-            setLastCanDrawLineAndTxtParagraph(curPage, code);
+            if (curPage != null){
+                int code = curPage.drawTxtParagraph(canvas, paint);
+                setLastCanDrawLineAndTxtParagraph(curPage, code);
+            }
         }
     }
 
     public void prepareNextBitmap() {
-        if (pagerSparseArray == null) {
+        if (pagerSparseArray == null || curPageTxtParagraph == null) {
             return;
         }
-        Page nextPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile);
+        Page nextPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile, false);
         pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
     }
 
@@ -237,27 +272,31 @@ public class PageManager {
         Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
         if (curPage != null){
             final TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
-            final String bookName = readRandomAccessFile.getRealPath();
+            final String bookName = PathHelper.getBookNameByPath(readRandomAccessFile.getRealPath());
             if (firstTxtParagraph != null){
-//                try {
-//                    Single.create(new SingleOnSubscribe<Void>() {
-//                        @Override
-//                        public void subscribe(SingleEmitter<Void> e) throws Exception {
-//
-//                            float percent = firstTxtParagraph.getSeekEnd() *1.0f / readRandomAccessFile.getSize();
-//
-//                            ReadTxtParagraph readTxtParagraph = ReadTxtParagraph.createReadTxtParagraph(bookName,readRandomAccessFile.getRealPath(),
-//                                    readRandomAccessFile.getSize(),percent,firstTxtParagraph);
-//                            long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
-//                            Log.e(TAG,"result="+result);
-//                        }
-//                    }).subscribeOn(Schedulers.io()).toFuture().get();
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
+                try {
+                    Single.create(new SingleOnSubscribe<Void>() {
+                        @Override
+                        public void subscribe(SingleEmitter<Void> e) throws Exception {
+                            float percent = firstTxtParagraph.getSeekEnd() *1.0f / readRandomAccessFile.getSize();
+
+                            ReadTxtParagraph readTxtParagraph = ReadTxtParagraph.createReadTxtParagraph(bookName,readRandomAccessFile.getRealPath(),
+                                    readRandomAccessFile.getSize(),percent,firstTxtParagraph);
+                            long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
+                            Log.e(TAG,"result="+result);
+                        }
+                    }).subscribeOn(Schedulers.io()).toFuture();
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 
             }
         }
+    }
+
+    public void setReadView(ReadView readView) {
+        this.readView = readView;
     }
 
     public void onDestroy() {

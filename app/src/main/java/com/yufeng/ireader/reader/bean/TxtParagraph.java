@@ -34,7 +34,7 @@ public class TxtParagraph {
     private long seekEnd = 0;
     private boolean isCanDrawCompleted;//能否被完全绘制完
 
-    private TxtParagraph(String contentPara, long seekStart, long seekEnd){
+    public TxtParagraph(String contentPara, long seekStart, long seekEnd){
         this.paragraph = contentPara;
         this.seekStart = seekStart;
         this.seekEnd = seekEnd;
@@ -266,6 +266,56 @@ public class TxtParagraph {
         return newTxtParagraph;
     }
 
+    public static String arrayToString(float[] array){
+        String result;
+        if (array == null || array.length == 0){
+            result = "";
+        }else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0 ; i < array.length ; i++){
+                stringBuilder.append(array[i]);
+                if (i < array.length -1){
+                    stringBuilder.append(",");
+                }
+            }
+            result = stringBuilder.toString();
+        }
+        return result;
+    }
+
+    public static float[] stringToArray(String arrStr){
+        String[] strings = arrStr.split(",");
+        float[] arr = new float[strings.length];
+        for (int i = 0 ; i < arr.length; i++){
+            arr[i] = Float.valueOf(strings[i]);
+        }
+        return arr;
+    }
+
+    public static String listToString(List<Integer> list){
+        if (list == null || list.size() == 0){
+            return "";
+        }else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0 ; i < list.size() ; i ++){
+                stringBuilder.append(list.get(i));
+                if (i < list.size() - 1){
+                    stringBuilder.append(",");
+                }
+            }
+            return stringBuilder.toString();
+        }
+    }
+
+    public static List<Integer> stringToList(String listStr){
+        List<Integer> list = new ArrayList<>();
+        String[] listStrs = listStr.split(",");
+        for (String value : listStrs){
+            list.add(Integer.parseInt(value));
+        }
+        return list;
+    }
+
     @Override
     public String toString() {
         return "TxtParagraph{" +
@@ -277,6 +327,7 @@ public class TxtParagraph {
                 ", seekEnd='" + seekEnd + '\'' +
                 ", firstCanDrawLine='" + firstCanDrawLine + '\'' +
                 ", lastCanDrawLine='" + lastCanDrawLine + '\'' +
+                ", isCanDrawCompleted='" + (isCanDrawCompleted?"可以绘制完全":"不可以绘制完全") + '\'' +
                 '}';
     }
 

@@ -17,7 +17,7 @@ public class FileHelper {
     public static void copyToSDFromAssets(Context context, String assetsPath, String directoryName){
         try {
             InputStream in = context.getAssets().open(assetsPath);
-            File file = new File(directoryName, PathHelper.getFileNameWithExension(assetsPath));
+            File file = new File(directoryName, PathHelper.getFileNameWithExtension(assetsPath));
             if (file.exists()){
                 return;
             }else {

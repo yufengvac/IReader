@@ -152,7 +152,7 @@ public class PathHelper {
      * @param path 文件地址
      * @return     文件名字 /和.之间的
      */
-    private static String getBookNameByPath(String path) {
+    public static String getBookNameByPath(String path) {
         int firstIndex = path.lastIndexOf("/");
         int lastIndex = path.lastIndexOf(".");
         return path.substring(firstIndex + 1, lastIndex);
@@ -163,7 +163,7 @@ public class PathHelper {
      * @param path 文件地址
      * @return     文件名带有后缀
      */
-    public static String getFileNameWithExension(String path){
+    public static String getFileNameWithExtension(String path){
         int firstIndex = path.lastIndexOf("/");
         return path.substring(firstIndex + 1);
     }

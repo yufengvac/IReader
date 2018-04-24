@@ -46,7 +46,7 @@ public class Page {
     }
 
 
-    static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
+    static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile, boolean forcedAdd){
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
@@ -60,12 +60,15 @@ public class Page {
             long startSeek = 0;
 
             if (lastPagerTxtParagraph != null){
-                if (!lastPagerTxtParagraph.isCanDrawCompleted()){
+                if (! lastPagerTxtParagraph.isCanDrawCompleted()){
                     needCalcNewTxtParagraph = true;
                     lastPagerTxtParagraph.setFirstCanDrawLine(lastCanDrawLine+1);
                 }else {
                     startSeek = lastPagerTxtParagraph.getSeekEnd() + 1;
                 }
+            }
+            if (forcedAdd && lastPagerTxtParagraph != null){
+                needCalcNewTxtParagraph = true;
             }
 
             TxtParagraph txtParagraph = lastPagerTxtParagraph;

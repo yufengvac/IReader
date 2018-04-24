@@ -4,6 +4,7 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.yufeng.ireader.reader.bean.TxtParagraph;
 
@@ -184,9 +185,43 @@ public class ReadTxtParagraph {
         readTxtParagraph.setSeekStart(txtParagraph.getSeekStart());
         readTxtParagraph.setSeekEnd(txtParagraph.getSeekEnd());
         readTxtParagraph.setCanbeDrawCompleted(txtParagraph.isCanDrawCompleted());
-
-
+        readTxtParagraph.setOffsetX(TxtParagraph.arrayToString(txtParagraph.getOffsetX()));
+        readTxtParagraph.setOffsetY(TxtParagraph.arrayToString(txtParagraph.getOffsetY()));
+        readTxtParagraph.setHeadIndex(TxtParagraph.listToString(txtParagraph.getHeadIndexList()));
         return readTxtParagraph;
     }
 
+    public static TxtParagraph backToTxtParagraph(ReadTxtParagraph readTxtParagraph){
+        long seekStart = readTxtParagraph.getSeekStart();
+        long seekEnd = readTxtParagraph.getSeekEnd();
+        String paragraph = readTxtParagraph.getTxtParagraph();
+        TxtParagraph txtParagraph = new TxtParagraph(paragraph, seekStart, seekEnd);
+        txtParagraph.setFirstCanDrawLine(readTxtParagraph.getFirstCanDrawLine());
+        txtParagraph.setLastCanDrawLine(readTxtParagraph.getLastCanDrawLine());
+        txtParagraph.setOffsetX(TxtParagraph.stringToArray(readTxtParagraph.getOffsetX()));
+        txtParagraph.setOffsetY(TxtParagraph.stringToArray(readTxtParagraph.getOffsetY()));
+        txtParagraph.setHeadIndexList(TxtParagraph.stringToList(readTxtParagraph.getHeadIndex()));
+        txtParagraph.setCanDrawCompleted(txtParagraph.getLastCanDrawLine() + 1 == txtParagraph.getHeadIndexList().size());
+        return txtParagraph;
+    }
+
+    @Override
+    public String toString() {
+        return "ReadTxtParagraph{" +
+                "bookPath='" + bookPath + '\'' +
+                ", bookName='" + bookName + '\'' +
+                ", size=" + size +
+                ", readPercent=" + readPercent +
+                ", lastReadTime=" + lastReadTime +
+                ", txtParagraph='" + txtParagraph + '\'' +
+                ", firstCanDrawLine=" + firstCanDrawLine +
+                ", lastCanDrawLine=" + lastCanDrawLine +
+                ", seekStart=" + seekStart +
+                ", seekEnd=" + seekEnd +
+                ", isCanbeDrawCompleted=" + isCanbeDrawCompleted +
+                ", offsetX='" + (TextUtils.isEmpty(offsetX)?"":offsetX) + '\'' +
+                ", offsetY='" + (TextUtils.isEmpty(offsetY)?"":offsetY) + '\'' +
+                ", headIndex='" + (TextUtils.isEmpty(headIndex)?"":headIndex) + '\'' +
+                '}';
+    }
 }

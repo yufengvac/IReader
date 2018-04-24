@@ -143,6 +143,7 @@ public class ReadView extends View{
     public void prepare(Activity activity, IReadSetting readSetting, String path){
         PageManager.getInstance().initPagers(readSetting, path);
         ReadExteriorHelper.init(activity, readSetting);
+        PageManager.getInstance().setReadView(this);
     }
 
     public void refresh(){

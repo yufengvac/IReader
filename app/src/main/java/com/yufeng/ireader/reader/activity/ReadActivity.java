@@ -53,7 +53,6 @@ public class ReadActivity extends BaseActivity{
     @Override
     public void initData() {
         readView.prepare(this,readSetting,path);
-        readView.refresh();
     }
 
     @Override
