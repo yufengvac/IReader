@@ -20,6 +20,9 @@ public interface ReadTxtParagraphDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertReadBookHistory(ReadTxtParagraph readTxtParagraph);
 
-    @Query("SELECT * FROM book_read_history ORDER BY last_read_time")
-    Single<List<ReadTxtParagraph>> getAllReadBookHistory();
+    @Query("SELECT * FROM book_read_history WHERE book_path = :bookPath ORDER BY last_read_time")
+    Single<List<ReadTxtParagraph>> getAllReadBookHistory(String bookPath);
+
+    @Query("DELETE FROM book_read_history")
+    int deleteReadBookHistory();
 }

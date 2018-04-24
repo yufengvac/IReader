@@ -86,7 +86,6 @@ public class ReadView extends View{
         }else {
             drawCurrentContent(canvas);
             prepareNextContent();
-            preparePreContent();
         }
 
     }
@@ -127,9 +126,6 @@ public class ReadView extends View{
         PageManager.getInstance().prepareNextBitmap();
     }
 
-    private void preparePreContent(){
-//        PageManager.getInstance().preparePreBitmap();
-    }
 
     private void turnNextPage(Canvas canvas){
         PageManager.getInstance().turnNextPage(canvas,contentPaint);
@@ -144,10 +140,6 @@ public class ReadView extends View{
         PageManager.getInstance().initPagers(readSetting, path);
         ReadExteriorHelper.init(activity, readSetting);
         PageManager.getInstance().setReadView(this);
-    }
-
-    public void refresh(){
-        invalidate();
     }
 
     public void saveHistory(){

@@ -101,7 +101,15 @@ public class PageManager {
         initReadRandomAccessFile(path);
         this.readSetting = readSetting;
 
-        Single<List<ReadTxtParagraph>> single = readBookHistoryDb.getReadTxtParagraphDao().getAllReadBookHistory();
+//        Single.create(new SingleOnSubscribe<Void>() {
+//            @Override
+//            public void subscribe(SingleEmitter<Void> e) throws Exception {
+//                readBookHistoryDb.getReadTxtParagraphDao().deleteReadBookHistory();
+//            }
+//        }).subscribeOn(Schedulers.io()).toFuture();
+
+
+        Single<List<ReadTxtParagraph>> single = readBookHistoryDb.getReadTxtParagraphDao().getAllReadBookHistory(path);
         single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<ReadTxtParagraph>>() {
                     @Override
