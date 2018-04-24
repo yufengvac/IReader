@@ -2,24 +2,19 @@ package com.yufeng.ireader.reader.bean;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
 import com.yufeng.ireader.reader.utils.CodeUtil;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
-import com.yufeng.ireader.utils.PathHelper;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/18-0018.
@@ -81,10 +76,6 @@ public class PageManager {
 
     public static PageManager getInstance() {
         return PagerManagerHolder.getINSTANCE();
-    }
-
-    public static void destroy() {
-        PagerManagerHolder.destroy();
     }
 
 
@@ -215,7 +206,7 @@ public class PageManager {
     }
 
     public void drawCanvasBg(Canvas canvas, Paint paint){
-//        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), readSetting.getCanvasBgRes()),null,new RectF(0,0,DisplayConstant.DISPLAY_WIDTH,DisplayConstant.DISPLAY_HEIGHT),paint);
+        ReadExteriorHelper.getInstance().drawReadBackground(canvas, paint);
     }
 
     private void initReadRandomAccessFile(String path) {
@@ -257,7 +248,7 @@ public class PageManager {
             pagerSparseArray = null;
             System.gc();
 
-            destroy();
+            PagerManagerHolder.destroy();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.utils.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -51,6 +52,7 @@ public class ReadActivity extends BaseActivity{
 
     @Override
     public void initData() {
+        ReadExteriorHelper.init(this, readSetting);
         readView.prepare(readSetting,path);
         readView.refresh();
     }

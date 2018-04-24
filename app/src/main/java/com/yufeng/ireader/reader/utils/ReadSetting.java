@@ -61,8 +61,8 @@ public class ReadSetting implements IReadSetting {
     }
 
     @Override
-    public int getCanvasBgRes() {
-        return R.drawable.read_skin_gray_bg;
+    public int getCanvasBgOptions() {
+        return 2;
     }
 
     @Override

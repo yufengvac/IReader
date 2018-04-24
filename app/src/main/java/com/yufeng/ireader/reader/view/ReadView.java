@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.bean.PageManager;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
@@ -109,7 +110,7 @@ public class ReadView extends View{
     }
 
     private void drawBg(Canvas canvas){
-        PageManager.getInstance().drawCanvasBg(canvas);
+        PageManager.getInstance().drawCanvasBg(canvas, contentPaint);
     }
 
     @Override
@@ -148,6 +149,7 @@ public class ReadView extends View{
 
     public void onDestroy(){
         PageManager.getInstance().onDestroy();
+        ReadExteriorHelper.getInstance().destroy();
     }
 
 }

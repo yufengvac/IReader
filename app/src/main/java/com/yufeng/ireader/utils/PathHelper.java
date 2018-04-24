@@ -20,14 +20,23 @@ import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/11.
+ *
  */
 
 public class PathHelper {
     private static final String TAG = PathHelper.class.getSimpleName();
-    private static final String APP_PATH = "ireader";
+    private static final String APP_PATH = "aireader";
     private static final String IMG_PATH = "img";
+    private static final String READER_COVER_PATH = "cover";
+    private static final String READER_FONT_PATH = "font";
+    private static final String ASSETS_READ_COVER = "readCover";
+    private static final String[] ASSETS_BG_NAMES = new String[]{"read_skin_darkgray_bg.jpg", "read_skin_gray_bg.jpg", "read_skin_kraftpaper_bg.jpg"};
 
-    public static boolean ensurePath() {
+    /**
+     * 创建项目根目录
+     * @return true 成功； false 失败
+     */
+    private static boolean ensureRootPath() {
 
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -37,35 +46,65 @@ public class PathHelper {
         return false;
     }
 
-    public static boolean ensureImgPath() {
-        if (ensurePath()) {
-            String imgRootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + APP_PATH;
-            File imgDirectory = new File(imgRootPath, IMG_PATH);
-            return imgDirectory.exists() || imgDirectory.mkdirs();
+    /**
+     * 创建项目根目录下的某个子目录
+     * @param directoryName 子目录名称
+     * @return true 成功； false 失败
+     */
+    private static boolean ensureDirectoryPath(String directoryName){
+        if (ensureRootPath()){
+            String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + APP_PATH;
+            File fontDirectory = new File(rootPath, directoryName);
+            return fontDirectory.exists() || fontDirectory.mkdirs();
         }
         return false;
     }
 
-    public static String getImgPath() {
-        if (ensureImgPath()) {
-            return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator
-                    + APP_PATH + File.separator + IMG_PATH + File.separator;
+    /**
+     * 获取根目录下的某个子目录完整路径
+     * @param directoryName 子目录名称
+     * @return 该子目录的完整路径
+     */
+    private static String getDirectoryPath(String directoryName){
+        if (ensureDirectoryPath(directoryName)){
+            return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + APP_PATH + File.separator
+                    + directoryName + File.separator;
         }
         return "";
     }
 
-    public static String getBookPath() {
-        if (ensurePath()) {
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), APP_PATH);
-            File[] files = file.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File pathname) {
-                    return getExensionByName(pathname.getName()).toLowerCase().equals("txt");
-                }
-            });
-            if (files.length > 0) {
-                return files[0].getAbsolutePath();
-            }
+
+    public static String getImgPath() {
+        return getDirectoryPath(IMG_PATH);
+    }
+    public static String getCoverPath(){
+        return getDirectoryPath(READER_COVER_PATH);
+    }
+    private static String getFontPath(){
+        return getDirectoryPath(READER_FONT_PATH);
+    }
+
+    /**
+     * 获取默认的在assets里面的阅读器背景图片
+     * @return 背景图片list
+     */
+    public static List<String> getDefaultReadBgInAssets(){
+        List<String> readBgList = new ArrayList<>();
+        String assetsPath = ASSETS_READ_COVER + File.separator;
+        for (String name: ASSETS_BG_NAMES){
+            readBgList.add(assetsPath + name);
+        }
+        return readBgList;
+    }
+
+    /**
+     * 根据选项获取阅读器背景在sd卡下面的全路径
+     * @param options 背景选项
+     * @return 该背景选项在sd卡下的全路径
+     */
+    public static String getReadBgPathByOption(int options){
+        if (options >=0 && options < ASSETS_READ_COVER.length()){
+            return getCoverPath() + ASSETS_BG_NAMES[options];
         }
         return "";
     }
@@ -77,7 +116,7 @@ public class PathHelper {
      */
     public static List<Book> getBooksInDirectory() {
         ArrayList<Book> bookList = new ArrayList<>();
-        if (ensurePath()) {
+        if (ensureRootPath()) {
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), APP_PATH);
             File[] files = file.listFiles(new FileFilter() {
                 @Override
@@ -96,6 +135,11 @@ public class PathHelper {
         return bookList;
     }
 
+    /**
+     * 根据文件名字取文件后缀 . 以后的
+     * @param name  文件路径名称带后缀的
+     * @return 文件后缀
+     */
     private static String getExensionByName(String name) {
         if (!TextUtils.isEmpty(name) && name.contains(".")) {
             return name.substring(name.lastIndexOf(".") + 1);
@@ -103,10 +147,25 @@ public class PathHelper {
         return "";
     }
 
+    /**
+     * 根据文件地址取 文件名字
+     * @param path 文件地址
+     * @return     文件名字 /和.之间的
+     */
     private static String getBookNameByPath(String path) {
         int firstIndex = path.lastIndexOf("/");
         int lastIndex = path.lastIndexOf(".");
         return path.substring(firstIndex + 1, lastIndex);
+    }
+
+    /**
+     * 获取带有后缀的文件名
+     * @param path 文件地址
+     * @return     文件名带有后缀
+     */
+    public static String getFileNameWithExension(String path){
+        int firstIndex = path.lastIndexOf("/");
+        return path.substring(firstIndex + 1);
     }
 
     public static ArrayList<String> getContentByPath(String path) {
