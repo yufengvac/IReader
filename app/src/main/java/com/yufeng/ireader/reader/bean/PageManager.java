@@ -143,7 +143,6 @@ public class PageManager {
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
             if (curPage != null){
-//                curPage.drawTxtParagraph(canvas, paint);
 
                 if (nextCacheBitmap != null){
 
@@ -172,12 +171,12 @@ public class PageManager {
         Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
         pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
 
-//        if (nextCacheBitmap != null){
-//
-//            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-//            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-//            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
-//        }
+        if (nextCacheBitmap != null){
+
+            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+        }
 
     }
 
@@ -194,29 +193,33 @@ public class PageManager {
 
         pagerSparseArray.put(PageType.PAGE_PREVIOUS, prePage);
 
+        if (prePage != null && preCacheBitmap != null){
+            Canvas cacheCanvas = new Canvas(preCacheBitmap);
+            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+            prePage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+        }
+
     }
 
 
     public void turnNextPage(final Canvas canvas, final Paint paint) {
         if (nextCacheBitmap != null) {
 
-            new Thread(){
+            Single.create(new SingleOnSubscribe<Void>() {
                 @Override
-                public void run() {
+                public void subscribe(SingleEmitter<Void> e) throws Exception {
                     Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
 
-//                    drawCanvasBitmap(canvas, nextCacheBitmap, paint);
                     curBitmap = nextCacheBitmap.copy(Bitmap.Config.ARGB_4444, true);
 
                     Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
                     pagerSparseArray.put(PageType.PAGE_PREVIOUS, curPage);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, nextPage);
 
-                    hasNextDraw = false;
                     prepareNextBitmap();
+                    preparePreBitmap();
                 }
-            }.start();
-
+            }).subscribeOn(Schedulers.io()).toFuture();
 
         } else {
             Log.e(TAG, "cacheBitmap == null");
@@ -231,11 +234,10 @@ public class PageManager {
                 TxtParagraph txtParagraph = prePage.getLastTxtParagraph();
                 if (txtParagraph != null){
 
-//                    drawCanvasBitmap(canvas, preCacheBitmap, paint);
 
-                    new Thread(){
+                    Single.create(new SingleOnSubscribe<Void>() {
                         @Override
-                        public void run() {
+                        public void subscribe(SingleEmitter<Void> e) throws Exception {
                             curBitmap = preCacheBitmap.copy(Bitmap.Config.ARGB_4444,true);
 
                             Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
@@ -243,10 +245,10 @@ public class PageManager {
                             pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
                             pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
 
-                            hasPreDraw = false;
                             preparePreBitmap();
+                            prepareNextBitmap();
                         }
-                    }.start();
+                    }).subscribeOn(Schedulers.io()).toFuture();
 
                 }
             } else {
@@ -272,30 +274,11 @@ public class PageManager {
         canvas.drawBitmap(bitmap,0 ,0 , paint);
     }
 
-    private boolean hasNextDraw = false;
     public Bitmap getNextCacheBitmap(){
-        if (!hasNextDraw){
-            Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
-            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
-            hasNextDraw = true;
-        }
         return nextCacheBitmap;
     }
 
-    private boolean hasPreDraw = false;
     public Bitmap getPreCacheBitmap(){
-        if (!hasPreDraw){
-            Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
-            if (prePage != null){
-                Canvas cacheCanvas = new Canvas(preCacheBitmap);
-                drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-
-                prePage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
-            }
-            hasPreDraw = true;
-        }
         return preCacheBitmap;
     }
 

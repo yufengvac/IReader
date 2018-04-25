@@ -1,7 +1,7 @@
 package com.yufeng.ireader.reader.utils;
 
-import com.yufeng.ireader.reader.viewimpl.LeftRightCoveragePageTurn;
 import com.yufeng.ireader.reader.viewimpl.LeftRightTranslatePageTurn;
+import com.yufeng.ireader.reader.viewimpl.LeftRightCoveragePageTurn;
 import com.yufeng.ireader.reader.viewimpl.NonePageTurn;
 import com.yufeng.ireader.reader.viewimpl.SimulationPageTurn;
 import com.yufeng.ireader.reader.viewimpl.TopBottomCoveragePageTurn;

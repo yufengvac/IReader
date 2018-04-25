@@ -72,6 +72,6 @@ public class ReadSetting implements IReadSetting {
 
     @Override
     public int getPageTurnType() {
-        return 1;
+        return 0;
     }
 }
