@@ -92,15 +92,21 @@ public class ReadView extends View implements OnPageTurnListener{
             }
             isTurnPre = false;
         }else {
-            drawCurrentContent(canvas);
-            prepareNextContent();
+            if (!pageTurn.onTouchEvent){
+                drawCurrentContent(canvas);
+                prepareNextContent();
+            }
         }
 
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN){
+        if (pageTurn.onTouchEvent(event)){
+            return true;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP){
+            performClick();
             float touchX = event.getX();
             if (touchX > DisplayConstant.DISPLAY_WIDTH * (2.0 / 3)){
                 pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_NEXT);
@@ -111,9 +117,8 @@ public class ReadView extends View implements OnPageTurnListener{
             }else {
                 Log.e(TAG,"showMainMenu");
             }
-        }else if (event.getAction() == MotionEvent.ACTION_UP){
-            performClick();
         }
+
         return super.onTouchEvent(event);
     }
 
@@ -177,15 +182,12 @@ public class ReadView extends View implements OnPageTurnListener{
     @Override
     public void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection) {
         if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT){
-//            turnNextPage(canvas);
             PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
             turnNextPage(canvas);
         }else if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_PREVIOUS){
             PageManager.getInstance().drawCanvasBitmap(canvas, getPreviousBitmap(),contentPaint);
             turnPrePage(canvas);
         }
-
-//        PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
     }
 
     public void saveHistory(){

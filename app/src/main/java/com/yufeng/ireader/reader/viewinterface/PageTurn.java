@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.MotionEvent;
 import android.view.animation.LinearInterpolator;
 
 /**
@@ -20,6 +21,7 @@ public abstract class PageTurn {
     protected Paint contentPaint ;
     private int pageTurnDirection = -1;
     protected Context context;
+    public boolean onTouchEvent = false;
 
     public static class PageTurnType{
         public static final int LEFT_RIGHT_COVERAGE = 0;
@@ -32,6 +34,7 @@ public abstract class PageTurn {
     public static class PageTurnDirection{
         public static final int DIRECTION_NEXT = 0;
         public static final int DIRECTION_PREVIOUS = 1;
+        public static final int DIRECTION_NULL = -1;
     }
 
     protected static final int ANIMATION_DURATION = 400;
@@ -41,21 +44,26 @@ public abstract class PageTurn {
         @Override
         public void onAnimationEnd(Animator animation) {
             animation.removeAllListeners();
-            isAnimationEnd = true;
+            setAnimationEnd(true);
         }
 
         @Override
         public void onAnimationStart(Animator animation) {
-            isAnimationEnd = false;
+            setAnimationEnd(false);
         }
     };
 
     public abstract void turnNext();
     public abstract void turnPrevious();
     public abstract boolean draw(Canvas canvas);
+    public abstract boolean onTouchEvent(MotionEvent event);
 
-    public boolean isAnimationEnd(){
+    protected boolean isAnimationEnd(){
         return isAnimationEnd;
+    }
+
+    protected void setAnimationEnd(boolean animationEnd) {
+        isAnimationEnd = animationEnd;
     }
 
     public final boolean onDraw(Canvas canvas){

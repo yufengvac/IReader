@@ -3,6 +3,7 @@ package com.yufeng.ireader.reader.viewimpl;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.graphics.Canvas;
+import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
@@ -43,6 +44,11 @@ public class LeftRightTranslatePageTurn extends PageTurn{
     @Override
     public void turnPrevious() {
         startAnimation(-DisplayConstant.DISPLAY_WIDTH,0);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return false;
     }
 
     @Override

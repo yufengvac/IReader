@@ -165,17 +165,19 @@ public class PageManager {
         }
         Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
-        TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
-        lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
+        if (curPage != null){
+            TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
+            lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
 
-        Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
-        pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
+            Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
+            pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
 
-        if (nextCacheBitmap != null){
+            if (nextCacheBitmap != null){
 
-            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+                Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+                drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+                nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+            }
         }
 
     }

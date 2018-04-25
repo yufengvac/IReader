@@ -5,6 +5,8 @@ import android.animation.ObjectAnimator;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
+import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
@@ -16,8 +18,11 @@ import com.yufeng.ireader.utils.DisplayConstant;
  */
 
 public class LeftRightCoveragePageTurn extends PageTurn{
+    private static final String TAG = LeftRightCoveragePageTurn.class.getSimpleName();
     private Animator animator;
     private float translateX;
+    private float touchX = 0;
+    private boolean hasEnsureDirection = false;
 
     private GradientDrawable[] shadowDrawable = new GradientDrawable[2];
     private static final int[][] SHADOW_COLOR = {{0x50454545, 0x00454545,}, {0xb0151515, 0x00151515}};
@@ -53,9 +58,54 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (animator != null && animator.isRunning()){
+            return true;
+        }
+        if (event.getAction() == MotionEvent.ACTION_DOWN){
+            touchX = event.getX();
+            hasEnsureDirection = false;
+            onTouchEvent = true;
+        }else if (event.getAction() == MotionEvent.ACTION_MOVE){
+            onTouchEvent = true;
+            if (!hasEnsureDirection){
+                if (event.getX() > touchX){ //方向是向右，即翻向上一页
+                    setPageTurnDirection(PageTurnDirection.DIRECTION_PREVIOUS);
+                    hasEnsureDirection = true;
+                }else if (event.getX() < touchX){ //方向是像左，即翻向下一页
+                    setPageTurnDirection(PageTurnDirection.DIRECTION_NEXT);
+                    hasEnsureDirection = true;
+                }
+            }
+            if (hasEnsureDirection){
+                if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+                    setShiftX(event.getX() - touchX);
+                }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+                    setShiftX(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX);
+                }
+
+            }
+
+        }else if (event.getAction() == MotionEvent.ACTION_UP){
+            onTouchEvent = false;
+            hasEnsureDirection = false;
+            if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+                startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH);
+            }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+                startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0);
+            }else if (event.getX() == touchX){
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    @Override
     public boolean draw(Canvas canvas) {
         if (isAnimationEnd()){//动画结束
             onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection());
+            setAnimationEnd(false);
             return true;
         }
         if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){

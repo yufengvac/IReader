@@ -1,6 +1,7 @@
 package com.yufeng.ireader.reader.viewimpl;
 
 import android.graphics.Canvas;
+import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 
@@ -18,6 +19,11 @@ public class TopBottomCoveragePageTurn extends PageTurn{
     @Override
     public void turnPrevious() {
 
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return false;
     }
 
     @Override
