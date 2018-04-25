@@ -1,4 +1,4 @@
-package com.yufeng.ireader.reader.utils;
+package com.yufeng.ireader.reader.viewimpl;
 
 import android.graphics.Paint;
 
@@ -68,5 +68,10 @@ public class ReadSetting implements IReadSetting {
     @Override
     public String getCanvasBgColor() {
         return "#B3AFA7";
+    }
+
+    @Override
+    public int getPageTurnType() {
+        return 1;
     }
 }

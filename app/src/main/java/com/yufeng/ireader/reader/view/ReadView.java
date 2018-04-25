@@ -2,6 +2,7 @@ package com.yufeng.ireader.reader.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,8 +16,11 @@ import android.view.View;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.bean.PageManager;
+import com.yufeng.ireader.reader.utils.PageTurnFactory;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
+import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
 
@@ -25,7 +29,7 @@ import com.yufeng.ireader.utils.DisplayConstant;
  *
  */
 
-public class ReadView extends View{
+public class ReadView extends View implements OnPageTurnListener{
     private static final String TAG = ReadView.class.getSimpleName();
 
     private Paint contentPaint;
@@ -37,6 +41,7 @@ public class ReadView extends View{
     private boolean isTurnNext = false;
     private boolean isTurnPre = false;
     private Context context;
+    private PageTurn pageTurn;
 
 
     public ReadView(Context context) {
@@ -77,11 +82,14 @@ public class ReadView extends View{
         super.onDraw(canvas);
         drawBg(canvas);
 
-        if (isTurnNext){
-            turnNextPage(canvas);
-            isTurnNext = false;
-        }else if (isTurnPre){
-            turnPrePage(canvas);
+        if (pageTurn.getPageTurnDirection() == PageTurn.PageTurnDirection.DIRECTION_NEXT){
+            if (pageTurn.onDraw(canvas)){
+                pageTurn.resetPageTurnDirection();
+            }
+        }else if (pageTurn.getPageTurnDirection() == PageTurn.PageTurnDirection.DIRECTION_PREVIOUS){
+            if (pageTurn.onDraw(canvas)){
+                pageTurn.resetPageTurnDirection();
+            }
             isTurnPre = false;
         }else {
             drawCurrentContent(canvas);
@@ -95,11 +103,11 @@ public class ReadView extends View{
         if (event.getAction() == MotionEvent.ACTION_DOWN){
             float touchX = event.getX();
             if (touchX > DisplayConstant.DISPLAY_WIDTH * (2.0 / 3)){
-                isTurnNext = true;
-                invalidate();
+                pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_NEXT);
+                pageTurn.turnNext();
             }else if (touchX < DisplayConstant.DISPLAY_WIDTH *( 1.0 / 3)){
-                isTurnPre = true;
-                invalidate();
+                pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
+                pageTurn.turnPrevious();
             }else {
                 Log.e(TAG,"showMainMenu");
             }
@@ -140,6 +148,44 @@ public class ReadView extends View{
         PageManager.getInstance().initPagers(readSetting, path);
         ReadExteriorHelper.init(activity, readSetting);
         PageManager.getInstance().setReadView(this);
+        pageTurn = PageTurnFactory.createPageTurn(readSetting);
+        pageTurn.setOnPageTurnListener(this);
+        pageTurn.setPaint(contentPaint);
+        pageTurn.setContext(getContext());
+    }
+
+    @Override
+    public Bitmap getNextBitmap() {
+        return PageManager.getInstance().getNextCacheBitmap();
+    }
+
+    @Override
+    public Bitmap getPreviousBitmap() {
+        return PageManager.getInstance().getPreCacheBitmap();
+    }
+
+    @Override
+    public Bitmap getCurrentBitmap() {
+        return PageManager.getInstance().getCurBitmap();
+    }
+
+    @Override
+    public void onAnimationInvalidate() {
+       invalidate();
+    }
+
+    @Override
+    public void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection) {
+        if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT){
+//            turnNextPage(canvas);
+            PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
+            turnNextPage(canvas);
+        }else if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_PREVIOUS){
+            PageManager.getInstance().drawCanvasBitmap(canvas, getPreviousBitmap(),contentPaint);
+            turnPrePage(canvas);
+        }
+
+//        PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
     }
 
     public void saveHistory(){

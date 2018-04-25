@@ -29,7 +29,7 @@ public class Page {
      * @param canvas canvas
      * @param paint  画笔
      */
-    public int drawTxtParagraph(Canvas canvas, Paint paint){
+    public void drawTxtParagraph(Canvas canvas, Paint paint){
         if (txtParagraphList != null && txtParagraphList.size() > 0 ){
             for (int i =0 ; i < txtParagraphList.size(); i++){
                 TxtParagraph txtParagraph = txtParagraphList.get(i);
@@ -37,12 +37,11 @@ public class Page {
             }
             TxtParagraph lastTxtParagraph = txtParagraphList.get(txtParagraphList.size()-1);
             if (lastTxtParagraph.getLastCanDrawLine() + 1 >= lastTxtParagraph.getHeadIndexList().size()){//表示该段落可以绘制完
-                return -1;
+                lastTxtParagraph.setCanDrawCompleted(true);
             }else {
-                return txtParagraphList.get(txtParagraphList.size()-1).getLastCanDrawLine();//表示该段落不能完全绘制完，返回最后那个段落的绘制的最后一行
+                lastTxtParagraph.setCanDrawCompleted(false);//表示该段落不能完全绘制完，返回最后那个段落的绘制的最后一行
             }
         }
-        return -2;
     }
 
 

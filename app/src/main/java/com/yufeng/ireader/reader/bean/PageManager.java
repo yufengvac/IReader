@@ -40,8 +40,7 @@ public class PageManager {
     private IReadSetting readSetting;
     private Bitmap nextCacheBitmap;
     private Bitmap preCacheBitmap;
-    private int lastCanDrawLine = -1;
-    private TxtParagraph curPageTxtParagraph;
+    private Bitmap curBitmap;
     private ReadTxtParagraphDatabase readBookHistoryDb;
     private ReadView readView;
 
@@ -70,7 +69,6 @@ public class PageManager {
             preCacheBitmap = null;
         }
 
-        curPageTxtParagraph = null;
         readBookHistoryDb = ReadTxtParagraphDatabase.getInstance();
     }
 
@@ -121,23 +119,19 @@ public class PageManager {
     }
 
     private void initPageFromHistory(List<ReadTxtParagraph> readTxtParagraphList){
+        TxtParagraph firstTxtParagraph = null;
         if (readTxtParagraphList !=null && readTxtParagraphList.size() > 0){
-            TxtParagraph firstTxtParagraph = ReadTxtParagraph.backToTxtParagraph(readTxtParagraphList.get(0));
-            if (firstTxtParagraph != null){
-                curPageTxtParagraph = firstTxtParagraph;
-                lastCanDrawLine = firstTxtParagraph.getLastCanDrawLine();
-            }
+            firstTxtParagraph = ReadTxtParagraph.backToTxtParagraph(readTxtParagraphList.get(0));
         }
-        if (curPageTxtParagraph != null){
-            Log.e(TAG,"历史记录:"+curPageTxtParagraph.toString());
+        if (firstTxtParagraph != null){
+            Log.e(TAG,"历史记录:"+firstTxtParagraph.toString());
         }
-        Page currentPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, this.readSetting, readRandomAccessFile, true);
+        Page currentPage = Page.createNextPager(firstTxtParagraph, firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
+                this.readSetting, readRandomAccessFile, true);
+
         pagerSparseArray.put(PageType.PAGE_CURRENT, currentPage);
         if (readView != null){
             readView.postInvalidate();
-        }
-        if (curPageTxtParagraph != null){
-            preparePreBitmap();
         }
     }
 
@@ -149,18 +143,42 @@ public class PageManager {
             Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
             if (curPage != null){
-                int code = curPage.drawTxtParagraph(canvas, paint);
-                setLastCanDrawLineAndTxtParagraph(curPage, code);
+//                curPage.drawTxtParagraph(canvas, paint);
+
+                if (nextCacheBitmap != null){
+
+                    Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+                    drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+                    curPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+                    curBitmap = nextCacheBitmap.copy(Bitmap.Config.ARGB_4444,true);
+                    drawCanvasBitmap(canvas, curBitmap, paint);
+                }
             }
         }
+
+        prepareNextBitmap();
+        preparePreBitmap();
     }
 
     public void prepareNextBitmap() {
-        if (pagerSparseArray == null || curPageTxtParagraph == null) {
+        if (pagerSparseArray == null) {
             return;
         }
-        Page nextPage = Page.createNextPager(curPageTxtParagraph, lastCanDrawLine, readSetting, readRandomAccessFile, false);
+        Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+
+        TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
+        lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
+
+        Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
         pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
+
+//        if (nextCacheBitmap != null){
+//
+//            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+//            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+//            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+//        }
+
     }
 
     private void preparePreBitmap() {
@@ -175,78 +193,67 @@ public class PageManager {
         Page prePage = Page.createPrePager(firstTxtParagraph, firstTxtParagraph.getFirstCanDrawLine(), readSetting, readRandomAccessFile);
 
         pagerSparseArray.put(PageType.PAGE_PREVIOUS, prePage);
-    }
-
-    private void setLastCanDrawLineAndTxtParagraph(Page pager, int code) {
-        lastCanDrawLine = code;
-        curPageTxtParagraph = pager.getLastTxtParagraph();
-
-        if (curPageTxtParagraph != null){
-            if (lastCanDrawLine == -1) {//可以被完全绘制完成
-                curPageTxtParagraph.setCanDrawCompleted(true);
-            } else if (lastCanDrawLine == -2) {
-                curPageTxtParagraph = null;
-            } else {//不可以被完全绘制完成
-                curPageTxtParagraph.setCanDrawCompleted(false);
-            }
-        }
-        curPageTxtParagraph = TxtParagraph.copyTxtParagraph(curPageTxtParagraph);
 
     }
 
-    public void turnNextPage(Canvas canvas, Paint paint) {
+
+    public void turnNextPage(final Canvas canvas, final Paint paint) {
         if (nextCacheBitmap != null) {
 
-            Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
-            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-            drawCanvasBg(cacheCanvas, paint);
+            new Thread(){
+                @Override
+                public void run() {
+                    Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
 
-            int code = nextPage.drawTxtParagraph(cacheCanvas, paint);
-            setLastCanDrawLineAndTxtParagraph(nextPage, code);
+//                    drawCanvasBitmap(canvas, nextCacheBitmap, paint);
+                    curBitmap = nextCacheBitmap.copy(Bitmap.Config.ARGB_4444, true);
 
-            canvas.drawBitmap(nextCacheBitmap, 0, 0, paint);
+                    Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+                    pagerSparseArray.put(PageType.PAGE_PREVIOUS, curPage);
+                    pagerSparseArray.put(PageType.PAGE_CURRENT, nextPage);
 
+                    hasNextDraw = false;
+                    prepareNextBitmap();
+                }
+            }.start();
 
-            Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-            pagerSparseArray.put(PageType.PAGE_PREVIOUS, curPage);
-            pagerSparseArray.put(PageType.PAGE_CURRENT, nextPage);
-
-            prepareNextBitmap();
 
         } else {
             Log.e(TAG, "cacheBitmap == null");
         }
     }
 
-    public void turnPrePage(Canvas canvas, Paint paint, Context context) {
+    public void turnPrePage(final Canvas canvas, Paint paint, Context context) {
         if (preCacheBitmap != null) {
-            Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
+            final Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
 
             if (prePage != null) {
                 TxtParagraph txtParagraph = prePage.getLastTxtParagraph();
                 if (txtParagraph != null){
 
-                    Canvas cacheCanvas = new Canvas(preCacheBitmap);
-                    drawCanvasBg(cacheCanvas, paint);
+//                    drawCanvasBitmap(canvas, preCacheBitmap, paint);
 
-                    int code = prePage.drawTxtParagraph(cacheCanvas, paint);
-                    setLastCanDrawLineAndTxtParagraph(prePage, code);
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            curBitmap = preCacheBitmap.copy(Bitmap.Config.ARGB_4444,true);
 
-                    canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
+                            Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
-                    Page nextPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+                            pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
+                            pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
 
-                    pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
-                    pagerSparseArray.put(PageType.PAGE_CURRENT, prePage);
+                            hasPreDraw = false;
+                            preparePreBitmap();
+                        }
+                    }.start();
 
-                    preparePreBitmap();
                 }
             } else {
                 Canvas cacheCanvas = new Canvas(preCacheBitmap);
                 drawCanvasBg(cacheCanvas, paint);
                 Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-                int code = curPage.drawTxtParagraph(cacheCanvas, paint);
-                setLastCanDrawLineAndTxtParagraph(curPage, code);
+                curPage.drawTxtParagraph(cacheCanvas, paint);
                 canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
 
                 Toast.makeText(context, "已经是第一章了~", Toast.LENGTH_SHORT).show();
@@ -259,6 +266,41 @@ public class PageManager {
 
     public void drawCanvasBg(Canvas canvas, Paint paint){
         ReadExteriorHelper.getInstance().drawReadBackground(canvas, paint);
+    }
+
+    public void drawCanvasBitmap(Canvas canvas, Bitmap bitmap, Paint paint){
+        canvas.drawBitmap(bitmap,0 ,0 , paint);
+    }
+
+    private boolean hasNextDraw = false;
+    public Bitmap getNextCacheBitmap(){
+        if (!hasNextDraw){
+            Page nextPage = pagerSparseArray.get(PageType.PAGE_NEXT);
+            Canvas cacheCanvas = new Canvas(nextCacheBitmap);
+            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+            nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+            hasNextDraw = true;
+        }
+        return nextCacheBitmap;
+    }
+
+    private boolean hasPreDraw = false;
+    public Bitmap getPreCacheBitmap(){
+        if (!hasPreDraw){
+            Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
+            if (prePage != null){
+                Canvas cacheCanvas = new Canvas(preCacheBitmap);
+                drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+
+                prePage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+            }
+            hasPreDraw = true;
+        }
+        return preCacheBitmap;
+    }
+
+    public Bitmap getCurBitmap(){
+        return curBitmap;
     }
 
     private void initReadRandomAccessFile(String path) {
@@ -287,7 +329,7 @@ public class PageManager {
                         @Override
                         public void subscribe(SingleEmitter<Void> e) throws Exception {
                             float percent = firstTxtParagraph.getSeekEnd() *1.0f / readRandomAccessFile.getSize();
-
+                            Log.i(TAG,"保存历史记录:"+firstTxtParagraph.toString());
                             ReadTxtParagraph readTxtParagraph = ReadTxtParagraph.createReadTxtParagraph(bookName,readRandomAccessFile.getRealPath(),
                                     readRandomAccessFile.getSize(),percent,firstTxtParagraph);
                             long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
@@ -310,8 +352,6 @@ public class PageManager {
     public void onDestroy() {
         try {
 
-            curPageTxtParagraph = null;
-            lastCanDrawLine = -1;
 
             if (nextCacheBitmap != null && !nextCacheBitmap.isRecycled()) {
                 nextCacheBitmap.recycle();

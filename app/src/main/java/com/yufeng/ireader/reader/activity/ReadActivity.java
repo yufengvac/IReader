@@ -2,10 +2,10 @@ package com.yufeng.ireader.reader.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
-import com.yufeng.ireader.reader.utils.ReadSetting;
+import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.ui.base.BaseActivity;
