@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.View;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.utils.HardWareManager;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -40,6 +41,10 @@ public class ReadActivity extends BaseActivity{
     public void initView() {
         readView = findViewById(R.id.activity_read_view);
         DisplayConstant.init(DisPlayUtil.getDisplayWidth(this),DisPlayUtil.getDisplayHeight(this));
+
+        if (HardWareManager.canOpenHardware()){
+            readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
     }
 
     @Override

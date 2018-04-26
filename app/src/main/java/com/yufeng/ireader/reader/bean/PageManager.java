@@ -120,11 +120,15 @@ public class PageManager {
 
     private void initPageFromHistory(List<ReadTxtParagraph> readTxtParagraphList){
         TxtParagraph firstTxtParagraph = null;
-        if (readTxtParagraphList !=null && readTxtParagraphList.size() > 0){
-            firstTxtParagraph = ReadTxtParagraph.backToTxtParagraph(readTxtParagraphList.get(0));
-        }
-        if (firstTxtParagraph != null){
-            Log.e(TAG,"历史记录:"+firstTxtParagraph.toString());
+        try {
+            if (readTxtParagraphList !=null && readTxtParagraphList.size() > 0){
+                firstTxtParagraph = ReadTxtParagraph.backToTxtParagraph(readTxtParagraphList.get(0));
+            }
+            if (firstTxtParagraph != null){
+                Log.e(TAG,"历史记录:"+firstTxtParagraph.toString());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         Page currentPage = Page.createNextPager(firstTxtParagraph, firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
                 this.readSetting, readRandomAccessFile, true);
