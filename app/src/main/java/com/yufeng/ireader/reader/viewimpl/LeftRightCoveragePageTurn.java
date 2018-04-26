@@ -34,14 +34,14 @@ public class LeftRightCoveragePageTurn extends PageTurn{
         onPageTurnListener.onAnimationInvalidate();
     }
 
-    private void startAnimation(float startX, float endX){
+    private void startAnimation(float startX, float endX, long duration){
         if (animator != null && animator.isRunning()){
             animator.cancel();
             animator = null;
         }
         shadowWidth = 30;
         animator = ObjectAnimator.ofFloat(this,"shiftX",startX, endX);
-        animator.setDuration(ANIMATION_DURATION);
+        animator.setDuration(duration);
         animator.setInterpolator(interpolator);
         animator.addListener(animatorListener);
         animator.start();
@@ -49,12 +49,12 @@ public class LeftRightCoveragePageTurn extends PageTurn{
 
     @Override
     public void turnNext() {
-        startAnimation(0, -DisplayConstant.DISPLAY_WIDTH);
+        startAnimation(0, -DisplayConstant.DISPLAY_WIDTH, ANIMATION_DURATION);
     }
 
     @Override
     public void turnPrevious() {
-        startAnimation(-DisplayConstant.DISPLAY_WIDTH,0);
+        startAnimation(-DisplayConstant.DISPLAY_WIDTH,0, ANIMATION_DURATION);
     }
 
     @Override
@@ -89,10 +89,11 @@ public class LeftRightCoveragePageTurn extends PageTurn{
         }else if (event.getAction() == MotionEvent.ACTION_UP){
             onTouchEvent = false;
             hasEnsureDirection = false;
+            long duration = (long)(ANIMATION_DURATION*1.0 / DisplayConstant.DISPLAY_WIDTH * (DisplayConstant.DISPLAY_WIDTH - Math.abs(event.getX() - touchX)));
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-                startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH);
+                startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH,duration);
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
-                startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0);
+                startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
             }else if (event.getX() == touchX){
                 return false;
             }
