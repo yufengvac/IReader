@@ -19,6 +19,7 @@ import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.utils.PageTurnFactory;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisPlayUtil;
@@ -38,10 +39,9 @@ public class ReadView extends View implements OnPageTurnListener{
     private static final String DEFAULT_TEXT_COLOR = "#000000";
     private static final String DEFAULT_BG_COLOR = "#B3AFA7";
     private static final int DEFAULT_STROKE_WIDTH = 2;
-    private boolean isTurnNext = false;
-    private boolean isTurnPre = false;
     private Context context;
     private PageTurn pageTurn;
+    private OnMenuListener onMenuListener;
 
 
     public ReadView(Context context) {
@@ -90,7 +90,6 @@ public class ReadView extends View implements OnPageTurnListener{
             if (pageTurn.onDraw(canvas)){
                 pageTurn.resetPageTurnDirection();
             }
-            isTurnPre = false;
         }else {
             if (!pageTurn.onTouchEvent){
                 drawCurrentContent(canvas);
@@ -115,7 +114,9 @@ public class ReadView extends View implements OnPageTurnListener{
                 pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
                 pageTurn.turnPrevious();
             }else {
-                Log.e(TAG,"showMainMenu");
+                if (onMenuListener != null){
+                    onMenuListener.onClickMenu();
+                }
             }
         }
 
@@ -157,6 +158,10 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());
+    }
+
+    public void setOnMenuListener(OnMenuListener listener){
+        onMenuListener = listener;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.yufeng.ireader.reader.utils.HardWareManager;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
@@ -18,7 +19,7 @@ import com.yufeng.ireader.utils.DisplayConstant;
  *
  */
 
-public class ReadActivity extends BaseActivity{
+public class ReadActivity extends BaseActivity implements OnMenuListener{
     private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
@@ -53,11 +54,18 @@ public class ReadActivity extends BaseActivity{
 
         readSetting = new ReadSetting();
         readSetting.setContentPaint(readView.getContentPaint());
+
+        readView.setOnMenuListener(this);
     }
 
     @Override
     public void initData() {
         readView.prepare(this,readSetting,path);
+    }
+
+    @Override
+    public void onClickMenu() {
+
     }
 
     @Override
