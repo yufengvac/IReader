@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.utils.HardWareManager;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -26,6 +27,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
 
     private ReadView readView;
     private IReadSetting readSetting;
+    private boolean isShowMenu = false;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -65,7 +67,13 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
 
     @Override
     public void onClickMenu() {
-
+        if (!isShowMenu){
+//            ReadExteriorHelper.getInstance().showSystemUI(this);
+            isShowMenu = true;
+        }else {
+//            ReadExteriorHelper.getInstance().hideSystemUI(this);
+            isShowMenu = false;
+        }
     }
 
     @Override

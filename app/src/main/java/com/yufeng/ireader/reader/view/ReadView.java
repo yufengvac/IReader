@@ -152,8 +152,11 @@ public class ReadView extends View implements OnPageTurnListener{
 
     public void prepare(Activity activity, IReadSetting readSetting, String path){
         PageManager.getInstance().initPagers(readSetting, path);
-        ReadExteriorHelper.init(activity, readSetting);
         PageManager.getInstance().setReadView(this);
+
+
+        ReadExteriorHelper.init(activity, readSetting);
+
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
