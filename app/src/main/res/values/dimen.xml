@@ -2,6 +2,7 @@
 <resources>
 
     <dimen name="common_padding">15dp</dimen>
+    <dimen name="common_margin">20dp</dimen>
 
     <dimen name="title_size">16sp</dimen>
     <dimen name="sub_title_size">14sp</dimen>

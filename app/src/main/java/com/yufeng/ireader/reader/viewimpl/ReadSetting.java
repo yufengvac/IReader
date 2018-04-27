@@ -4,6 +4,7 @@ import android.graphics.Paint;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by Administrator on 2018/4/16-0016.
@@ -73,5 +74,10 @@ public class ReadSetting implements IReadSetting {
     @Override
     public int getPageTurnType() {
         return 0;
+    }
+
+    @Override
+    public boolean isDayMode() {
+        return ReadPreferHelper.getInstance().isDayMode();
     }
 }

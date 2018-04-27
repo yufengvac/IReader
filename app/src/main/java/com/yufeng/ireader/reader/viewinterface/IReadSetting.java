@@ -31,4 +31,6 @@ public interface IReadSetting {
     String getCanvasBgColor();
 
     int getPageTurnType();
+
+    boolean isDayMode();
 }

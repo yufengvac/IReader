@@ -13,16 +13,18 @@ import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
+import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.PathHelper;
 
 /**
  * Created by yufeng on 2018/4/11.
  *
  */
 
-public class ReadActivity extends BaseActivity implements OnMenuListener{
+public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener{
     private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
@@ -64,6 +66,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
         readSetting.setContentPaint(readView.getContentPaint());
 
         readView.setOnMenuListener(this);
+        readMenuSetView.setBookName(PathHelper.getBookNameByPath(path));
     }
 
     @Override
@@ -81,6 +84,31 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
         }else {
             readMenuSetView.show();
         }
+    }
+
+    @Override
+    public void onCategoryClick(View view) {
+
+    }
+
+    @Override
+    public void onBrightnessClick(View view) {
+
+    }
+
+    @Override
+    public void onListenClick(View view) {
+
+    }
+
+    @Override
+    public void onSettingClick(View view) {
+
+    }
+
+    @Override
+    public void onDayNightClick(View view) {
+        readView.changeDayNightMode();
     }
 
     @Override

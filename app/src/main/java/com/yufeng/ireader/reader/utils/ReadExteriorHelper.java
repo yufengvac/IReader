@@ -123,6 +123,13 @@ public class ReadExteriorHelper {
         bgRectF = new RectF(0, 0 , DisplayConstant.DISPLAY_WIDTH, DisplayConstant.DISPLAY_HEIGHT);
     }
 
+    public void setReadNightMode(){
+
+    }
+    public void setReadDayMode(){
+
+    }
+
     public void setFullScreen(Activity activity, boolean full) {
         Window window = activity.getWindow();
 

@@ -25,6 +25,7 @@ import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/15.
@@ -43,6 +44,7 @@ public class ReadView extends View implements OnPageTurnListener{
     private Context context;
     private PageTurn pageTurn;
     private OnMenuListener onMenuListener;
+    private IReadSetting readSetting;
 
 
     public ReadView(Context context) {
@@ -152,6 +154,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
     public void prepare(Activity activity, IReadSetting readSetting, String path){
+        this.readSetting = readSetting;
         PageManager.getInstance().initPagers(readSetting, path);
         PageManager.getInstance().setReadView(this);
 
@@ -165,6 +168,15 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());
+    }
+    public void changeDayNightMode(){
+        if (readSetting.isDayMode()){
+            ReadExteriorHelper.getInstance().setReadNightMode();
+            ReadPreferHelper.getInstance().setIsDayMode(false);
+        }else {
+            ReadExteriorHelper.getInstance().setReadDayMode();
+            ReadPreferHelper.getInstance().setIsDayMode(true);
+        }
     }
 
     public void setOnMenuListener(OnMenuListener listener){
