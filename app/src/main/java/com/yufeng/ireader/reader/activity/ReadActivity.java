@@ -7,6 +7,8 @@ import android.view.View;
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.utils.HardWareManager;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
+import com.yufeng.ireader.reader.view.MenuSetView;
+import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -27,7 +29,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
 
     private ReadView readView;
     private IReadSetting readSetting;
-    private boolean isShowMenu = false;
+    private ReadMenuSetView readMenuSetView;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -45,8 +47,12 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
         readView = findViewById(R.id.activity_read_view);
         DisplayConstant.init(DisPlayUtil.getDisplayWidth(this),DisPlayUtil.getDisplayHeight(this));
 
-        if (HardWareManager.canOpenHardware()){
-            readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+//        if (HardWareManager.canOpenHardware()){
+//            readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+//        }
+
+        if (readMenuSetView == null){
+            readMenuSetView = new ReadMenuSetView(this);
         }
     }
 
@@ -67,12 +73,13 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
 
     @Override
     public void onClickMenu() {
-        if (!isShowMenu){
-//            ReadExteriorHelper.getInstance().showSystemUI(this);
-            isShowMenu = true;
+        if (readMenuSetView == null){
+            readMenuSetView = new ReadMenuSetView(this);
+        }
+        if (readMenuSetView.isMenuShowing()){
+            readMenuSetView.hide();
         }else {
-//            ReadExteriorHelper.getInstance().hideSystemUI(this);
-            isShowMenu = false;
+            readMenuSetView.show();
         }
     }
 

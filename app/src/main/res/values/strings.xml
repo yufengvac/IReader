@@ -2,4 +2,11 @@
     <string name="app_name">ireader</string>
 
     <string name="main_book_shelf">书架</string>
+
+    <string name="read_menu_pre_chapter">上一章</string>
+    <string name="read_menu_next_chapter">下一章</string>
+    <string name="read_menu_category">目录</string>
+    <string name="read_menu_brightness">亮度</string>
+    <string name="read_menu_listen">朗读</string>
+    <string name="read_menu_setting">设置</string>
 </resources>

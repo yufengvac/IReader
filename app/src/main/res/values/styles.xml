@@ -25,9 +25,42 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/title_size</item>
     </style>
+
     <style name="sub_title_text_style">
         <item name="android:textColor">@color/sub_title</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/sub_title_size</item>
+    </style>
+
+    <style name="read_menu_text_style">
+        <item name="android:textColor">@color/read_menu_title_color</item>
+        <item name="android:textSize">@dimen/sub_title_size</item>
+    </style>
+
+    <!-- 全屏不需要显示 StateBar 的 PopupMenu 主题 -->
+    <style name="Theme.PopupMenu.Fullscreen" parent="Theme.AppCompat.Light">
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:backgroundDimAmount">0.3</item>
+        <item name="colorPrimaryDark">@color/gray</item>
+    </style>
+
+    <style name="read_seek_bar">
+        <item name="android:thumb">@drawable/seekbar_thumb</item>
+        <item name="android:progressDrawable">@drawable/seekbar_style</item>
+        <item name="android:maxHeight">2.4dp</item>
+        <item name="android:minHeight">2.4dp</item>
+        <item name="android:paddingLeft">9dp</item>
+        <item name="android:paddingRight">9dp</item>
+        <item name="android:thumbOffset">8dp</item>
     </style>
 </resources>

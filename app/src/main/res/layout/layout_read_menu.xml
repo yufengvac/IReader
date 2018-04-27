@@ -2,108 +2,158 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
 
     <FrameLayout
+        android:id="@+id/read_menu_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="@color/read_menu_bg">
+
         <TextView
+            android:id="@+id/read_menu_book_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="诛仙"
-            android:textColor="@color/read_menu_title_color"
-            android:textSize="17sp"
             android:layout_gravity="center_vertical"
-            android:padding="@dimen/common_padding"/>
+            android:padding="@dimen/common_padding"
+            android:textColor="@color/read_menu_title_color"
+            android:textSize="17sp" />
     </FrameLayout>
 
     <View
+        android:id="@+id/read_menu_blank"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="@android:color/transparent" />
 
     <LinearLayout
+        android:id="@+id/read_menu_bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="125dp"
         android:background="@color/read_menu_bg"
         android:orientation="vertical">
-        <ProgressBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            android:progress="10"
-            android:max="100"
-            android:padding="@dimen/common_padding"/>
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:layout_marginLeft="@dimen/common_padding"
+            android:layout_marginStart="@dimen/common_padding"
+            android:layout_marginRight="@dimen/common_padding"
+            android:layout_marginEnd="@dimen/common_padding">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/read_menu_pre_chapter"
+                android:layout_gravity="center_vertical"
+                style="@style/read_menu_text_style"/>
+
+            <SeekBar
+                android:id="@+id/chapter_progress_online"
+                style="@style/read_seek_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:progress="0" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/read_menu_next_chapter"
+                android:layout_gravity="center_vertical"
+                style="@style/read_menu_text_style"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
             android:orientation="horizontal">
+
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/read_menu_category_s"
+                    android:contentDescription="@string/app_name"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="目录"
-                    android:layout_gravity="center"
-                    android:textColor="@color/read_menu_title_color"/>
+                    android:text="@string/read_menu_category"
+                    style="@style/read_menu_text_style"
+                    android:layout_marginTop="7dp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/read_menu_brightness_s"
+                    android:contentDescription="@string/app_name"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="朗读"
-                    android:layout_gravity="center"
-                    android:textColor="@color/read_menu_title_color"/>
+                    android:text="@string/read_menu_brightness"
+                    style="@style/read_menu_text_style"
+                    android:layout_marginTop="7dp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/read_menu_listen_s"
+                    android:contentDescription="@string/app_name"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="设置"
-                    android:layout_gravity="center"
-                    android:textColor="@color/read_menu_title_color"/>
+                    android:text="@string/read_menu_listen"
+                    style="@style/read_menu_text_style"
+                    android:layout_marginTop="7dp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/read_menu_setting_s"
+                    android:contentDescription="@string/app_name"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="亮度"
-                    android:layout_gravity="center"
-                    android:textColor="@color/read_menu_title_color"/>
+                    android:text="@string/read_menu_setting"
+                    style="@style/read_menu_text_style"
+                    android:layout_marginTop="7dp"/>
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="圈子"
-                    android:layout_gravity="center"
-                    android:textColor="@color/read_menu_title_color"/>
-            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
