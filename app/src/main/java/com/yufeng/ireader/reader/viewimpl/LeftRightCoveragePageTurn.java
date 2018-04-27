@@ -27,6 +27,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     private GradientDrawable[] shadowDrawable = new GradientDrawable[2];
     private static final int[][] SHADOW_COLOR = {{0x50454545, 0x00454545,}, {0xb0151515, 0x00151515}};
     private int shadowWidth;
+    private boolean isPageTurn = true;
 
     @SuppressWarnings("unused")
     public void setShiftX(float x){
@@ -79,7 +80,9 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             }
             if (hasEnsureDirection){
                 if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-                    setShiftX(event.getX() - touchX);
+                    if (event.getX() - touchX <= 0){
+                        setShiftX(event.getX() - touchX);
+                    }
                 }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
                     setShiftX(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX);
                 }
@@ -89,11 +92,22 @@ public class LeftRightCoveragePageTurn extends PageTurn{
         }else if (event.getAction() == MotionEvent.ACTION_UP){
             onTouchEvent = false;
             hasEnsureDirection = false;
+            isPageTurn = true;
             long duration = (long)(ANIMATION_DURATION*1.0 / DisplayConstant.DISPLAY_WIDTH * (DisplayConstant.DISPLAY_WIDTH - Math.abs(event.getX() - touchX)));
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-                startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH,duration);
+
+//                if (touchX - event.getX() <= CRITICAL_VALUE){
+//                    isPageTurn = false;
+//                    duration = (long)((touchX - event.getX()) * ANIMATION_DURATION / DisplayConstant.DISPLAY_WIDTH);
+//                    startAnimation( event.getX() - touchX, 0, duration);
+//                }else {
+                    startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH,duration);
+//                }
+
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+
                 startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
+
             }else if (event.getX() == touchX){
                 return false;
             }
@@ -105,7 +119,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     @Override
     public boolean draw(Canvas canvas) {
         if (isAnimationEnd()){//动画结束
-            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection());
+            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection(), isPageTurn);
             setAnimationEnd(false);
             return true;
         }

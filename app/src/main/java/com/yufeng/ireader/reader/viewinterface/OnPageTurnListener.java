@@ -14,5 +14,5 @@ public interface OnPageTurnListener {
     Bitmap getCurrentBitmap();
     Bitmap getPreviousBitmap();
     void onAnimationInvalidate();
-    void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection);
+    void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection, boolean isPageTurn);
 }

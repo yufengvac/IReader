@@ -1,25 +1,5 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <!--<item name="colorPrimaryDark">@color/white</item>-->
-    </style>
-
-    <style name="BaseTheme" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/splash</item>
-    </style>
-
-    <style name="splashTheme" parent="BaseTheme">
-        <item name="android:windowBackground">@drawable/splash</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="mainTheme" parent="BaseTheme">
-        <item name="android:windowBackground">@color/white</item>
-    </style>
-
     <style name="title_text_style">
         <item name="android:textColor">@color/black</item>
         <item name="android:textStyle">bold</item>

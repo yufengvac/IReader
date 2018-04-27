@@ -47,9 +47,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener{
         readView = findViewById(R.id.activity_read_view);
         DisplayConstant.init(DisPlayUtil.getDisplayWidth(this),DisPlayUtil.getDisplayHeight(this));
 
-//        if (HardWareManager.canOpenHardware()){
-//            readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-//        }
+        if (HardWareManager.canOpenHardware()){
+            readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
 
         if (readMenuSetView == null){
             readMenuSetView = new ReadMenuSetView(this);

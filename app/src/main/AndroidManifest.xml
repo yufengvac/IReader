@@ -16,7 +16,7 @@
             android:theme="@style/mainTheme"/>
 
         <activity android:name=".reader.activity.ReadActivity"
-            android:theme="@style/mainTheme"/>
+            android:theme="@style/readTheme"/>
 
         <activity android:name=".ui.splash.SplashActivity"
             android:theme="@style/BaseTheme">

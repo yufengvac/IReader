@@ -1,0 +1,9 @@
+<resources>
+
+    <style name="mainTheme" parent="BaseTheme">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <style name="readTheme" parent="mainTheme">
+    </style>
+</resources>

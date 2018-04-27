@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -156,6 +157,9 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
         ReadExteriorHelper.init(activity, readSetting);
+//        ReadExteriorHelper.getInstance().setFullScreen(activity,true);
+//        ReadExteriorHelper.hideNavigation(activity.getWindow().getDecorView());
+
 
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
         pageTurn.setOnPageTurnListener(this);
@@ -188,7 +192,10 @@ public class ReadView extends View implements OnPageTurnListener{
     }
 
     @Override
-    public void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection) {
+    public void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection, boolean isPageTurn) {
+        if (!isPageTurn){
+            return;
+        }
         if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT){
             PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
             turnNextPage(canvas);

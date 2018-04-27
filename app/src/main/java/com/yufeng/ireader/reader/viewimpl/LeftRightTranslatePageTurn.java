@@ -54,7 +54,7 @@ public class LeftRightTranslatePageTurn extends PageTurn{
     @Override
     public boolean draw(Canvas canvas) {
         if (isAnimationEnd()){//动画结束
-            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection());
+            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection(), true);
             return true;
         }
         canvas.save();
