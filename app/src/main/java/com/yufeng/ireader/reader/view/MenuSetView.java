@@ -86,12 +86,12 @@ public abstract class MenuSetView implements IMenuSetView{
             return;
         }
         startHideAnimation();
+        isShow = false;
         Observable.timer(DURATION, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
                         windowManager.removeView(mWindow.getDecorView());
-                        isShow = false;
                     }
                 });
 

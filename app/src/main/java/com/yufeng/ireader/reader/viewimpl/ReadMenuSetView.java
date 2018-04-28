@@ -2,10 +2,11 @@ package com.yufeng.ireader.reader.viewimpl;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,14 +15,13 @@ import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.view.MenuSetView;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.utils.DisPlayUtil;
-import com.yufeng.ireader.utils.DisplayConstant;
 
 /**
  * Created by yufeng on 2018/4/27-0027.
  * 阅读器的菜单view
  */
 
-public class ReadMenuSetView extends MenuSetView implements View.OnClickListener{
+public class ReadMenuSetView extends MenuSetView implements View.OnClickListener, Animator.AnimatorListener,Animation.AnimationListener{
     private View topView;
     private View blankView;
     private View bottomView;
@@ -36,6 +36,9 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
     private int bottomViewHeight;
 
     private TextView bookNameTv;
+
+    private Animation appearTranslateAnim;
+    private Animation dismissRotateScaleAnim;
 
     public ReadMenuSetView(Context context) {
         super(context);
@@ -74,6 +77,16 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         brightnessLayout.setOnClickListener(this);
         listenLayout.setOnClickListener(this);
         settingLayout.setOnClickListener(this);
+        dayNightModeIv.setOnClickListener(this);
+
+        //这是日夜间模式的出现动画
+        appearTranslateAnim = AnimationUtils.loadAnimation(mContext, R.anim.overshoot_jump_bottom_anim);
+        appearTranslateAnim.setAnimationListener(this);
+
+        //这是日夜间模式的消失动画
+        dismissRotateScaleAnim = AnimationUtils.loadAnimation(mContext, R.anim.rotate_inhale);
+        dismissRotateScaleAnim.setDuration(DURATION);
+        dismissRotateScaleAnim.setAnimationListener(this);
     }
 
     @Override
@@ -84,13 +97,69 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
     @Override
     protected void startShowAnimation() {
         getTopShowAnimation().start();
-        getBottomShowAnimation().start();
+
+        Animator animator = getBottomShowAnimation();
+        animator.addListener(this);
+        animator.start();
     }
     @Override
     protected void startHideAnimation() {
+        dayNightModeIv.startAnimation(dismissRotateScaleAnim);
         getTopHideAnimation().start();
         getBottomHideAnimation().start();
     }
+
+
+    /****************AnimatorListener*************/
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        dayNightModeIv.setVisibility(View.VISIBLE);
+        dayNightModeIv.startAnimation(appearTranslateAnim);
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+
+    }
+
+
+
+
+    /****************AnimationListener*************/
+
+    @Override
+    public void onAnimationStart(Animation animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animation animation) {
+        if (dayNightModeIv != null){
+            if (animation == appearTranslateAnim){
+                dayNightModeIv.setVisibility(View.VISIBLE);
+            }else if (animation == dismissRotateScaleAnim){
+                dayNightModeIv.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onAnimationRepeat(Animation animation) {
+
+    }
+
+    /****************AnimationListener*************/
+
 
     private Animator getTopShowAnimation(){
         Animator animator = ObjectAnimator.ofFloat(topView,"translationY",-topViewHeight,0);
