@@ -26,6 +26,8 @@ public interface IReadSetting {
 
     Paint getContentPaint();
 
+    String getContentPaintTextColor();
+
     int getCanvasBgOptions();
 
     String getCanvasBgColor();

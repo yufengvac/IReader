@@ -3,6 +3,7 @@ package com.yufeng.ireader.reader.viewimpl;
 import android.graphics.Paint;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.ReadPreferHelper;
 
@@ -62,13 +63,18 @@ public class ReadSetting implements IReadSetting {
     }
 
     @Override
+    public String getContentPaintTextColor() {
+        return ReadExteriorHelper.getInstance().getContentPaintTextColor();
+    }
+
+    @Override
     public int getCanvasBgOptions() {
-        return 2;
+        return -1;
     }
 
     @Override
     public String getCanvasBgColor() {
-        return "#B3AFA7";
+        return ReadExteriorHelper.getInstance().getBackgroundColor();
     }
 
     @Override

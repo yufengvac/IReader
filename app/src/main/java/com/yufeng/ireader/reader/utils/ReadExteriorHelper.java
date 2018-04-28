@@ -18,6 +18,7 @@ import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.FileHelper;
 import com.yufeng.ireader.utils.PathHelper;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -90,6 +91,13 @@ public class ReadExteriorHelper {
         if (readSetting == null){
             return;
         }
+
+        //如果是夜间模式，在这里只限定背景颜色，其实也可以自定义背景图片，暂时先不扩展
+        if (!readSetting.isDayMode()){
+            canvas.drawColor(Color.parseColor(readSetting.getCanvasBgColor()));
+            return;
+        }
+
         int readBgOption = readSetting.getCanvasBgOptions();
         String bgPath = PathHelper.getReadBgPathByOption(readBgOption);
         if (TextUtils.isEmpty(bgPath)){ //背景路径为空，只能设置该canvas的颜色资源
@@ -123,11 +131,43 @@ public class ReadExteriorHelper {
         bgRectF = new RectF(0, 0 , DisplayConstant.DISPLAY_WIDTH, DisplayConstant.DISPLAY_HEIGHT);
     }
 
-    public void setReadNightMode(){
-
+    /**
+     * 改变日夜间模式
+     */
+    public void changeDayNightMode(){
+        ReadPreferHelper.getInstance().setIsDayMode(!readSetting.isDayMode());
+        resetContentPaint();
     }
-    public void setReadDayMode(){
 
+    /**
+     * 获取画步背景颜色值
+     * @return 背景颜色字符串值
+     */
+    public String getBackgroundColor(){
+        if (readSetting.isDayMode()){//日间模式
+            return "#B3AFA7";
+        }else {//夜间模式
+            return "#121212";
+        }
+    }
+
+    /**
+     * 获取内容字体颜色值
+     * @return 字体颜色字符串值
+     */
+    public String getContentPaintTextColor(){
+        if (readSetting.isDayMode()){//日间模式
+            return "#333333";
+        }else {//夜间模式
+            return "#4D4D4D";
+        }
+    }
+
+    /**
+     * 重置画笔颜色
+     */
+    public void resetContentPaint(){
+        readSetting.getContentPaint().setColor(Color.parseColor(getContentPaintTextColor()));
     }
 
     public void setFullScreen(Activity activity, boolean full) {

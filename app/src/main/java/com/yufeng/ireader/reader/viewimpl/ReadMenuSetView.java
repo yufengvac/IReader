@@ -15,6 +15,7 @@ import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.view.MenuSetView;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.utils.DisPlayUtil;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/27-0027.
@@ -39,6 +40,8 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
 
     private Animation appearTranslateAnim;
     private Animation dismissRotateScaleAnim;
+    private Animation changeModeDismissAnim;
+    private Animation changeModeAppearAnim;
 
     public ReadMenuSetView(Context context) {
         super(context);
@@ -65,6 +68,8 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         bookNameTv = (TextView) findViewById(R.id.read_menu_book_name_tv);
 
         dayNightModeIv = (ImageView) findViewById(R.id.read_menu_day_night_mode);
+
+        setDayNightImageView();
     }
 
     private void initListener(){
@@ -87,6 +92,16 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         dismissRotateScaleAnim = AnimationUtils.loadAnimation(mContext, R.anim.rotate_inhale);
         dismissRotateScaleAnim.setDuration(DURATION);
         dismissRotateScaleAnim.setAnimationListener(this);
+
+        //改变日夜间模式消失的动画
+        changeModeDismissAnim = AnimationUtils.loadAnimation(mContext, R.anim.rotate_inhale);
+        changeModeDismissAnim.setDuration(DURATION);
+        changeModeDismissAnim.setAnimationListener(this);
+
+        //改变日夜间模式出现的动画
+        changeModeAppearAnim = AnimationUtils.loadAnimation(mContext, R.anim.rotate_spit);
+        changeModeAppearAnim.setDuration(DURATION);
+        changeModeAppearAnim.setAnimationListener(this);
     }
 
     @Override
@@ -149,6 +164,11 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
                 dayNightModeIv.setVisibility(View.VISIBLE);
             }else if (animation == dismissRotateScaleAnim){
                 dayNightModeIv.setVisibility(View.GONE);
+            }else if (animation == changeModeDismissAnim){
+                setDayNightImageView();
+                dayNightModeIv.startAnimation(changeModeAppearAnim);
+            }else if (animation == changeModeAppearAnim){
+                dayNightModeIv.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -194,6 +214,17 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         }
     }
 
+    /**
+     * 设置日夜间模式图片
+     */
+    private void setDayNightImageView(){
+        if (ReadPreferHelper.getInstance().isDayMode()){
+            dayNightModeIv.setImageResource(R.drawable.read_mode_day);
+        }else {
+            dayNightModeIv.setImageResource(R.drawable.read_mode_night);
+        }
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -224,6 +255,7 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
             case R.id.read_menu_day_night_mode:
                 if (onReadMenuClickListener != null){
                     onReadMenuClickListener.onDayNightClick(settingLayout);
+                    dayNightModeIv.startAnimation(changeModeDismissAnim);
                 }
                 break;
         }

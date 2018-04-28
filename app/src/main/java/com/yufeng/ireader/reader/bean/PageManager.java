@@ -139,7 +139,7 @@ public class PageManager {
         }
     }
 
-    public void drawPager(Canvas canvas, Paint paint) {
+    public void drawPager(final Canvas canvas, final Paint paint) {
         if (pagerSparseArray == null) {
             return;
         }
@@ -148,39 +148,58 @@ public class PageManager {
 
             if (curPage != null){
 
+                curPage.drawTxtParagraph(canvas, paint);
+
+            }
+        }
+
+        Single.create(new SingleOnSubscribe<Void>() {
+            @Override
+            public void subscribe(SingleEmitter<Void> singleEmitter) throws Exception {
+                Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+
+                if (curBitmap != null && !curBitmap.isRecycled()){
+                    curBitmap.recycle();
+                    curBitmap = null;
+                }
+                try {
+                    curBitmap = Bitmap.createBitmap(DisplayConstant.DISPLAY_WIDTH, DisplayConstant.DISPLAY_HEIGHT, Bitmap.Config.ARGB_4444);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if (curBitmap != null && curPage != null){
+                    Canvas cacheCanvas = new Canvas(curBitmap);
+                    drawCanvasBg(cacheCanvas, paint);
+                    curPage.drawTxtParagraph(cacheCanvas, paint);
+                }
+
+                prepareNextBitmap();
+                preparePreBitmap();
+
+            }
+        }).subscribeOn(Schedulers.io()).toFuture();
+    }
+
+    private void prepareNextBitmap() {
+        if (pagerSparseArray == null) {
+            return;
+        }
+        synchronized (this){
+            Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+
+            if (curPage != null){
+                TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
+                lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
+
+                Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
+                pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
+
                 if (nextCacheBitmap != null){
 
                     Canvas cacheCanvas = new Canvas(nextCacheBitmap);
                     drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-                    curPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
-                    curBitmap = nextCacheBitmap.copy(Bitmap.Config.ARGB_4444,true);
-                    drawCanvasBitmap(canvas, curBitmap, paint);
+                    nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
                 }
-            }
-        }
-
-        prepareNextBitmap();
-        preparePreBitmap();
-    }
-
-    public void prepareNextBitmap() {
-        if (pagerSparseArray == null) {
-            return;
-        }
-        Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-
-        if (curPage != null){
-            TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
-            lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
-
-            Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
-            pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
-
-            if (nextCacheBitmap != null){
-
-                Canvas cacheCanvas = new Canvas(nextCacheBitmap);
-                drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-                nextPage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
             }
         }
 
@@ -190,19 +209,21 @@ public class PageManager {
         if (pagerSparseArray == null) {
             return;
         }
-        Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
+        synchronized (this){
+            Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
 
-        TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
-        firstTxtParagraph = TxtParagraph.copyTxtParagraph(firstTxtParagraph);
+            TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
+            firstTxtParagraph = TxtParagraph.copyTxtParagraph(firstTxtParagraph);
 
-        Page prePage = Page.createPrePager(firstTxtParagraph, firstTxtParagraph.getFirstCanDrawLine(), readSetting, readRandomAccessFile);
+            Page prePage = Page.createPrePager(firstTxtParagraph, firstTxtParagraph.getFirstCanDrawLine(), readSetting, readRandomAccessFile);
 
-        pagerSparseArray.put(PageType.PAGE_PREVIOUS, prePage);
+            pagerSparseArray.put(PageType.PAGE_PREVIOUS, prePage);
 
-        if (prePage != null && preCacheBitmap != null){
-            Canvas cacheCanvas = new Canvas(preCacheBitmap);
-            drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
-            prePage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+            if (prePage != null && preCacheBitmap != null){
+                Canvas cacheCanvas = new Canvas(preCacheBitmap);
+                drawCanvasBg(cacheCanvas, readSetting.getContentPaint());
+                prePage.drawTxtParagraph(cacheCanvas, readSetting.getContentPaint());
+            }
         }
 
     }
@@ -224,6 +245,7 @@ public class PageManager {
 
                     prepareNextBitmap();
                     preparePreBitmap();
+
                 }
             }).subscribeOn(Schedulers.io()).toFuture();
 
@@ -307,6 +329,13 @@ public class PageManager {
 
     }
 
+    public void changeDayNightMode(){
+        this.readView.postInvalidate();
+    }
+
+    /**
+     * 保存当前page的第一个TxtParagraph作为历史记录
+     */
     public void saveReadHistory(){
         Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
         if (curPage != null){
@@ -350,6 +379,11 @@ public class PageManager {
             if (preCacheBitmap != null && !preCacheBitmap.isRecycled()) {
                 preCacheBitmap.recycle();
                 preCacheBitmap = null;
+            }
+
+            if (curBitmap != null && !curBitmap.isRecycled()){
+                curBitmap.recycle();
+                curBitmap = null;
             }
 
             if (readRandomAccessFile != null) {

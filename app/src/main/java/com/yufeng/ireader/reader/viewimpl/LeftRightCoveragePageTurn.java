@@ -5,12 +5,12 @@ import android.animation.ObjectAnimator;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/25-0025.
@@ -18,7 +18,7 @@ import com.yufeng.ireader.utils.DisplayConstant;
  */
 
 public class LeftRightCoveragePageTurn extends PageTurn{
-    private static final String TAG = LeftRightCoveragePageTurn.class.getSimpleName();
+//    private static final String TAG = LeftRightCoveragePageTurn.class.getSimpleName();
     private Animator animator;
     private float translateX;
     private float touchX = 0;
@@ -28,9 +28,10 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     private static final int[][] SHADOW_COLOR = {{0x50454545, 0x00454545,}, {0xb0151515, 0x00151515}};
     private int shadowWidth;
     private boolean isPageTurn = true;
+    private boolean isDayMode = true;
 
     @SuppressWarnings("unused")
-    public void setShiftX(float x){
+    private void setShiftX(float x){
         translateX = x;
         onPageTurnListener.onAnimationInvalidate();
     }
@@ -40,6 +41,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             animator.cancel();
             animator = null;
         }
+        isDayMode = ReadPreferHelper.getInstance().isDayMode();
         shadowWidth = 30;
         animator = ObjectAnimator.ofFloat(this,"shiftX",startX, endX);
         animator.setDuration(duration);
@@ -133,7 +135,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
         if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
             canvas.translate(translateX + DisplayConstant.DISPLAY_WIDTH,0);
             //绘制阴影
-            Drawable drawable = getShadow(true);
+            Drawable drawable = getShadow(isDayMode);
             drawable.setBounds(0, 0, (int) Math.min(shadowWidth, -translateX), DisplayConstant.DISPLAY_HEIGHT);
             drawable.draw(canvas);
 
@@ -143,7 +145,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
         }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
             canvas.translate(translateX + DisplayConstant.DISPLAY_WIDTH,0);
             //绘制阴影
-            Drawable drawable = getShadow(true);
+            Drawable drawable = getShadow(isDayMode);
             drawable.setBounds(0, 0, (int) Math.min(shadowWidth, -translateX), DisplayConstant.DISPLAY_HEIGHT);
             drawable.draw(canvas);
 

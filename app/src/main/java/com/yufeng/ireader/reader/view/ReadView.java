@@ -3,19 +3,14 @@ package com.yufeng.ireader.reader.view;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.utils.PageTurnFactory;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
@@ -25,7 +20,6 @@ import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
-import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/15.
@@ -62,7 +56,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
     private void init(Context context){
         this.context = context;
-        initDefaultContentPaint(context);
+        initDefaultContentPaint(context);;
     }
 
     private void initDefaultContentPaint(Context context){
@@ -96,7 +90,6 @@ public class ReadView extends View implements OnPageTurnListener{
         }else {
             if (!pageTurn.onTouchEvent){
                 drawCurrentContent(canvas);
-                prepareNextContent();
             }
         }
 
@@ -139,10 +132,6 @@ public class ReadView extends View implements OnPageTurnListener{
         PageManager.getInstance().drawPager(canvas, contentPaint);
     }
 
-    private void prepareNextContent(){
-        PageManager.getInstance().prepareNextBitmap();
-    }
-
 
     private void turnNextPage(Canvas canvas){
         PageManager.getInstance().turnNextPage(canvas,contentPaint);
@@ -160,6 +149,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
         ReadExteriorHelper.init(activity, readSetting);
+        ReadExteriorHelper.getInstance().resetContentPaint();
 //        ReadExteriorHelper.getInstance().setFullScreen(activity,true);
 //        ReadExteriorHelper.hideNavigation(activity.getWindow().getDecorView());
 
@@ -170,13 +160,8 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setContext(getContext());
     }
     public void changeDayNightMode(){
-        if (readSetting.isDayMode()){
-            ReadExteriorHelper.getInstance().setReadNightMode();
-            ReadPreferHelper.getInstance().setIsDayMode(false);
-        }else {
-            ReadExteriorHelper.getInstance().setReadDayMode();
-            ReadPreferHelper.getInstance().setIsDayMode(true);
-        }
+        ReadExteriorHelper.getInstance().changeDayNightMode();
+        PageManager.getInstance().changeDayNightMode();
     }
 
     public void setOnMenuListener(OnMenuListener listener){
