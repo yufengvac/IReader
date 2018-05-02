@@ -219,9 +219,9 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
      */
     private void setDayNightImageView(){
         if (ReadPreferHelper.getInstance().isDayMode()){
-            dayNightModeIv.setImageResource(R.drawable.read_mode_day);
-        }else {
             dayNightModeIv.setImageResource(R.drawable.read_mode_night);
+        }else {
+            dayNightModeIv.setImageResource(R.drawable.read_mode_day);
         }
     }
 
