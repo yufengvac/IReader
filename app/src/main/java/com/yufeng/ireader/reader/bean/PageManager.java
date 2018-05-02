@@ -329,10 +329,6 @@ public class PageManager {
 
     }
 
-    public void changeDayNightMode(){
-        this.readView.postInvalidate();
-    }
-
     /**
      * 保存当前page的第一个TxtParagraph作为历史记录
      */
@@ -351,7 +347,7 @@ public class PageManager {
                             ReadTxtParagraph readTxtParagraph = ReadTxtParagraph.createReadTxtParagraph(bookName,readRandomAccessFile.getRealPath(),
                                     readRandomAccessFile.getSize(),percent,firstTxtParagraph);
                             long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
-                            Log.e(TAG,"result="+result);
+                            Log.e(TAG,"保存第"+result+"次阅读历史记录");
                         }
                     }).subscribeOn(Schedulers.io()).toFuture();
 
@@ -361,6 +357,15 @@ public class PageManager {
 
             }
         }
+
+        final long deleteLastTime = System.currentTimeMillis() - 3 * 24 * 3600 * 1000;
+        Single.create(new SingleOnSubscribe<Void>() {
+            @Override
+            public void subscribe(SingleEmitter<Void> singleEmitter) throws Exception {
+                int result = readBookHistoryDb.getReadTxtParagraphDao().deleteReadBookHistory(readRandomAccessFile.getRealPath(), deleteLastTime);
+                Log.e(TAG,"删除三天前的阅读记录"+result+"条");
+            }
+        }).subscribeOn(Schedulers.io()).toFuture();
     }
 
     public void setReadView(ReadView readView) {

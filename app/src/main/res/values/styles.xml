@@ -17,6 +17,15 @@
         <item name="android:textSize">@dimen/sub_title_size</item>
     </style>
 
+    <style name="read_menu_text_dark_style" parent="read_menu_text_style">
+        <item name="android:textColor">@color/read_menu_title_color_dark</item>
+    </style>
+
+    <style name="read_menu_big_text_style">
+        <item name="android:textColor">@color/read_menu_title_color</item>
+        <item name="android:textSize">@dimen/sub_big_title_size</item>
+    </style>
+
     <!-- 全屏不需要显示 StateBar 的 PopupMenu 主题 -->
     <style name="Theme.PopupMenu.Fullscreen" parent="Theme.AppCompat.Light">
         <item name="android:windowFullscreen">false</item>

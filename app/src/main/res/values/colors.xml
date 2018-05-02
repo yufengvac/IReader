@@ -11,5 +11,10 @@
 
     <color name="read_menu_bg">@color/gray3</color>
     <color name="read_menu_title_color">@color/white1</color>
+    <color name="read_menu_title_color_dark">@color/white2</color>
     <color name="read_menu_seek_green">@color/green</color>
+
+    <color name="read_menu_theme_1">#EBF0D3</color>
+    <color name="read_menu_theme_2">#DCEFF4</color>
+    <color name="read_menu_theme_3">#F8E7E7</color>
 </resources>

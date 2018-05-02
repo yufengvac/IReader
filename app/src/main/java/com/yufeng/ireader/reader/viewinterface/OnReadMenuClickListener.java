@@ -12,5 +12,4 @@ public interface OnReadMenuClickListener {
     void onBrightnessClick(View view);
     void onListenClick(View view);
     void onSettingClick(View view);
-    void onDayNightClick(View view);
 }

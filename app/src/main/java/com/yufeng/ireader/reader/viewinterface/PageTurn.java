@@ -29,6 +29,7 @@ public abstract class PageTurn {
         public static final int SIMULATION = 2;
         public static final int TOP_BOTTOM_COVERAGE = 3;
         public static final int NONE = 4;
+        public static final int ALPHA = 5;
     }
 
     public static class PageTurnDirection{

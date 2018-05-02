@@ -23,6 +23,6 @@ public interface ReadTxtParagraphDao {
     @Query("SELECT * FROM book_read_history WHERE book_path = :bookPath ORDER BY last_read_time")
     Single<List<ReadTxtParagraph>> getAllReadBookHistory(String bookPath);
 
-    @Query("DELETE FROM book_read_history")
-    int deleteReadBookHistory();
+    @Query("DELETE FROM book_read_history WHERE book_path = :bookPath AND last_read_time <= :deleteLastTime")
+    int deleteReadBookHistory(String bookPath, long deleteLastTime);
 }

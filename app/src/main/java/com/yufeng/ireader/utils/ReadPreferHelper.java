@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.yufeng.ireader.base.ReadApplication;
+import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
 
 /**
  * Created by yufeng on 2018/4/27.
@@ -15,7 +16,8 @@ public class ReadPreferHelper {
     private SharedPreferences sp = null;
     private static final String SHARE_PREFRERFERENCES_NAME = "read_setting";
 
-    private static final String IS_DAY_MODE = "is_day_mode";
+    private static final String KEY_IS_DAY_MODE = "is_day_mode";
+    private static final String KEY_TYPE_FACE = "type_face";
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -38,9 +40,17 @@ public class ReadPreferHelper {
     }
 
     public boolean isDayMode(){
-        return sp.getBoolean(IS_DAY_MODE, true);
+        return sp.getBoolean(KEY_IS_DAY_MODE, true);
     }
     public void setIsDayMode(boolean isDayMode){
-        sp.edit().putBoolean(IS_DAY_MODE, isDayMode).apply();
+        sp.edit().putBoolean(KEY_IS_DAY_MODE, isDayMode).apply();
+    }
+
+
+    public void setTypeface(int typeface){
+        sp.edit().putInt(KEY_TYPE_FACE, typeface).apply();
+    }
+    public int getTypeface(){
+        return sp.getInt(KEY_TYPE_FACE, ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT);
     }
 }

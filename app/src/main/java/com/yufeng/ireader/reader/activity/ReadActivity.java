@@ -6,14 +6,14 @@ import android.view.View;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.utils.HardWareManager;
-import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
-import com.yufeng.ireader.reader.view.MenuSetView;
-import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
-import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.view.ReadView;
+import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
+import com.yufeng.ireader.reader.viewimpl.ReadMenuSettingView;
+import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
+import com.yufeng.ireader.reader.viewinterface.OnReadViewChangeListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
@@ -24,7 +24,7 @@ import com.yufeng.ireader.utils.PathHelper;
  *
  */
 
-public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener{
+public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener {
     private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
@@ -32,6 +32,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     private ReadView readView;
     private IReadSetting readSetting;
     private ReadMenuSetView readMenuSetView;
+    private ReadMenuSettingView readMenuSettingView;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -53,9 +54,6 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
             readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
 
-        if (readMenuSetView == null){
-            readMenuSetView = new ReadMenuSetView(this);
-        }
     }
 
     @Override
@@ -66,6 +64,8 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         readSetting.setContentPaint(readView.getContentPaint());
 
         readView.setOnMenuListener(this);
+
+        readMenuSetView = new ReadMenuSetView(this,readSetting);
         readMenuSetView.setBookName(PathHelper.getBookNameByPath(path));
     }
 
@@ -77,7 +77,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     @Override
     public void onClickMenu() {
         if (readMenuSetView == null){
-            readMenuSetView = new ReadMenuSetView(this);
+            readMenuSetView = new ReadMenuSetView(this,readSetting);
         }
         if (readMenuSetView.isMenuShowing()){
             readMenuSetView.hide();
@@ -103,12 +103,19 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
     @Override
     public void onSettingClick(View view) {
-
+        if (readMenuSettingView == null){
+            readMenuSettingView = new ReadMenuSettingView(this,readSetting);
+        }
+        if (!readMenuSettingView.isMenuShowing()){
+            readMenuSettingView.show();
+        }else {
+            readMenuSettingView.hide();
+        }
     }
 
     @Override
-    public void onDayNightClick(View view) {
-        readView.changeDayNightMode();
+    public void onReadViewChange() {
+        readView.postInvalidate();
     }
 
     @Override

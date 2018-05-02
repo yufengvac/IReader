@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -13,6 +14,7 @@ import android.view.View;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.utils.PageTurnFactory;
+import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
@@ -20,6 +22,7 @@ import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/15.
@@ -56,7 +59,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
     private void init(Context context){
         this.context = context;
-        initDefaultContentPaint(context);;
+        initDefaultContentPaint(context);
     }
 
     private void initDefaultContentPaint(Context context){
@@ -66,6 +69,25 @@ public class ReadView extends View implements OnPageTurnListener{
         contentPaint.setTextSize(DisPlayUtil.sp2px(context, DEFAULT_TEXT_SIZE));
         contentPaint.setStyle(Paint.Style.FILL);
         contentPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
+
+        Typeface typeface = getFontface();
+        if (typeface != null){
+            contentPaint.setTypeface(typeface);
+        }else {
+            contentPaint.setTypeface(Typeface.DEFAULT);
+        }
+
+    }
+
+    private Typeface getFontface(){
+        int typeface = ReadPreferHelper.getInstance().getTypeface();
+        Typeface fontTypeface = null;
+        if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_ITALIC){
+            fontTypeface = Typeface.createFromAsset(context.getAssets(),"font/italic.ttf");
+        }else if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_XU){
+            fontTypeface = Typeface.createFromAsset(context.getAssets(), "font/xujinglei.ttf");
+        }
+        return fontTypeface;
     }
 
 
@@ -158,10 +180,6 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());
-    }
-    public void changeDayNightMode(){
-        ReadExteriorHelper.getInstance().changeDayNightMode();
-        PageManager.getInstance().changeDayNightMode();
     }
 
     public void setOnMenuListener(OnMenuListener listener){

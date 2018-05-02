@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
@@ -162,6 +163,27 @@ public class ReadExteriorHelper {
             return "#4D4D4D";
         }
     }
+
+    /**
+     * 更换字体
+     * @param context  context
+     * @param typeface 字体
+     */
+    public void changeTypeface(Context context, int typeface){
+        ReadPreferHelper.getInstance().setTypeface(typeface);
+        Typeface fontTypeface = null;
+        if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_ITALIC){
+            fontTypeface = Typeface.createFromAsset(context.getAssets(),"font/italic.ttf");
+        }else if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_XU){
+            fontTypeface = Typeface.createFromAsset(context.getAssets(), "font/xujinglei.ttf");
+        }
+        if (fontTypeface != null){
+            readSetting.getContentPaint().setTypeface(fontTypeface);
+        }else {
+            readSetting.getContentPaint().setTypeface(Typeface.DEFAULT);
+        }
+    }
+
 
     /**
      * 重置画笔颜色

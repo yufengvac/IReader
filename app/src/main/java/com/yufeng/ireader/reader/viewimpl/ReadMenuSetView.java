@@ -12,7 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.view.MenuSetView;
+import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.ReadPreferHelper;
@@ -43,8 +45,11 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
     private Animation changeModeDismissAnim;
     private Animation changeModeAppearAnim;
 
-    public ReadMenuSetView(Context context) {
-        super(context);
+    private Animator bottomShowAnimator;
+    private Animator bottomHideAnimator;
+
+    public ReadMenuSetView(Context context, IReadSetting readSetting) {
+        super(context, readSetting);
         mContext = context;
         if (! (context instanceof OnReadMenuClickListener)){
             throw new ClassCastException("the activity must implement OnReadMenuClickListener ");
@@ -113,23 +118,28 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
     protected void startShowAnimation() {
         getTopShowAnimation().start();
 
-        Animator animator = getBottomShowAnimation();
-        animator.addListener(this);
-        animator.start();
+        bottomShowAnimator = getBottomShowAnimation();
+        bottomShowAnimator.addListener(this);
+        bottomShowAnimator.start();
     }
     @Override
     protected void startHideAnimation() {
         dayNightModeIv.startAnimation(dismissRotateScaleAnim);
         getTopHideAnimation().start();
-        getBottomHideAnimation().start();
+
+        bottomHideAnimator = getBottomHideAnimation();
+        bottomHideAnimator.addListener(this);
+        bottomHideAnimator.start();
     }
 
 
     /****************AnimatorListener*************/
     @Override
-    public void onAnimationEnd(Animator animation) {
-        dayNightModeIv.setVisibility(View.VISIBLE);
-        dayNightModeIv.startAnimation(appearTranslateAnim);
+    public void onAnimationEnd(Animator animator) {
+        if (animator == bottomShowAnimator){
+            dayNightModeIv.setVisibility(View.VISIBLE);
+            dayNightModeIv.startAnimation(appearTranslateAnim);
+        }
     }
 
     @Override
@@ -233,29 +243,34 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
                 hide();
                 break;
             case R.id.read_menu_category_layout:
+                hide();
                 if (onReadMenuClickListener != null){
                     onReadMenuClickListener.onCategoryClick(categoryLayout);
                 }
                 break;
             case R.id.read_menu_brightness_layout:
+                hide();
                 if (onReadMenuClickListener != null){
                     onReadMenuClickListener.onBrightnessClick(brightnessLayout);
                 }
                 break;
             case R.id.read_menu_listen_layout:
+                hide();
                 if (onReadMenuClickListener != null){
                     onReadMenuClickListener.onListenClick(listenLayout);
                 }
                 break;
             case R.id.read_menu_setting_layout:
+                hide();
                 if (onReadMenuClickListener != null){
                     onReadMenuClickListener.onSettingClick(settingLayout);
                 }
                 break;
             case R.id.read_menu_day_night_mode:
-                if (onReadMenuClickListener != null){
-                    onReadMenuClickListener.onDayNightClick(settingLayout);
-                    dayNightModeIv.startAnimation(changeModeDismissAnim);
+                ReadExteriorHelper.getInstance().changeDayNightMode();
+                dayNightModeIv.startAnimation(changeModeDismissAnim);
+                if (onReadViewChangeListener != null){
+                    onReadViewChangeListener.onReadViewChange();
                 }
                 break;
         }

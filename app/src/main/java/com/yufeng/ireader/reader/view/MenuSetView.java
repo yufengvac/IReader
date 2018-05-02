@@ -8,6 +8,8 @@ import android.view.WindowManager;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.viewinterface.IMenuSetView;
+import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.reader.viewinterface.OnReadViewChangeListener;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,18 +29,20 @@ public abstract class MenuSetView implements IMenuSetView{
     private Window mWindow;
     private WindowManager windowManager;
     private boolean isShow = false;
-    public MenuSetView(Context context){
+    protected OnReadViewChangeListener onReadViewChangeListener;
+    protected IReadSetting readSetting;
+    public MenuSetView(Context context, IReadSetting readSetting){
+        this.readSetting = readSetting;
         init(context);
     }
 
     private void init(Context context){
         Dialog dialog = new Dialog(context, R.style.Theme_PopupMenu_Fullscreen);
         mWindow = dialog.getWindow();
-        if (mWindow != null){
-//            mWindow.setType(WindowManager.LayoutParams.TYPE_APPLICATION);
-        }
-
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (context instanceof OnReadViewChangeListener){
+            onReadViewChangeListener = (OnReadViewChangeListener)context;
+        }
     }
 
     @Override

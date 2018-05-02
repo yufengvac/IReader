@@ -86,4 +86,9 @@ public class ReadSetting implements IReadSetting {
     public boolean isDayMode() {
         return ReadPreferHelper.getInstance().isDayMode();
     }
+
+    @Override
+    public int getFontface() {
+        return ReadPreferHelper.getInstance().getTypeface();
+    }
 }
