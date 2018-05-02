@@ -98,8 +98,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             return;
         }
 
-        float textSize = readSetting.getContentPaint().getTextSize();
-        fontSizeValueTv.setText(String.valueOf(DisPlayUtil.px2sp(mContext,textSize)));
+        setTextSizeValue();
 
         int fontfaceOption = readSetting.getFontface();
         if (fontfaceOption == ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT){
@@ -159,6 +158,11 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         }
     }
 
+    private void setTextSizeValue(){
+        float textSize = readSetting.getContentPaint().getTextSize();
+        fontSizeValueTv.setText(String.valueOf(DisPlayUtil.px2sp(mContext,textSize)));
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -166,25 +170,39 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             case R.id.read_menu_setting_blank_view:
                 hide();
                 break;
+            case R.id.read_menu_setting_font_size_minus_tv:
+                ReadExteriorHelper.getInstance().changeTextSize(mContext, true);
+                setTextSizeValue();
+                if (onReadViewChangeListener != null){
+                    onReadViewChangeListener.onReadViewChange(true);
+                }
+                break;
+            case R.id.read_menu_setting_font_size_plus_tv:
+                ReadExteriorHelper.getInstance().changeTextSize(mContext, false);
+                setTextSizeValue();
+                if (onReadViewChangeListener != null){
+                    onReadViewChangeListener.onReadViewChange(true);
+                }
+                break;
             case R.id.read_menu_setting_font_default:
                 setSelectedTextView(fontDefaultTv);
                 ReadExteriorHelper.getInstance().changeTypeface(mContext, ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT);
                 if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange();
+                    onReadViewChangeListener.onReadViewChange(false);
                 }
                 break;
             case R.id.read_menu_setting_font_italics_tv:
                 setSelectedTextView(fontItalicTv);
                 ReadExteriorHelper.getInstance().changeTypeface(mContext, ReadExteriorConstants.ReadTypeFace.TYPEFACE_ITALIC);
                 if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange();
+                    onReadViewChangeListener.onReadViewChange(false);
                 }
                 break;
             case R.id.read_menu_setting_font_song_tv:
                 setSelectedTextView(fontSongTv);
                 ReadExteriorHelper.getInstance().changeTypeface(mContext, ReadExteriorConstants.ReadTypeFace.TYPEFACE_XU);
                 if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange();
+                    onReadViewChangeListener.onReadViewChange(false);
                 }
                 break;
         }

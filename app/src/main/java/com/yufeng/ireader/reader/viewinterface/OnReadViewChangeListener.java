@@ -6,5 +6,5 @@ package com.yufeng.ireader.reader.viewinterface;
  */
 
 public interface OnReadViewChangeListener {
-    void onReadViewChange();
+    void onReadViewChange(boolean isForcedCalc);
 }

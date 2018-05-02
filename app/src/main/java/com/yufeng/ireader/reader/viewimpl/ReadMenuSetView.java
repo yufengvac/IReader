@@ -270,7 +270,7 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
                 ReadExteriorHelper.getInstance().changeDayNightMode();
                 dayNightModeIv.startAnimation(changeModeDismissAnim);
                 if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange();
+                    onReadViewChangeListener.onReadViewChange(false);
                 }
                 break;
         }
