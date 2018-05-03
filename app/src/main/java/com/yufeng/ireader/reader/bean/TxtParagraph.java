@@ -129,11 +129,11 @@ public class TxtParagraph {
     }
 
 
-    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight, float[] offsetY){
+    public float calculatorOffsetY(IReadSetting readSetting, float startOffsetY, int displayHeight, float[] offsetY, boolean isNeedCalcAgain){
         if (offsetX == null || headIndexList == null){
             return startOffsetY;
         }
-        if (offsetY == null){
+        if (offsetY == null || isNeedCalcAgain){
             offsetY = new float[headIndexList.size()];
             setOffsetY(offsetY);
         }

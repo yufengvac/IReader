@@ -185,14 +185,27 @@ public class ReadExteriorHelper {
         }
     }
 
-    public void changeTextSize(Context context, boolean isMinus){
+    public void changeTextSize(Context context, boolean isMinus, boolean setDefault){
         int curTextSize = DisPlayUtil.px2sp(context, readSetting.getContentPaint().getTextSize());
+        if (setDefault){
+            if (curTextSize == ReadExteriorConstants.DEFAULT_TEXT_SIZE){
+                return;
+            }
+            readSetting.getContentPaint().setTextSize(DisPlayUtil.sp2px(context, ReadExteriorConstants.DEFAULT_TEXT_SIZE));
+            ReadPreferHelper.getInstance().setFontTextSize(ReadExteriorConstants.DEFAULT_TEXT_SIZE);
+            return;
+        }
+
         if (isMinus && curTextSize > ReadExteriorConstants.MIN_TEXT_SIZE){
+
             readSetting.getContentPaint().setTextSize(DisPlayUtil.sp2px(context, curTextSize - 1));
             ReadPreferHelper.getInstance().setFontTextSize(curTextSize -1);
+
         }else if (!isMinus && curTextSize < ReadExteriorConstants.MAX_TEXT_SIZE){
+
             readSetting.getContentPaint().setTextSize(DisPlayUtil.sp2px(context, curTextSize + 1));
             ReadPreferHelper.getInstance().setFontTextSize(curTextSize + 1);
+
         }
 
     }

@@ -135,6 +135,11 @@ public class CharCalculator {
         int lastCanDrawLine ;
         int firstCanDrawLine = txtParagraph.getFirstCanDrawLine();
 
+        if (firstCanDrawLine >= headIndexList.size()){
+            firstCanDrawLine = headIndexList.size() - 1;
+            txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
+        }
+
         lastCanDrawLine = headIndexList.size() - 1;
         offsetY[firstCanDrawLine] = startOffsetY;
 

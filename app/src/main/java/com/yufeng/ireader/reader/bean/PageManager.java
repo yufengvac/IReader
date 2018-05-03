@@ -148,12 +148,12 @@ public class PageManager {
 
             if (curPage != null){
 
-//                if (isForceCalc){
-//                    TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
-//                    curPage = Page.createNextPager(firstTxtParagraph , firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
-//                            this.readSetting, readRandomAccessFile, true);
-//                    pagerSparseArray.put(PageType.PAGE_CURRENT, curPage);
-//                }
+                if (isForceCalc){
+                    TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
+                    curPage = Page.createCurPagerAgain(firstTxtParagraph , firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
+                            this.readSetting, readRandomAccessFile);
+                    pagerSparseArray.put(PageType.PAGE_CURRENT, curPage);
+                }
                 curPage.drawTxtParagraph(canvas, paint);
 
             }

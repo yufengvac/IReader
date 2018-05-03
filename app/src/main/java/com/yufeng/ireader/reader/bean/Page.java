@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
+import com.yufeng.ireader.reader.utils.CharCalculator;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -44,7 +45,80 @@ public class Page {
         }
     }
 
+    static Page createCurPagerAgain(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
+        Page pager = new Page();
+        int displayWidth = DisplayConstant.DISPLAY_WIDTH;
+        int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+        try {
+            Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
+            float startOffsetY = readSetting.getPaddingTop() +  (fontMetrics.descent - fontMetrics.ascent);
+            Log.e(TAG,"startOffsetY="+startOffsetY);
 
+            List<TxtParagraph> drawTxtParaList = new ArrayList<>();
+            boolean needCalcNewTxtParagraph = false;
+            long startSeek = 0;
+
+            if (lastPagerTxtParagraph != null){
+                if (! lastPagerTxtParagraph.isCanDrawCompleted()){
+                    needCalcNewTxtParagraph = true;
+                    lastPagerTxtParagraph.setFirstCanDrawLine(lastCanDrawLine+1);
+                }else {
+                    startSeek = lastPagerTxtParagraph.getSeekEnd() + 1;
+                }
+            }
+            if (lastPagerTxtParagraph != null){
+                needCalcNewTxtParagraph = true;
+            }
+
+            TxtParagraph txtParagraph = lastPagerTxtParagraph;
+            while (true){
+                if ( !needCalcNewTxtParagraph ){
+                    txtParagraph = TxtParagraph.createTxtParagraphBySeekStart(readRandomAccessFile, displayWidth, readSetting, startSeek);
+                }
+
+                startSeek = txtParagraph.getSeekEnd() + 1;
+
+                if (needCalcNewTxtParagraph){
+                    CharCalculator.calcCharOffsetX(txtParagraph.getParagraph(), displayWidth, readSetting, txtParagraph);
+                }
+                drawTxtParaList.add(txtParagraph);
+
+                startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight, txtParagraph.getOffsetY(),true);
+                needCalcNewTxtParagraph = false;
+
+                Log.i(TAG,"startOffsetY = "+startOffsetY);
+                if (startOffsetY >= displayHeight - readSetting.getPaddingBottom() -( fontMetrics.descent- fontMetrics.ascent)){
+                    Log.e(TAG,"页面已经全部获取完了");
+                    break;
+                }
+            }
+            if (pager.txtParagraphList == null){
+                pager.txtParagraphList = new ArrayList<>();
+            }else {
+                pager.txtParagraphList.clear();
+            }
+            pager.txtParagraphList.addAll(drawTxtParaList);
+            for (TxtParagraph txtParagraph1: pager.txtParagraphList){
+                Log.i(TAG,"最终该下个页面page的所有内容为："+txtParagraph1.toString());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return pager;
+    }
+
+
+    /**
+     * 根据当前页面的最后一个段落，创建出下一个page页面出来
+     * @param lastPagerTxtParagraph    当前页面的最后一段
+     * @param lastCanDrawLine          当前页面的最后一段的可绘制的最后一行
+     * @param readSetting              设置选项
+     * @param readRandomAccessFile     读取书籍流
+     * @param forcedAdd                是否强制加入，在读取历史记录的时候，无论最后一段有没有绘制完，都需要加入
+     * @return                         下一页的page内容
+     */
     static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile, boolean forcedAdd){
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
@@ -79,7 +153,7 @@ public class Page {
                 startSeek = txtParagraph.getSeekEnd() + 1;
                 drawTxtParaList.add(txtParagraph);
 
-                startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight, txtParagraph.getOffsetY());
+                startOffsetY =  txtParagraph.calculatorOffsetY(readSetting, startOffsetY, displayHeight, txtParagraph.getOffsetY(), false);
                 needCalcNewTxtParagraph = false;
 
                 Log.i(TAG,"startOffsetY = "+startOffsetY);
