@@ -25,7 +25,7 @@ public class NonePageTurn extends PageTurn {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return false;
+        return event.getAction() != MotionEvent.ACTION_UP;
     }
 
     @Override

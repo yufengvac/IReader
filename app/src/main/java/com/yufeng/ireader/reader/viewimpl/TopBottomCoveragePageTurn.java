@@ -23,11 +23,11 @@ public class TopBottomCoveragePageTurn extends PageTurn{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return false;
+        return event.getAction() != MotionEvent.ACTION_UP;
     }
 
     @Override
     public boolean draw(Canvas canvas) {
-        return false;
+        return true;
     }
 }

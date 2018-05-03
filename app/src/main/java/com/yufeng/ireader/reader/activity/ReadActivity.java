@@ -121,6 +121,11 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     }
 
     @Override
+    public void onReadViewPageTurnChange() {
+        readView.recreatePageTurn(readSetting);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         readView.saveHistory();

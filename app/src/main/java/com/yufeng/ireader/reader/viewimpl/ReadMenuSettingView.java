@@ -97,17 +97,17 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         fontSongTv.setOnClickListener(this);
         fontMoreTv.setOnClickListener(this);
 
-        pageTurnCoverageTv.setOnClickListener(this);
-        pageTurnTopBottomTv.setOnClickListener(this);
-        pageTurnSimulationTv.setOnClickListener(this);
-        pageTurnAlphaTv.setOnClickListener(this);
-        pageTurnNoneTv.setOnClickListener(this);
-
         themeGrayIv.setOnClickListener(this);
         theme1Iv.setOnClickListener(this);
         theme2Iv.setOnClickListener(this);
         theme3Iv.setOnClickListener(this);
         themeKraftPaperIv.setOnClickListener(this);
+
+        pageTurnCoverageTv.setOnClickListener(this);
+        pageTurnTopBottomTv.setOnClickListener(this);
+        pageTurnSimulationTv.setOnClickListener(this);
+        pageTurnAlphaTv.setOnClickListener(this);
+        pageTurnNoneTv.setOnClickListener(this);
     }
 
     private void initData(){
@@ -128,15 +128,15 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
 
 
         int pageTurnType = readSetting.getPageTurnType();
-        if (pageTurnType == 0){
+        if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_COVERAGE){
             setSelectedTextView(pageTurnCoverageTv);
-        }else if (pageTurnType == 1){
+        }else if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_TOPBOTTOM){
             setSelectedTextView(pageTurnTopBottomTv);
-        }else if (pageTurnType == 2){
+        }else if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_SIMULATION){
             setSelectedTextView(pageTurnSimulationTv);
-        }else if (pageTurnType == 3){
+        }else if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_ALPHA){
             setSelectedTextView(pageTurnAlphaTv);
-        }else if (pageTurnType == 4){
+        }else if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_NONE){
             setSelectedTextView(pageTurnNoneTv);
         }
 
@@ -191,6 +191,44 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             pageTurnAlphaTv.setTextColor(selectedColor);
         }else if (textView == pageTurnNoneTv){
             pageTurnNoneTv.setTextColor(selectedColor);
+        }
+    }
+
+    /**
+     * 设置翻页方式TextView
+     * @param view 需要设置的翻页的TextView
+     */
+    private void setPageTurnTextView(View view){
+        int id = view.getId();
+
+        int notSelectedColor = ContextCompat.getColor(mContext, R.color.read_menu_title_color);
+        int selectedColor = ContextCompat.getColor(mContext, R.color.read_menu_seek_green);
+
+
+        pageTurnCoverageTv.setTextColor(notSelectedColor);
+        pageTurnTopBottomTv.setTextColor(notSelectedColor);
+        pageTurnSimulationTv.setTextColor(notSelectedColor);
+        pageTurnAlphaTv.setTextColor(notSelectedColor);
+        pageTurnNoneTv.setTextColor(notSelectedColor);
+
+        if (id == pageTurnCoverageTv.getId()){
+            pageTurnCoverageTv.setTextColor(selectedColor);
+            ReadPreferHelper.getInstance().setPageTurnType(ReadExteriorConstants.PageTurnType.PAGE_TURN_COVERAGE);
+        }else if (id == pageTurnTopBottomTv.getId()){
+            pageTurnTopBottomTv.setTextColor(selectedColor);
+            ReadPreferHelper.getInstance().setPageTurnType(ReadExteriorConstants.PageTurnType.PAGE_TURN_TOPBOTTOM);
+        }else if (id == pageTurnSimulationTv.getId()){
+            pageTurnSimulationTv.setTextColor(selectedColor);
+            ReadPreferHelper.getInstance().setPageTurnType(ReadExteriorConstants.PageTurnType.PAGE_TURN_SIMULATION);
+        }else if (id == pageTurnAlphaTv.getId()){
+            pageTurnAlphaTv.setTextColor(selectedColor);
+            ReadPreferHelper.getInstance().setPageTurnType(ReadExteriorConstants.PageTurnType.PAGE_TURN_ALPHA);
+        }else if (id == pageTurnNoneTv.getId()){
+            pageTurnNoneTv.setTextColor(selectedColor);
+            ReadPreferHelper.getInstance().setPageTurnType(ReadExteriorConstants.PageTurnType.PAGE_TURN_NONE);
+        }
+        if (onReadViewChangeListener != null ){
+            onReadViewChangeListener.onReadViewPageTurnChange();
         }
     }
 
@@ -306,6 +344,13 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             case R.id.read_menu_setting_3_theme_iv:
             case R.id.read_menu_setting_kraft_paper_theme_iv:
                 setSelectedTheme(v,true);
+                break;
+            case R.id.read_menu_setting_page_turn_coverage_tv:
+            case R.id.read_menu_setting_page_turn_top_bottom_tv:
+            case R.id.read_menu_setting_page_turn_simulation_tv:
+            case R.id.read_menu_setting_page_turn_alpha_tv:
+            case R.id.read_menu_setting_page_turn_none_tv:
+                setPageTurnTextView(v);
                 break;
         }
     }

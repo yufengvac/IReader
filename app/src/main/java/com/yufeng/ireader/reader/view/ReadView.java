@@ -41,7 +41,6 @@ public class ReadView extends View implements OnPageTurnListener{
     private Context context;
     private PageTurn pageTurn;
     private OnMenuListener onMenuListener;
-    private IReadSetting readSetting;
     private boolean isForceCalc = false;//是否需要重新进行当前页的排版
 
 
@@ -71,7 +70,7 @@ public class ReadView extends View implements OnPageTurnListener{
         contentPaint.setStyle(Paint.Style.FILL);
         contentPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
 
-        Typeface typeface = getFontface();
+        Typeface typeface = getFontFace();
         if (typeface != null){
             contentPaint.setTypeface(typeface);
         }else {
@@ -80,7 +79,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
     }
 
-    private Typeface getFontface(){
+    private Typeface getFontFace(){
         int typeface = ReadPreferHelper.getInstance().getTypeface();
         Typeface fontTypeface = null;
         if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_ITALIC){
@@ -166,7 +165,6 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
     public void prepare(Activity activity, IReadSetting readSetting, String path){
-        this.readSetting = readSetting;
         PageManager.getInstance().initPagers(readSetting, path);
         PageManager.getInstance().setReadView(this);
 
@@ -186,6 +184,13 @@ public class ReadView extends View implements OnPageTurnListener{
     public void refreshReadView(boolean isForceCalc){
         this.isForceCalc = isForceCalc;
         invalidate();
+    }
+
+    public void recreatePageTurn(IReadSetting readSetting){
+        pageTurn = PageTurnFactory.createPageTurn(readSetting);
+        pageTurn.setOnPageTurnListener(this);
+        pageTurn.setPaint(contentPaint);
+        pageTurn.setContext(getContext());
     }
 
     public void setOnMenuListener(OnMenuListener listener){

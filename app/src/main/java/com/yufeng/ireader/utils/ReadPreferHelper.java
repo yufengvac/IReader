@@ -22,6 +22,7 @@ public class ReadPreferHelper {
     private static final String KEY_THEME_OPTION = "theme_option";
     private static final String KEY_THEME_BG_COLOR = "theme_bg_color";
     private static final String KEY_THEME_BG_IMG = "theme_bg_img";
+    private static final String KEY_PAGE_TURN_TYPE = "page_turn_type";
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -86,6 +87,14 @@ public class ReadPreferHelper {
     }
     public int getThemeImg(){
         return sp.getInt(KEY_THEME_BG_IMG, ReadExteriorConstants.ThemeBgImg.IMG_GRAY);
+    }
+
+
+    public void setPageTurnType(int pageTurnType){
+        sp.edit().putInt(KEY_PAGE_TURN_TYPE, pageTurnType).apply();
+    }
+    public int getPageTurnType(){
+        return sp.getInt(KEY_PAGE_TURN_TYPE, ReadExteriorConstants.PageTurnType.PAGE_TURN_COVERAGE);
     }
 
 }
