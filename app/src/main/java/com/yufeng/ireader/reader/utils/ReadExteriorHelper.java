@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -37,6 +36,7 @@ public class ReadExteriorHelper {
     private IReadSetting readSetting;
     private Bitmap bgBitmap = null;
     private RectF bgRectF = null;
+    private int lastCanvaBgImgOption = 0;
 
     private ReadExteriorHelper(Activity activity, IReadSetting readSetting){
         weakReference = new WeakReference<>(activity);
@@ -101,14 +101,28 @@ public class ReadExteriorHelper {
         }
 
         int readBgOption = readSetting.getCanvasBgOptions();
-        String bgPath = PathHelper.getReadBgPathByOption(readBgOption);
-        if (TextUtils.isEmpty(bgPath)){ //背景路径为空，只能设置该canvas的颜色资源
+        if (readBgOption == ReadExteriorConstants.ThemeOption.COLOR){
+
             canvas.drawColor(Color.parseColor(readSetting.getCanvasBgColor()));
-        }else {
-            if (bgBitmap == null){
-                createBgBitmap(bgPath);
+
+        }else if (readBgOption == ReadExteriorConstants.ThemeOption.IMG){
+            String bgPath = PathHelper.getReadBgPathByOption(readSetting.getCanvasImgOptions());
+            if (TextUtils.isEmpty(bgPath)){ //背景路径为空，只能设置该canvas的颜色资源
+                canvas.drawColor(Color.parseColor(readSetting.getCanvasBgColor()));
+            }else {
+                if (bgBitmap == null){
+                    createBgBitmap(bgPath);
+                }
+                if(lastCanvaBgImgOption != readSetting.getCanvasImgOptions()){
+                    if (bgBitmap != null && !bgBitmap.isRecycled()){
+                        bgBitmap.recycle();
+                        bgBitmap = null;
+                    }
+                    createBgBitmap(bgPath);
+                }
+                canvas.drawBitmap(bgBitmap,null,bgRectF,paint);
+                lastCanvaBgImgOption = readSetting.getCanvasImgOptions();
             }
-            canvas.drawBitmap(bgBitmap,null,bgRectF,paint);
         }
     }
 
@@ -147,7 +161,7 @@ public class ReadExteriorHelper {
      */
     public String getBackgroundColor(){
         if (readSetting.isDayMode()){//日间模式
-            return "#B3AFA7";
+            return ReadPreferHelper.getInstance().getThemeColor();
         }else {//夜间模式
             return "#121212";
         }
@@ -185,6 +199,12 @@ public class ReadExteriorHelper {
         }
     }
 
+    /**
+     * 改变字体大小
+     * @param context    context
+     * @param isMinus    是否是减小字体大小
+     * @param setDefault 是否是设置默认字体大小
+     */
     public void changeTextSize(Context context, boolean isMinus, boolean setDefault){
         int curTextSize = DisPlayUtil.px2sp(context, readSetting.getContentPaint().getTextSize());
         if (setDefault){

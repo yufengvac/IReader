@@ -13,8 +13,10 @@ import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.view.MenuSetView;
+import com.yufeng.ireader.reader.view.ThemeImageView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/5/2-0002.
@@ -33,6 +35,8 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
     private TextView fontDefaultTv, fontItalicTv, fontSongTv, fontMoreTv;
 
     private TextView pageTurnCoverageTv, pageTurnTopBottomTv, pageTurnSimulationTv, pageTurnAlphaTv, pageTurnNoneTv;
+
+    private ThemeImageView themeGrayIv,theme1Iv,theme2Iv,theme3Iv,themeKraftPaperIv;
 
     public ReadMenuSettingView(Context context, IReadSetting readSetting) {
         super(context,readSetting);
@@ -65,6 +69,13 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         Typeface song = Typeface.createFromAsset(mContext.getAssets(), "font/xujinglei.ttf");
         fontSongTv.setTypeface(song);
 
+
+        themeGrayIv = (ThemeImageView) findViewById(R.id.read_menu_setting_gray_theme_iv);
+        theme1Iv = (ThemeImageView) findViewById(R.id.read_menu_setting_1_theme_iv);
+        theme2Iv = (ThemeImageView) findViewById(R.id.read_menu_setting_2_theme_iv);
+        theme3Iv = (ThemeImageView) findViewById(R.id.read_menu_setting_3_theme_iv);
+        themeKraftPaperIv = (ThemeImageView) findViewById(R.id.read_menu_setting_kraft_paper_theme_iv);
+
         pageTurnCoverageTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_coverage_tv);
         pageTurnTopBottomTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_top_bottom_tv);
         pageTurnSimulationTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_simulation_tv);
@@ -91,6 +102,12 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         pageTurnSimulationTv.setOnClickListener(this);
         pageTurnAlphaTv.setOnClickListener(this);
         pageTurnNoneTv.setOnClickListener(this);
+
+        themeGrayIv.setOnClickListener(this);
+        theme1Iv.setOnClickListener(this);
+        theme2Iv.setOnClickListener(this);
+        theme3Iv.setOnClickListener(this);
+        themeKraftPaperIv.setOnClickListener(this);
     }
 
     private void initData(){
@@ -98,7 +115,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             return;
         }
 
-        setTextSizeValue();
+        setTextSizeValue(null, false);
 
         int fontFaceOption = readSetting.getFontface();
         if (fontFaceOption == ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT){
@@ -123,9 +140,28 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             setSelectedTextView(pageTurnNoneTv);
         }
 
+        if (readSetting.getCanvasBgOptions() == ReadExteriorConstants.ThemeOption.IMG){
+            if (readSetting.getCanvasImgOptions() == ReadExteriorConstants.ThemeBgImg.IMG_GRAY){
+                setSelectedTheme(themeGrayIv, false);
+            }else if (readSetting.getCanvasImgOptions() == ReadExteriorConstants.ThemeBgImg.IMG_KRAFT_PAPER){
+                setSelectedTheme(themeKraftPaperIv, false);
+            }
+        }else if (readSetting.getCanvasBgOptions() == ReadExteriorConstants.ThemeOption.COLOR){
+            if (readSetting.getCanvasBgColor().equals(ReadExteriorConstants.ThemeBgColor.COLOR_1)){
+                setSelectedTheme(theme1Iv,false);
+            }else if (readSetting.getCanvasBgColor().equals(ReadExteriorConstants.ThemeBgColor.COLOR_2)){
+                setSelectedTheme(theme2Iv,false);
+            }else if (readSetting.getCanvasBgColor().equals(ReadExteriorConstants.ThemeBgColor.COLOR_3)){
+                setSelectedTheme(theme3Iv,false);
+            }
+        }
+
     }
 
-
+    /**
+     * 设置选中的TextView字体颜色样式
+     * @param textView 选中的TextView
+     */
     private void setSelectedTextView(TextView textView){
         int notSelectedColor = ContextCompat.getColor(mContext, R.color.read_menu_title_color);
         int selectedColor = ContextCompat.getColor(mContext, R.color.read_menu_seek_green);
@@ -158,7 +194,26 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         }
     }
 
-    private void setTextSizeValue(){
+    /**
+     * 设置当前阅读器的字体大小
+     * @param view 操作的view
+     */
+    private void setTextSizeValue(View view, boolean needInvalidate){
+        if (view != null){
+            int id = view.getId();
+            boolean isMinus = false;
+            boolean isDefault = false;
+            if (id == fontSizeMinusTv.getId()){
+                isMinus = true;
+            }else if (id == fontSizePlusTv.getId()){
+                isMinus = false;
+            }else if (id == fontSizeDefaultTv.getId()){
+                isDefault = true;
+            }
+            ReadExteriorHelper.getInstance().changeTextSize(mContext, isMinus,isDefault);
+        }
+
+
         int textSize = DisPlayUtil.px2sp(mContext,readSetting.getContentPaint().getTextSize());
         if (textSize == ReadExteriorConstants.MAX_TEXT_SIZE){
             fontSizePlusTv.setEnabled(false);
@@ -172,6 +227,47 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             fontSizeMinusTv.setEnabled(true);
         }
         fontSizeValueTv.setText(String.valueOf(textSize));
+        if (onReadViewChangeListener != null && needInvalidate){
+            onReadViewChangeListener.onReadViewChange(true);
+        }
+    }
+
+    /**
+     * 设置主题背景的勾选样式
+     * @param view 需要设置的主题背景ThemeImageView对象
+     */
+    private void setSelectedTheme(View view, boolean needInvalidate){
+        themeGrayIv.clearSelected();
+        theme1Iv.clearSelected();
+        theme2Iv.clearSelected();
+        theme3Iv.clearSelected();
+        themeKraftPaperIv.clearSelected();
+        int id = view.getId();
+        if (id == themeGrayIv.getId()){
+            ReadPreferHelper.getInstance().setThemeOption(ReadExteriorConstants.ThemeOption.IMG);
+            ReadPreferHelper.getInstance().setThemeImg(ReadExteriorConstants.ThemeBgImg.IMG_GRAY);
+            themeGrayIv.setSelected();
+        }else if (id == theme1Iv.getId()){
+            ReadPreferHelper.getInstance().setThemeOption(ReadExteriorConstants.ThemeOption.COLOR);
+            ReadPreferHelper.getInstance().setThemeColor(ReadExteriorConstants.ThemeBgColor.COLOR_1);
+            theme1Iv.setSelected();
+        }else if (id == theme2Iv.getId()){
+            ReadPreferHelper.getInstance().setThemeOption(ReadExteriorConstants.ThemeOption.COLOR);
+            ReadPreferHelper.getInstance().setThemeColor(ReadExteriorConstants.ThemeBgColor.COLOR_2);
+            theme2Iv.setSelected();
+        }else if (id == theme3Iv.getId()){
+            ReadPreferHelper.getInstance().setThemeOption(ReadExteriorConstants.ThemeOption.COLOR);
+            ReadPreferHelper.getInstance().setThemeColor(ReadExteriorConstants.ThemeBgColor.COLOR_3);
+            theme3Iv.setSelected();
+        }else if (id == themeKraftPaperIv.getId()){
+            ReadPreferHelper.getInstance().setThemeOption(ReadExteriorConstants.ThemeOption.IMG);
+            ReadPreferHelper.getInstance().setThemeImg(ReadExteriorConstants.ThemeBgImg.IMG_KRAFT_PAPER);
+            themeKraftPaperIv.setSelected();
+        }
+
+        if (onReadViewChangeListener != null && needInvalidate){
+            onReadViewChangeListener.onReadViewChange(false);
+        }
     }
 
     @Override
@@ -182,32 +278,13 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
                 hide();
                 break;
             case R.id.read_menu_setting_font_size_minus_tv:
-                ReadExteriorHelper.getInstance().changeTextSize(mContext, true, false);
-                setTextSizeValue();
-                if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange(true);
-                }
-                break;
             case R.id.read_menu_setting_font_size_plus_tv:
-                ReadExteriorHelper.getInstance().changeTextSize(mContext, false,false);
-                setTextSizeValue();
-                if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange(true);
-                }
-                break;
             case R.id.read_menu_setting_font_size_default_tv:
-                ReadExteriorHelper.getInstance().changeTextSize(mContext, false,true);
-                setTextSizeValue();
-                if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange(true);
-                }
+                setTextSizeValue(v, true);
                 break;
             case R.id.read_menu_setting_font_default:
                 setSelectedTextView(fontDefaultTv);
                 ReadExteriorHelper.getInstance().changeTypeface(mContext, ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT);
-                if (onReadViewChangeListener != null){
-                    onReadViewChangeListener.onReadViewChange(false);
-                }
                 break;
             case R.id.read_menu_setting_font_italics_tv:
                 setSelectedTextView(fontItalicTv);
@@ -222,6 +299,13 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
                 if (onReadViewChangeListener != null){
                     onReadViewChangeListener.onReadViewChange(false);
                 }
+                break;
+            case R.id.read_menu_setting_gray_theme_iv:
+            case R.id.read_menu_setting_1_theme_iv:
+            case R.id.read_menu_setting_2_theme_iv:
+            case R.id.read_menu_setting_3_theme_iv:
+            case R.id.read_menu_setting_kraft_paper_theme_iv:
+                setSelectedTheme(v,true);
                 break;
         }
     }

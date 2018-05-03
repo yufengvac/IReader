@@ -30,6 +30,8 @@ public interface IReadSetting {
 
     int getCanvasBgOptions();
 
+    int getCanvasImgOptions();
+
     String getCanvasBgColor();
 
     int getPageTurnType();

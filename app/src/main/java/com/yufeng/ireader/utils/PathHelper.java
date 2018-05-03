@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.Chapter;
+import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
 import com.yufeng.ireader.ui.beans.Book;
 
 import java.io.BufferedInputStream;

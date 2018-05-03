@@ -26,4 +26,21 @@ public class ReadExteriorConstants {
         public static final int PAGE_TURN_ALPHA = PageTurn.PageTurnType.ALPHA;
         public static final int PAGE_TURN_NONE = PageTurn.PageTurnType.NONE;
     }
+
+    public static class ThemeOption{
+        public static final int IMG = 0;
+        public static final int COLOR = 1;
+    }
+
+    public static class ThemeBgColor{
+        public static final String COLOR_1 = "#EBF0D3";
+        public static final String COLOR_2 = "#DCEFF4";
+        public static final String COLOR_3 = "#F8E7E7";
+    }
+
+    public static class ThemeBgImg{
+        public static final int IMG_DARK_GRAY = 0;
+        public static final int IMG_GRAY = 1;
+        public static final int IMG_KRAFT_PAPER = 2;
+    }
 }

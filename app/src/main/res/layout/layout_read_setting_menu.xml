@@ -126,7 +126,8 @@
                 android:text="@string/read_menu_setting_theme"
                 style="@style/read_menu_text_dark_style"
                 android:padding="@dimen/common_padding"/>
-            <ImageView
+            <com.yufeng.ireader.reader.view.ThemeImageView
+                android:id="@+id/read_menu_setting_gray_theme_iv"
                 android:layout_width="@dimen/read_menu_setting_theme_width"
                 android:layout_height="@dimen/read_menu_setting_theme_width"
                 android:layout_marginLeft="@dimen/common_padding"
@@ -134,7 +135,8 @@
                 android:contentDescription="@string/app_name"
                 android:src="@drawable/read_theme_bg_gray"
                 android:layout_gravity="center_vertical"/>
-            <ImageView
+            <com.yufeng.ireader.reader.view.ThemeImageView
+                android:id="@+id/read_menu_setting_1_theme_iv"
                 android:layout_width="@dimen/read_menu_setting_theme_width"
                 android:layout_height="@dimen/read_menu_setting_theme_width"
                 android:layout_marginLeft="@dimen/common_padding"
@@ -142,7 +144,8 @@
                 android:contentDescription="@string/app_name"
                 android:background="@color/read_menu_theme_1"
                 android:layout_gravity="center_vertical"/>
-            <ImageView
+            <com.yufeng.ireader.reader.view.ThemeImageView
+                android:id="@+id/read_menu_setting_2_theme_iv"
                 android:layout_width="@dimen/read_menu_setting_theme_width"
                 android:layout_height="@dimen/read_menu_setting_theme_width"
                 android:layout_marginLeft="@dimen/common_padding"
@@ -150,7 +153,8 @@
                 android:contentDescription="@string/app_name"
                 android:background="@color/read_menu_theme_2"
                 android:layout_gravity="center_vertical"/>
-            <ImageView
+            <com.yufeng.ireader.reader.view.ThemeImageView
+                android:id="@+id/read_menu_setting_3_theme_iv"
                 android:layout_width="@dimen/read_menu_setting_theme_width"
                 android:layout_height="@dimen/read_menu_setting_theme_width"
                 android:layout_marginLeft="@dimen/common_padding"
@@ -158,7 +162,8 @@
                 android:contentDescription="@string/app_name"
                 android:background="@color/read_menu_theme_3"
                 android:layout_gravity="center_vertical"/>
-            <ImageView
+            <com.yufeng.ireader.reader.view.ThemeImageView
+                android:id="@+id/read_menu_setting_kraft_paper_theme_iv"
                 android:layout_width="@dimen/read_menu_setting_theme_width"
                 android:layout_height="@dimen/read_menu_setting_theme_width"
                 android:layout_marginLeft="@dimen/common_padding"

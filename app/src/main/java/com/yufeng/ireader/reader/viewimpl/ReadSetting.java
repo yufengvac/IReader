@@ -69,7 +69,12 @@ public class ReadSetting implements IReadSetting {
 
     @Override
     public int getCanvasBgOptions() {
-        return -1;
+        return ReadPreferHelper.getInstance().getThemeOption();
+    }
+
+    @Override
+    public int getCanvasImgOptions() {
+        return ReadPreferHelper.getInstance().getThemeImg();
     }
 
     @Override

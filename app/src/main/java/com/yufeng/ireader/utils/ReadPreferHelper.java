@@ -19,6 +19,9 @@ public class ReadPreferHelper {
     private static final String KEY_IS_DAY_MODE = "is_day_mode";
     private static final String KEY_TYPE_FACE = "type_face";
     private static final String KEY_TEXT_SIZE = "text_size";
+    private static final String KEY_THEME_OPTION = "theme_option";
+    private static final String KEY_THEME_BG_COLOR = "theme_bg_color";
+    private static final String KEY_THEME_BG_IMG = "theme_bg_img";
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -58,9 +61,31 @@ public class ReadPreferHelper {
     public void setFontTextSize(int textSize){
         sp.edit().putInt(KEY_TEXT_SIZE, textSize).apply();
     }
-
     public int getFontTextSize(){
         return sp.getInt(KEY_TEXT_SIZE, ReadExteriorConstants.DEFAULT_TEXT_SIZE);
+    }
+
+
+    public void setThemeOption(int option){
+        sp.edit().putInt(KEY_THEME_OPTION, option).apply();
+    }
+    public int getThemeOption(){
+        return sp.getInt(KEY_THEME_OPTION, ReadExteriorConstants.ThemeOption.COLOR);
+    }
+
+
+    public void setThemeColor(String color){
+        sp.edit().putString(KEY_THEME_BG_COLOR, color).apply();
+    }
+    public String getThemeColor(){
+        return sp.getString(KEY_THEME_BG_COLOR,ReadExteriorConstants.ThemeBgColor.COLOR_1);
+    }
+
+    public void setThemeImg(int imgOption){
+        sp.edit().putInt(KEY_THEME_BG_IMG, imgOption).apply();
+    }
+    public int getThemeImg(){
+        return sp.getInt(KEY_THEME_BG_IMG, ReadExteriorConstants.ThemeBgImg.IMG_GRAY);
     }
 
 }
