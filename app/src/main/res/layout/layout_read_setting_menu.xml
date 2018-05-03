@@ -67,10 +67,12 @@
                 android:id="@+id/read_menu_setting_font_size_default_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/read_menu_setting_font_default"
+                android:text="@string/read_menu_setting_default"
                 style="@style/read_menu_text_style"
                 android:layout_gravity="center_vertical"
-                android:padding="@dimen/common_padding"/>
+                android:padding="@dimen/common_padding"
+                android:layout_marginRight="@dimen/common_padding"
+                android:layout_marginEnd="@dimen/common_padding"/>
         </LinearLayout>
 
 

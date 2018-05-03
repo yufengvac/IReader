@@ -67,6 +67,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
         readMenuSetView = new ReadMenuSetView(this,readSetting);
         readMenuSetView.setBookName(PathHelper.getBookNameByPath(path));
+
+        readMenuSettingView = new ReadMenuSettingView(this,readSetting);
+
     }
 
     @Override
@@ -114,8 +117,8 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     }
 
     @Override
-    public void onReadViewChange() {
-        readView.postInvalidate();
+    public void onReadViewChange(boolean isForcedCalc) {
+        readView.refreshReadView(isForcedCalc);
     }
 
     @Override

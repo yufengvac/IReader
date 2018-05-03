@@ -9,6 +9,10 @@ import com.yufeng.ireader.reader.viewinterface.PageTurn;
 
 public class ReadExteriorConstants {
 
+    public static final int DEFAULT_TEXT_SIZE = 22;
+    public static final int MAX_TEXT_SIZE = 30;
+    public static final int MIN_TEXT_SIZE = 9;
+
     public static class ReadTypeFace{
         public static final int TYPEFACE_DEFAULT = 0;
         public static final int TYPEFACE_ITALIC = 1;

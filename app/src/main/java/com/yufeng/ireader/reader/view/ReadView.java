@@ -34,7 +34,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
     private Paint contentPaint;
 
-    private static final int DEFAULT_TEXT_SIZE = 22;
+
     private static final String DEFAULT_TEXT_COLOR = "#000000";
     private static final String DEFAULT_BG_COLOR = "#B3AFA7";
     private static final int DEFAULT_STROKE_WIDTH = 2;
@@ -42,6 +42,7 @@ public class ReadView extends View implements OnPageTurnListener{
     private PageTurn pageTurn;
     private OnMenuListener onMenuListener;
     private IReadSetting readSetting;
+    private boolean isForceCalc = false;//是否需要重新进行当前页的排版
 
 
     public ReadView(Context context) {
@@ -66,7 +67,7 @@ public class ReadView extends View implements OnPageTurnListener{
         contentPaint = new Paint();
         contentPaint.setAntiAlias(true);
         contentPaint.setColor(Color.parseColor(DEFAULT_TEXT_COLOR));
-        contentPaint.setTextSize(DisPlayUtil.sp2px(context, DEFAULT_TEXT_SIZE));
+        contentPaint.setTextSize(DisPlayUtil.sp2px(context, ReadPreferHelper.getInstance().getFontTextSize()));
         contentPaint.setStyle(Paint.Style.FILL);
         contentPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
 
@@ -151,7 +152,7 @@ public class ReadView extends View implements OnPageTurnListener{
     }
 
     private void drawCurrentContent(Canvas canvas){
-        PageManager.getInstance().drawPager(canvas, contentPaint);
+        PageManager.getInstance().drawPager(canvas, contentPaint, isForceCalc);
     }
 
 
@@ -180,6 +181,11 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());
+    }
+
+    public void refreshReadView(boolean isForceCalc){
+        this.isForceCalc = isForceCalc;
+        invalidate();
     }
 
     public void setOnMenuListener(OnMenuListener listener){

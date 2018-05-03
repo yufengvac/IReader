@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.FileHelper;
 import com.yufeng.ireader.utils.PathHelper;
@@ -182,6 +183,18 @@ public class ReadExteriorHelper {
         }else {
             readSetting.getContentPaint().setTypeface(Typeface.DEFAULT);
         }
+    }
+
+    public void changeTextSize(Context context, boolean isMinus){
+        int curTextSize = DisPlayUtil.px2sp(context, readSetting.getContentPaint().getTextSize());
+        if (isMinus && curTextSize > ReadExteriorConstants.MIN_TEXT_SIZE){
+            readSetting.getContentPaint().setTextSize(DisPlayUtil.sp2px(context, curTextSize - 1));
+            ReadPreferHelper.getInstance().setFontTextSize(curTextSize -1);
+        }else if (!isMinus && curTextSize < ReadExteriorConstants.MAX_TEXT_SIZE){
+            readSetting.getContentPaint().setTextSize(DisPlayUtil.sp2px(context, curTextSize + 1));
+            ReadPreferHelper.getInstance().setFontTextSize(curTextSize + 1);
+        }
+
     }
 
 

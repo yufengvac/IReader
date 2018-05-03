@@ -18,6 +18,7 @@ public class ReadPreferHelper {
 
     private static final String KEY_IS_DAY_MODE = "is_day_mode";
     private static final String KEY_TYPE_FACE = "type_face";
+    private static final String KEY_TEXT_SIZE = "text_size";
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -53,4 +54,13 @@ public class ReadPreferHelper {
     public int getTypeface(){
         return sp.getInt(KEY_TYPE_FACE, ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT);
     }
+
+    public void setFontTextSize(int textSize){
+        sp.edit().putInt(KEY_TEXT_SIZE, textSize).apply();
+    }
+
+    public int getFontTextSize(){
+        return sp.getInt(KEY_TEXT_SIZE, ReadExteriorConstants.DEFAULT_TEXT_SIZE);
+    }
+
 }
