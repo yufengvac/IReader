@@ -38,7 +38,7 @@ public abstract class PageTurn {
         public static final int DIRECTION_NULL = -1;
     }
 
-    protected static final int ANIMATION_DURATION = 400;
+    protected static final int ANIMATION_DURATION = 300;
     protected static final int CRITICAL_VALUE = 25;
     protected LinearInterpolator interpolator = new LinearInterpolator();
 

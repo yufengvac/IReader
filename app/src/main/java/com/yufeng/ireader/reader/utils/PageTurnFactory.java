@@ -1,5 +1,6 @@
 package com.yufeng.ireader.reader.utils;
 
+import com.yufeng.ireader.reader.viewimpl.AlphaPageTurn;
 import com.yufeng.ireader.reader.viewimpl.LeftRightTranslatePageTurn;
 import com.yufeng.ireader.reader.viewimpl.LeftRightCoveragePageTurn;
 import com.yufeng.ireader.reader.viewimpl.NonePageTurn;
@@ -31,9 +32,12 @@ public class PageTurnFactory {
             case PageTurn.PageTurnType.TOP_BOTTOM_COVERAGE:
                 pageTurn = new TopBottomCoveragePageTurn();
                 break;
+            case PageTurn.PageTurnType.ALPHA:
+                pageTurn = new AlphaPageTurn();
+                break;
             case PageTurn.PageTurnType.NONE:
-                default:
-                    pageTurn = new NonePageTurn();
+            default:
+                pageTurn = new NonePageTurn();
         }
         return pageTurn;
     }
