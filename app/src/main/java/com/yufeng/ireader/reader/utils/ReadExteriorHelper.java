@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -230,6 +231,25 @@ public class ReadExteriorHelper {
 
     }
 
+    /**
+     * 设置是否沉浸阅读
+     */
+    public void changeImmersiveRead(){
+        boolean isImmersiveRead = ReadPreferHelper.getInstance().getImmersiveRead();
+        Activity activity = weakReference.get();
+        if (activity == null){
+            return;
+        }
+        DisplayConstant.initStatusBarHeight(DisPlayUtil.getStatusBarHeight(activity));
+        if (isImmersiveRead){
+            setFullScreen(activity, false);
+            ReadPreferHelper.getInstance().setIsImmersiveRead(false);
+        }else {
+            setFullScreen(activity, true);
+            ReadPreferHelper.getInstance().setIsImmersiveRead(true);
+        }
+    }
+
 
     /**
      * 重置画笔颜色
@@ -270,6 +290,31 @@ public class ReadExteriorHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setFullScreen2(Activity activity, boolean isFull){
+        Window window = activity.getWindow();
+        int systemUiVisibility = window.getDecorView().getSystemUiVisibility();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN){
+            return;
+        }
+        int flags = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+        if (isFull){
+            systemUiVisibility |= flags;
+            window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }else {
+            systemUiVisibility &= ~flags;
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+        window.getDecorView().setSystemUiVisibility(systemUiVisibility);
     }
 
     /**

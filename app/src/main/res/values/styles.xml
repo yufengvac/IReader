@@ -27,7 +27,7 @@
     </style>
 
     <!-- 全屏不需要显示 StateBar 的 PopupMenu 主题 -->
-    <style name="Theme.PopupMenu.Fullscreen" parent="Theme.AppCompat.Light">
+    <style name="Theme.PopupMenu.Fullscreen" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>

@@ -23,6 +23,7 @@ public class ReadPreferHelper {
     private static final String KEY_THEME_BG_COLOR = "theme_bg_color";
     private static final String KEY_THEME_BG_IMG = "theme_bg_img";
     private static final String KEY_PAGE_TURN_TYPE = "page_turn_type";
+    private static final String KEY_IMMERSIVE_READ = "immersive_read";
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -97,4 +98,11 @@ public class ReadPreferHelper {
         return sp.getInt(KEY_PAGE_TURN_TYPE, ReadExteriorConstants.PageTurnType.PAGE_TURN_COVERAGE);
     }
 
+
+    public void setIsImmersiveRead(boolean isImmersiveRead){
+        sp.edit().putBoolean(KEY_IMMERSIVE_READ,isImmersiveRead).apply();
+    }
+    public boolean getImmersiveRead(){
+        return sp.getBoolean(KEY_IMMERSIVE_READ, true);
+    }
 }

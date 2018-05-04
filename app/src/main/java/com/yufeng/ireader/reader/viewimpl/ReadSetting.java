@@ -2,7 +2,6 @@ package com.yufeng.ireader.reader.viewimpl;
 
 import android.graphics.Paint;
 
-import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.ReadPreferHelper;
@@ -93,7 +92,12 @@ public class ReadSetting implements IReadSetting {
     }
 
     @Override
-    public int getFontface() {
+    public int getFontFace() {
         return ReadPreferHelper.getInstance().getTypeface();
+    }
+
+    @Override
+    public boolean isImmersiveRead() {
+        return ReadPreferHelper.getInstance().getImmersiveRead();
     }
 }

@@ -38,6 +38,8 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
 
     private ThemeImageView themeGrayIv,theme1Iv,theme2Iv,theme3Iv,themeKraftPaperIv;
 
+    private TextView immersiveReadTv;
+
     public ReadMenuSettingView(Context context, IReadSetting readSetting) {
         super(context,readSetting);
         mContext = context;
@@ -49,7 +51,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
 
     private void initView(){
         bottomView = findViewById(R.id.read_menu_setting_bottom_view);
-        bottomViewHeight = DisPlayUtil.dp2px(mContext, 200);
+        bottomViewHeight = DisPlayUtil.dp2px(mContext, 270);
 
         blankView = findViewById(R.id.read_menu_setting_blank_view);
 
@@ -82,6 +84,8 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         pageTurnAlphaTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_alpha_tv);
         pageTurnNoneTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_none_tv);
 
+        immersiveReadTv = (TextView) findViewById(R.id.read_menu_setting_immersive_read_tv);
+
     }
 
     private void initListener(){
@@ -108,6 +112,8 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         pageTurnSimulationTv.setOnClickListener(this);
         pageTurnAlphaTv.setOnClickListener(this);
         pageTurnNoneTv.setOnClickListener(this);
+
+        immersiveReadTv.setOnClickListener(this);
     }
 
     private void initData(){
@@ -115,9 +121,11 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             return;
         }
 
+        //设置默认字号
         setTextSizeValue(null, false);
 
-        int fontFaceOption = readSetting.getFontface();
+        //设置字体
+        int fontFaceOption = readSetting.getFontFace();
         if (fontFaceOption == ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT){
             setSelectedTextView(fontDefaultTv);
         }else if (fontFaceOption == ReadExteriorConstants.ReadTypeFace.TYPEFACE_ITALIC){
@@ -127,6 +135,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         }
 
 
+        //设置翻页方式
         int pageTurnType = readSetting.getPageTurnType();
         if (pageTurnType == ReadExteriorConstants.PageTurnType.PAGE_TURN_COVERAGE){
             setSelectedTextView(pageTurnCoverageTv);
@@ -140,6 +149,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             setSelectedTextView(pageTurnNoneTv);
         }
 
+        //设置主题背景
         if (readSetting.getCanvasBgOptions() == ReadExteriorConstants.ThemeOption.IMG){
             if (readSetting.getCanvasImgOptions() == ReadExteriorConstants.ThemeBgImg.IMG_GRAY){
                 setSelectedTheme(themeGrayIv, false);
@@ -156,6 +166,8 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             }
         }
 
+        //设置沉浸阅读
+        setImmersiveReadTv();
     }
 
     /**
@@ -308,6 +320,14 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         }
     }
 
+    private void setImmersiveReadTv(){
+        if (readSetting.isImmersiveRead()){
+            immersiveReadTv.setTextColor(ContextCompat.getColor(mContext, R.color.read_menu_seek_green));
+        }else {
+            immersiveReadTv.setTextColor(ContextCompat.getColor(mContext, R.color.read_menu_title_color));
+        }
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -351,6 +371,13 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             case R.id.read_menu_setting_page_turn_alpha_tv:
             case R.id.read_menu_setting_page_turn_none_tv:
                 setPageTurnTextView(v);
+                break;
+            case R.id.read_menu_setting_immersive_read_tv:
+                ReadExteriorHelper.getInstance().changeImmersiveRead();
+                setImmersiveReadTv();
+                if (onReadViewChangeListener != null){
+                    onReadViewChangeListener.onReadViewChange(true);
+                }
                 break;
         }
     }

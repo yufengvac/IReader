@@ -27,4 +27,5 @@
     <string name="read_menu_setting_page_turn_top_bottom">上下</string>
     <string name="read_menu_setting_page_turn_top_none">无</string>
     <string name="read_menu_setting_page_turn_top_alpha">淡入</string>
+    <string name="read_menu_setting_immersive_reading">沉浸阅读</string>
 </resources>

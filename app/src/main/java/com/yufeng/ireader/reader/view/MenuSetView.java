@@ -3,6 +3,7 @@ package com.yufeng.ireader.reader.view;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -31,15 +32,25 @@ public abstract class MenuSetView implements IMenuSetView{
     private boolean isShow = false;
     protected OnReadViewChangeListener onReadViewChangeListener;
     protected IReadSetting readSetting;
+
+    private ViewGroup decorView;
+
     public MenuSetView(Context context, IReadSetting readSetting){
         this.readSetting = readSetting;
         init(context);
     }
 
     private void init(Context context){
+
         Dialog dialog = new Dialog(context, R.style.Theme_PopupMenu_Fullscreen);
         mWindow = dialog.getWindow();
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (mWindow != null){
+            mWindow.setWindowManager(windowManager,null , null);
+            mWindow.setType(WindowManager.LayoutParams.TYPE_APPLICATION);
+        }
+
+
         if (context instanceof OnReadViewChangeListener){
             onReadViewChangeListener = (OnReadViewChangeListener)context;
         }
@@ -65,6 +76,8 @@ public abstract class MenuSetView implements IMenuSetView{
             return;
         }
 
+        decorView = (ViewGroup) mWindow.getDecorView();
+
         WindowManager.LayoutParams params = mWindow.getAttributes();
         if ((params.softInputMode & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
             WindowManager.LayoutParams paramsCopy = new WindowManager.LayoutParams();
@@ -78,7 +91,7 @@ public abstract class MenuSetView implements IMenuSetView{
             params = paramsCopy;
         }
 
-        windowManager.addView(mWindow.getDecorView(),params);
+        windowManager.addView(decorView,params);
 
         startShowAnimation();
         isShow = true;
@@ -95,7 +108,9 @@ public abstract class MenuSetView implements IMenuSetView{
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        windowManager.removeView(mWindow.getDecorView());
+                        windowManager.removeView(decorView);
+                        decorView = null;
+                        mWindow.closeAllPanels();
                     }
                 });
 

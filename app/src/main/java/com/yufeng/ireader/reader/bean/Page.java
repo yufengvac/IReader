@@ -49,6 +49,9 @@ public class Page {
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+        if (readSetting.isImmersiveRead()){
+            displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
+        }
         try {
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() +  (fontMetrics.descent - fontMetrics.ascent);
@@ -123,6 +126,9 @@ public class Page {
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+        if (readSetting.isImmersiveRead()){
+            displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
+        }
         try {
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() +  (fontMetrics.descent - fontMetrics.ascent);
@@ -183,9 +189,13 @@ public class Page {
 
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+        int statusBarHeight = DisplayConstant.STATUS_BAR_HEIGHT;
         try {
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = displayHeight - readSetting.getPaddingBottom() - (fontMetrics.descent - fontMetrics.ascent) - readSetting.getLineSpaceExtra();
+            if (readSetting.isImmersiveRead()){
+                startOffsetY += statusBarHeight;
+            }
             Log.e(TAG,"startOffsetY="+startOffsetY);
 
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();
@@ -206,6 +216,11 @@ public class Page {
 
 
             TxtParagraph txtParagraph = startPagerTxtParagraph;
+
+            float criticalHeight = readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent;
+            if (readSetting.isImmersiveRead()){
+                criticalHeight -= statusBarHeight;
+            }
             while (true){
                 if ( !needCalcNewTxtParagraph ){
                     txtParagraph = TxtParagraph.createTxtParagraphBySeekEnd(readRandomAccessFile, displayWidth, readSetting, endSeek);
@@ -218,7 +233,7 @@ public class Page {
                 needCalcNewTxtParagraph = false;
 
                 Log.i(TAG,"startOffsetYReserve = "+startOffsetY);
-                if (startOffsetY <= (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent) || endSeek <= CodeUtil.getBeginOffset(readRandomAccessFile.getCode())){
+                if (startOffsetY <= criticalHeight || endSeek <= CodeUtil.getBeginOffset(readRandomAccessFile.getCode())){
                     Log.e(TAG,"前一页面已经全部获取完了");
                     break;
                 }

@@ -4,6 +4,7 @@ import android.graphics.Paint;
 
 import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.utils.DisplayConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,10 +185,15 @@ public class CharCalculator {
 
         offsetY[lastCanDrawLine] = startOffsetY;
 
+        float criticalHeight = readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent;
+        if (readSetting.isImmersiveRead()){
+            criticalHeight -= DisplayConstant.STATUS_BAR_HEIGHT;
+        }
+
         for (int i = lastCanDrawLine -1 ; i >= 0; i --){
 
             float preDrawLine = offsetY[i + 1] - oneLineHeight;
-            if (preDrawLine < (readSetting.getPaddingTop()+ fontMetrics.descent - fontMetrics.ascent)){
+            if (preDrawLine < criticalHeight){
                 firstCanDrawLine = i + 1;
                 txtParagraph.setFirstCanDrawLine(firstCanDrawLine);
                 return preDrawLine;

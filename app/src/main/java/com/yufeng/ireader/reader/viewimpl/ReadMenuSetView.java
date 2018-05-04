@@ -19,6 +19,12 @@ import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.ReadPreferHelper;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+
 /**
  * Created by yufeng on 2018/4/27-0027.
  * 阅读器的菜单view
@@ -46,7 +52,6 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
     private Animation changeModeAppearAnim;
 
     private Animator bottomShowAnimator;
-    private Animator bottomHideAnimator;
 
     public ReadMenuSetView(Context context, IReadSetting readSetting) {
         super(context, readSetting);
@@ -116,8 +121,16 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
 
     @Override
     protected void startShowAnimation() {
-        getTopShowAnimation().start();
-
+        topView.setVisibility(View.GONE);
+        Single.timer(150, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        topView.setVisibility(View.VISIBLE);
+                        getTopShowAnimation().start();
+                    }
+                });
         bottomShowAnimator = getBottomShowAnimation();
         bottomShowAnimator.addListener(this);
         bottomShowAnimator.start();
@@ -127,7 +140,7 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         dayNightModeIv.startAnimation(dismissRotateScaleAnim);
         getTopHideAnimation().start();
 
-        bottomHideAnimator = getBottomHideAnimation();
+        Animator bottomHideAnimator = getBottomHideAnimation();
         bottomHideAnimator.addListener(this);
         bottomHideAnimator.start();
     }

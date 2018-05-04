@@ -170,7 +170,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
         ReadExteriorHelper.init(activity, readSetting);
         ReadExteriorHelper.getInstance().resetContentPaint();
-//        ReadExteriorHelper.getInstance().setFullScreen(activity,true);
+        ReadExteriorHelper.getInstance().setFullScreen(activity,readSetting.isImmersiveRead());
 //        ReadExteriorHelper.hideNavigation(activity.getWindow().getDecorView());
 
 

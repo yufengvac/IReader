@@ -38,5 +38,7 @@ public interface IReadSetting {
 
     boolean isDayMode();
 
-    int getFontface();
+    int getFontFace();
+
+    boolean isImmersiveRead();
 }

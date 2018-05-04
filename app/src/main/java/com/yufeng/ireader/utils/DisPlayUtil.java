@@ -57,4 +57,13 @@ public class DisPlayUtil {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp,context.getResources().getDisplayMetrics());
     }
 
+    public static int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            result = context.getResources().getDimensionPixelOffset(resId);
+        }
+        return result;
+    }
+
 }

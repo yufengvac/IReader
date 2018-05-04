@@ -18,6 +18,7 @@ import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.PathHelper;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -25,7 +26,7 @@ import com.yufeng.ireader.utils.PathHelper;
  */
 
 public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener {
-    private static final String TAG = ReadActivity.class.getSimpleName();
+//    private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
 
@@ -48,7 +49,11 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     @Override
     public void initView() {
         readView = findViewById(R.id.activity_read_view);
-        DisplayConstant.init(DisPlayUtil.getDisplayWidth(this),DisPlayUtil.getDisplayHeight(this));
+
+        DisplayConstant.init(DisPlayUtil.getDisplayWidth(this), DisPlayUtil.getDisplayHeight(this));
+        if (ReadPreferHelper.getInstance().getImmersiveRead()){
+            DisplayConstant.initStatusBarHeight(DisPlayUtil.getStatusBarHeight(this));
+        }
 
         if (HardWareManager.canOpenHardware()){
             readView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
