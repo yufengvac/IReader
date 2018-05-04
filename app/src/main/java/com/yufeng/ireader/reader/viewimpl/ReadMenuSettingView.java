@@ -38,7 +38,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
 
     private ThemeImageView themeGrayIv,theme1Iv,theme2Iv,theme3Iv,themeKraftPaperIv;
 
-    private TextView immersiveReadTv;
+    private TextView immersiveReadTv, singleHandedReadTv;
 
     public ReadMenuSettingView(Context context, IReadSetting readSetting) {
         super(context,readSetting);
@@ -85,6 +85,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         pageTurnNoneTv = (TextView) findViewById(R.id.read_menu_setting_page_turn_none_tv);
 
         immersiveReadTv = (TextView) findViewById(R.id.read_menu_setting_immersive_read_tv);
+        singleHandedReadTv = (TextView) findViewById(R.id.read_menu_setting_single_handed_read_tv);
 
     }
 
@@ -114,6 +115,7 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         pageTurnNoneTv.setOnClickListener(this);
 
         immersiveReadTv.setOnClickListener(this);
+        singleHandedReadTv.setOnClickListener(this);
     }
 
     private void initData(){
@@ -168,6 +170,9 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
 
         //设置沉浸阅读
         setImmersiveReadTv();
+
+        //设置单手模式
+        setSingleHandedReadTv();
     }
 
     /**
@@ -328,6 +333,14 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
         }
     }
 
+    private void setSingleHandedReadTv(){
+        if (readSetting.isSingleHandedRead()){
+            singleHandedReadTv.setTextColor(ContextCompat.getColor(mContext, R.color.read_menu_seek_green));
+        }else {
+            singleHandedReadTv.setTextColor(ContextCompat.getColor(mContext, R.color.read_menu_title_color));
+        }
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -381,6 +394,10 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
                 if (onReadViewChangeListener != null){
                     onReadViewChangeListener.onReadViewChange(true);
                 }
+                break;
+            case R.id.read_menu_setting_single_handed_read_tv:
+                ReadExteriorHelper.getInstance().changeSingleHandedRead();
+                setSingleHandedReadTv();
                 break;
         }
     }

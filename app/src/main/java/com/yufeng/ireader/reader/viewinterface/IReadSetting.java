@@ -41,4 +41,6 @@ public interface IReadSetting {
     int getFontFace();
 
     boolean isImmersiveRead();
+
+    boolean isSingleHandedRead();
 }

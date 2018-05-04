@@ -22,8 +22,9 @@ public class ReadPreferHelper {
     private static final String KEY_THEME_OPTION = "theme_option";
     private static final String KEY_THEME_BG_COLOR = "theme_bg_color";
     private static final String KEY_THEME_BG_IMG = "theme_bg_img";
-    private static final String KEY_PAGE_TURN_TYPE = "page_turn_type";
-    private static final String KEY_IMMERSIVE_READ = "immersive_read";
+    private static final String KEY_PAGE_TURN_TYPE = "page_turn_type";//翻页方式
+    private static final String KEY_IMMERSIVE_READ = "immersive_read";//沉浸阅读
+    private static final String KEY_SINGLE_HANDED_READ = "single_handed_read";//单手阅读
 
     private ReadPreferHelper(){
         if (sp == null){
@@ -104,5 +105,12 @@ public class ReadPreferHelper {
     }
     public boolean getImmersiveRead(){
         return sp.getBoolean(KEY_IMMERSIVE_READ, true);
+    }
+
+    public void setIsSingleHandedRead(boolean isSingleHandedRead){
+        sp.edit().putBoolean(KEY_SINGLE_HANDED_READ, isSingleHandedRead).apply();
+    }
+    public boolean getIsSingleHanded(){
+        return sp.getBoolean(KEY_SINGLE_HANDED_READ, false);
     }
 }

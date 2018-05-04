@@ -42,7 +42,7 @@ public class ReadView extends View implements OnPageTurnListener{
     private PageTurn pageTurn;
     private OnMenuListener onMenuListener;
     private boolean isForceCalc = false;//是否需要重新进行当前页的排版
-
+    private IReadSetting readSetting;
 
     public ReadView(Context context) {
        this(context, null);
@@ -128,8 +128,14 @@ public class ReadView extends View implements OnPageTurnListener{
                 pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_NEXT);
                 pageTurn.turnNext();
             }else if (touchX < DisplayConstant.DISPLAY_WIDTH *( 1.0 / 3)){
-                pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
-                pageTurn.turnPrevious();
+                if (readSetting != null && readSetting.isSingleHandedRead()){
+                    pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_NEXT);
+                    pageTurn.turnNext();
+                }else {
+                    pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
+                    pageTurn.turnPrevious();
+                }
+
             }else {
                 if (onMenuListener != null){
                     onMenuListener.onClickMenu();
@@ -164,6 +170,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
     public void prepare(Activity activity, IReadSetting readSetting, String path){
+        this.readSetting = readSetting;
         PageManager.getInstance().initPagers(readSetting, path);
         PageManager.getInstance().setReadView(this);
 

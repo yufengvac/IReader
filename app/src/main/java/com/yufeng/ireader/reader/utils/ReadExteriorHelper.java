@@ -252,6 +252,10 @@ public class ReadExteriorHelper {
         }
     }
 
+    public void changeSingleHandedRead(){
+        ReadPreferHelper.getInstance().setIsSingleHandedRead(!readSetting.isSingleHandedRead());
+    }
+
 
     /**
      * 重置画笔颜色

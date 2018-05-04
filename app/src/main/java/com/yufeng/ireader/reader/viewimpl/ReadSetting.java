@@ -100,4 +100,9 @@ public class ReadSetting implements IReadSetting {
     public boolean isImmersiveRead() {
         return ReadPreferHelper.getInstance().getImmersiveRead();
     }
+
+    @Override
+    public boolean isSingleHandedRead() {
+        return ReadPreferHelper.getInstance().getIsSingleHanded();
+    }
 }

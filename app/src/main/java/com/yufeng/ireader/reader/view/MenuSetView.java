@@ -2,6 +2,7 @@ package com.yufeng.ireader.reader.view;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -11,6 +12,8 @@ import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.viewinterface.IMenuSetView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnReadViewChangeListener;
+import com.yufeng.ireader.utils.DisPlayUtil;
+import com.yufeng.ireader.utils.DisplayConstant;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +37,8 @@ public abstract class MenuSetView implements IMenuSetView{
     protected IReadSetting readSetting;
 
     private ViewGroup decorView;
+    private View statusBarView;
+    private Context mContext;
 
     public MenuSetView(Context context, IReadSetting readSetting){
         this.readSetting = readSetting;
@@ -41,7 +46,7 @@ public abstract class MenuSetView implements IMenuSetView{
     }
 
     private void init(Context context){
-
+        this.mContext = context;
         Dialog dialog = new Dialog(context, R.style.Theme_PopupMenu_Fullscreen);
         mWindow = dialog.getWindow();
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -77,6 +82,7 @@ public abstract class MenuSetView implements IMenuSetView{
         }
 
         decorView = (ViewGroup) mWindow.getDecorView();
+//        addSimulatedStatusBarView();
 
         WindowManager.LayoutParams params = mWindow.getAttributes();
         if ((params.softInputMode & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
@@ -97,6 +103,19 @@ public abstract class MenuSetView implements IMenuSetView{
         isShow = true;
     }
 
+    private void addSimulatedStatusBarView(){
+        statusBarView = new View(mContext);
+        statusBarView.setBackgroundColor(Color.parseColor("#000000"));
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(DisplayConstant.DISPLAY_WIDTH, DisPlayUtil.getStatusBarHeight(mContext));
+        decorView.addView(statusBarView, params);
+    }
+    private void removeSimulatedStatusBarView(){
+        if (decorView != null){
+            decorView.removeView(statusBarView);
+            statusBarView = null;
+        }
+    }
+
     @Override
     public void hide() {
         if (!isShow) {
@@ -108,6 +127,7 @@ public abstract class MenuSetView implements IMenuSetView{
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
+//                        removeSimulatedStatusBarView();
                         windowManager.removeView(decorView);
                         decorView = null;
                         mWindow.closeAllPanels();

@@ -236,6 +236,13 @@
                 android:text="@string/read_menu_setting_immersive_reading"
                 style="@style/read_menu_text_style"
                 android:padding="@dimen/common_padding"/>
+            <TextView
+                android:id="@+id/read_menu_setting_single_handed_read_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/read_menu_setting_single_handed_reading"
+                style="@style/read_menu_text_style"
+                android:padding="@dimen/common_padding"/>
         </LinearLayout>
 
     </LinearLayout>
