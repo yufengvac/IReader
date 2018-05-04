@@ -343,6 +343,9 @@ public class ReadMenuSettingView extends MenuSetView implements View.OnClickList
             case R.id.read_menu_setting_font_default:
                 setSelectedTextView(fontDefaultTv);
                 ReadExteriorHelper.getInstance().changeTypeface(mContext, ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT);
+                if (onReadViewChangeListener != null){
+                    onReadViewChangeListener.onReadViewChange(false);
+                }
                 break;
             case R.id.read_menu_setting_font_italics_tv:
                 setSelectedTextView(fontItalicTv);

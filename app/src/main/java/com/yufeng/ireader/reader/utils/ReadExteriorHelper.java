@@ -192,6 +192,8 @@ public class ReadExteriorHelper {
             fontTypeface = Typeface.createFromAsset(context.getAssets(),"font/italic.ttf");
         }else if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_XU){
             fontTypeface = Typeface.createFromAsset(context.getAssets(), "font/xujinglei.ttf");
+        }else if (typeface == ReadExteriorConstants.ReadTypeFace.TYPEFACE_DEFAULT){
+            fontTypeface = null;
         }
         if (fontTypeface != null){
             readSetting.getContentPaint().setTypeface(fontTypeface);
