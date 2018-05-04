@@ -99,7 +99,6 @@ public class ReadView extends View implements OnPageTurnListener{
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawBg(canvas);
 
         if (pageTurn.getPageTurnDirection() == PageTurn.PageTurnDirection.DIRECTION_NEXT){
             if (pageTurn.onDraw(canvas)){

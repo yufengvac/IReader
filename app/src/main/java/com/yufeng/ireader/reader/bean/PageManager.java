@@ -154,6 +154,7 @@ public class PageManager {
                             this.readSetting, readRandomAccessFile);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, curPage);
                 }
+                drawCanvasBg(canvas, paint);
                 curPage.drawTxtParagraph(canvas, paint);
 
             }
