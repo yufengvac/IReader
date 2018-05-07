@@ -22,6 +22,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     private Animator animator;
     private float translateX;
     private float touchX = 0;
+    private float minTouchX = 0;
     private boolean hasEnsureDirection = false;
 
     private GradientDrawable[] shadowDrawable = new GradientDrawable[2];
@@ -30,7 +31,6 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     private boolean isPageTurn = true;
     private boolean isDayMode = true;
 
-    @SuppressWarnings("unused")
     private void setShiftX(float x){
         translateX = x;
         onPageTurnListener.onAnimationInvalidate();
@@ -69,6 +69,8 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             touchX = event.getX();
             hasEnsureDirection = false;
             onTouchEvent = true;
+            isPageTurn = true;
+            minTouchX = touchX;
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){
             onTouchEvent = true;
             if (!hasEnsureDirection){
@@ -88,6 +90,9 @@ public class LeftRightCoveragePageTurn extends PageTurn{
                 }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
                     setShiftX(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX);
                 }
+                if (event.getX() < minTouchX){
+                    minTouchX = event.getX();
+                }
 
             }
 
@@ -99,12 +104,13 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
 
 //                if (touchX - event.getX() <= CRITICAL_VALUE){
-//                    isPageTurn = false;
-//                    duration = (long)((touchX - event.getX()) * ANIMATION_DURATION / DisplayConstant.DISPLAY_WIDTH);
-//                    startAnimation( event.getX() - touchX, 0, duration);
-//                }else {
+                if ( event.getX() > minTouchX){
+                    isPageTurn = false;
+                    duration = (long)(ANIMATION_DURATION*1.0 / DisplayConstant.DISPLAY_WIDTH * Math.abs(event.getX() - touchX));
+                    startAnimation( -Math.abs(touchX - event.getX()), 0, duration);
+                }else {
                     startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH,duration);
-//                }
+                }
 
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
 

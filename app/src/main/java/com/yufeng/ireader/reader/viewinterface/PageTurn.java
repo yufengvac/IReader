@@ -39,7 +39,7 @@ public abstract class PageTurn {
     }
 
     protected static final int ANIMATION_DURATION = 300;
-    protected static final int CRITICAL_VALUE = 25;
+    protected static final int CRITICAL_VALUE = 30;
     protected LinearInterpolator interpolator = new LinearInterpolator();
 
     protected Animator.AnimatorListener animatorListener = new AnimatorListenerAdapter() {
