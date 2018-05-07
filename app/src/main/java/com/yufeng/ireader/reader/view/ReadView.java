@@ -226,7 +226,7 @@ public class ReadView extends View implements OnPageTurnListener{
     @Override
     public void onPageTurnAnimationEnd(Canvas canvas, int pageTurnDirection, boolean isPageTurn) {
         if (!isPageTurn){
-            if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT){
+            if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT || pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_PREVIOUS){
                 PageManager.getInstance().drawCanvasBitmap(canvas, getCurrentBitmap(),contentPaint);
             }
             return;

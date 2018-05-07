@@ -22,7 +22,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
     private Animator animator;
     private float translateX;
     private float touchX = 0;
-    private float minTouchX = 0;
+    private float [] lastMoveX = new float[2];
     private boolean hasEnsureDirection = false;
 
     private GradientDrawable[] shadowDrawable = new GradientDrawable[2];
@@ -70,7 +70,8 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             hasEnsureDirection = false;
             onTouchEvent = true;
             isPageTurn = true;
-            minTouchX = touchX;
+            lastMoveX[0] = 0;
+            lastMoveX[1] = 0;
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){
             onTouchEvent = true;
             if (!hasEnsureDirection){
@@ -90,8 +91,14 @@ public class LeftRightCoveragePageTurn extends PageTurn{
                 }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
                     setShiftX(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX);
                 }
-                if (event.getX() < minTouchX){
-                    minTouchX = event.getX();
+
+                if (lastMoveX[0] == 0){
+                    lastMoveX[0] = event.getX();
+                }else if (lastMoveX[1] == 0){
+                    lastMoveX[1] = event.getX();
+                }else {
+                    lastMoveX[0] = lastMoveX[1];
+                    lastMoveX[1] = event.getX();
                 }
 
             }
@@ -104,17 +111,21 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
 
 //                if (touchX - event.getX() <= CRITICAL_VALUE){
-                if ( event.getX() > minTouchX){
+                if ( lastMoveX[1] > lastMoveX[0] || Math.abs(touchX - event.getX()) <= CRITICAL_VALUE){
                     isPageTurn = false;
-                    duration = (long)(ANIMATION_DURATION*1.0 / DisplayConstant.DISPLAY_WIDTH * Math.abs(event.getX() - touchX));
-                    startAnimation( -Math.abs(touchX - event.getX()), 0, duration);
+                    startAnimation( event.getX() - touchX, 0, ANIMATION_DURATION - duration);
                 }else {
                     startAnimation(event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH,duration);
                 }
 
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
 
-                startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
+                if (lastMoveX[1] < lastMoveX[0]){
+                    isPageTurn = false;
+                    startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH, ANIMATION_DURATION - duration);
+                }else {
+                    startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
+                }
 
             }else if (event.getX() == touchX){
                 return false;
