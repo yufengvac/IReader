@@ -1,16 +1,23 @@
 package com.yufeng.ireader.reader.activity;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.db.ReadChapter;
+import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.utils.HardWareManager;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSettingView;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.reader.viewinterface.OnReadViewChangeListener;
@@ -20,13 +27,15 @@ import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.PathHelper;
 import com.yufeng.ireader.utils.ReadPreferHelper;
 
+import java.util.List;
+
 /**
  * Created by yufeng on 2018/4/11.
  *
  */
 
-public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener {
-//    private static final String TAG = ReadActivity.class.getSimpleName();
+public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener, OnChapterSplitListener {
+    private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
 
@@ -79,8 +88,30 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         readMenuSetView.setBookName(PathHelper.getBookNameByPath(path));
 
         readMenuSettingView = new ReadMenuSettingView(this,readSetting);
+
+        Intent intent = new Intent(this, ChapterService.class);
+        intent.putExtra(ChapterService.KEY_BOOK_PATH, path);
+        bindService(intent,chapterConn, BIND_AUTO_CREATE);
     }
 
+    ServiceConnection chapterConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ChapterService.ChapterBinder chapterBinder = (ChapterService.ChapterBinder) service;
+            ChapterService chapterService = chapterBinder.getService();
+            chapterService.setOnChapterSplitListener(ReadActivity.this);
+            chapterService.startSplitChapter();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+
+
+    /***************************OnMenuListener**********************************************/
     @Override
     public void onClickMenu() {
         if (readMenuSetView == null){
@@ -93,6 +124,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         }
     }
 
+
+
+    /***************************OnReadMenuClickListener******************************************/
     @Override
     public void onCategoryClick(View view) {
 
@@ -120,6 +154,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         }
     }
 
+
+
+    /*************************OnReadViewChangeListener*******************************************/
     @Override
     public void onReadViewChange(boolean isForcedCalc) {
         readView.refreshReadView(isForcedCalc);
@@ -128,6 +165,27 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     @Override
     public void onReadViewPageTurnChange() {
         readView.recreatePageTurn(readSetting);
+    }
+
+
+
+
+    /*************************OnChapterSplitListener**********************************/
+    @Override
+    public void onError(String msg) {
+
+    }
+
+    @Override
+    public void onCompleted(List<ReadChapter> readChapterList) {
+        for (int i = 0 ; i < readChapterList.size() ; i++){
+            Log.e(TAG,readChapterList.get(i).toString());
+        }
+    }
+
+    @Override
+    public void onSplitting(float percent) {
+        Log.i(TAG,"正在进行解析章节-进度"+percent);
     }
 
     @Override
@@ -140,5 +198,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     protected void onDestroy() {
         super.onDestroy();
         readView.onDestroy();
+        if (chapterConn != null){
+            unbindService(chapterConn);
+            chapterConn = null;
+        }
     }
 }

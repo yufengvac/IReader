@@ -91,7 +91,7 @@ public class TxtParagraph {
         return txtParagraph;
     }
 
-    private static String getParagraphString(ReadRandomAccessFile readRandomAccessFile,long seekStart, byte[] bytes) throws IOException{
+    public static String getParagraphString(ReadRandomAccessFile readRandomAccessFile,long seekStart, byte[] bytes) throws IOException{
         int count = 0;
 
         for (int i= 0; i < bytes.length; i++){

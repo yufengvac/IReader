@@ -17,6 +17,7 @@
 
         <activity android:name=".reader.activity.ReadActivity"
             android:theme="@style/readTheme"/>
+        <service android:name=".reader.service.ChapterService"/>
 
         <activity android:name=".ui.splash.SplashActivity"
             android:theme="@style/BaseTheme">
