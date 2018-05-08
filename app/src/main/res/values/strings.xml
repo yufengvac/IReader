@@ -29,4 +29,6 @@
     <string name="read_menu_setting_page_turn_top_alpha">淡入</string>
     <string name="read_menu_setting_immersive_reading">沉浸阅读</string>
     <string name="read_menu_setting_single_handed_reading">单手阅读</string>
+
+    <string name="catalog_point">.</string>
 </resources>

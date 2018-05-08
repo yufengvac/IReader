@@ -43,7 +43,8 @@ public class ChapterService extends Service{
     private OnChapterSplitListener onChapterSplitListener;
     private ReadRandomAccessFile readRandomAccessFile;
     private List<ReadChapter> readChapterList;
-    private DecimalFormat decimalFormat = new DecimalFormat("0.00");
+    private boolean isStopSplit = false;
+    private boolean isSplitComplted = false;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -51,13 +52,16 @@ public class ChapterService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null){
+            bookPath = intent.getStringExtra(KEY_BOOK_PATH);
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        bookPath = intent.getStringExtra(KEY_BOOK_PATH);
+        isStopSplit = false;
         return new ChapterBinder();
     }
 
@@ -71,6 +75,7 @@ public class ChapterService extends Service{
         Single.create(new SingleOnSubscribe<Void>() {
             @Override
             public void subscribe(SingleEmitter<Void> singleEmitter) throws Exception {
+                isSplitComplted = false;
                 boolean isPrepared = prepareWork();
                 beginSplitChapter(isPrepared);
             }
@@ -79,21 +84,30 @@ public class ChapterService extends Service{
 
     public void setOnChapterSplitListener(OnChapterSplitListener listener){
         this.onChapterSplitListener = listener;
+        if (isSplitComplted){
+            onChapterSplitListener.onCompleted(readChapterList);
+        }
+    }
+
+    public void endSplitChapter(){
+        isStopSplit = true;
+        ChapterUtil.reset();
     }
 
 
     private boolean prepareWork(){
         try {
-            if (onChapterSplitListener == null){
-                return false;
-            }
 
             if (TextUtils.isEmpty(bookPath)){
-                onChapterSplitListener.onError(OnChapterSplitListener.ERROR_MSG.PATH_NULL);
+                if (onChapterSplitListener != null){
+                    onChapterSplitListener.onError(OnChapterSplitListener.ERROR_MSG.PATH_NULL);
+                }
             }
 
             if (!new File(bookPath).exists()){
-                onChapterSplitListener.onError(OnChapterSplitListener.ERROR_MSG.BOOK_NULL);
+                if (onChapterSplitListener != null){
+                    onChapterSplitListener.onError(OnChapterSplitListener.ERROR_MSG.BOOK_NULL);
+                }
             }
 
             if (readRandomAccessFile != null){
@@ -123,7 +137,7 @@ public class ChapterService extends Service{
         try {
             long maxLength = readRandomAccessFile.getSize();
             long seekStart;
-            while (readRandomAccessFile.getCurPosition() < maxLength){
+            while (readRandomAccessFile.getCurPosition() < maxLength && !isStopSplit){
 
                 seekStart = readRandomAccessFile.getCurPosition();
                 byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
@@ -141,8 +155,11 @@ public class ChapterService extends Service{
             if (onChapterSplitListener != null){
                 onChapterSplitListener.onCompleted(readChapterList);
             }
+            Log.e(TAG,"章节解析完成");
+            isSplitComplted = true;
         }catch (IOException e){
             e.printStackTrace();
+            isSplitComplted = true;
         }
     }
 

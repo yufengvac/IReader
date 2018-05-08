@@ -45,17 +45,25 @@ public class ChapterUtil {
         onChapterSplitListener = listener;
     }
 
+    public static void reset(){
+        seekStart = 0;
+        paragraph = "";
+        totalLength = 0;
+        readChapterList = null;
+        onChapterSplitListener = null;
+    }
+
     public static void startSplitChapter(){
         String para = trim(paragraph);
         if (TextUtils.isEmpty(para)){
             return;
         }
         splitIntroduction();
-        splitChapter();
+        splitChapter(para);
     }
 
 
-    public static void splitChapter(){
+    public static void splitChapter(String paragraph){
         if (paragraph.length() >= 35){//多于35个字符长度一律不视作标题
             return;
         }
@@ -169,6 +177,11 @@ public class ChapterUtil {
 
     private static void createNormalChapter(String chapterContent){
         ReadChapter readChapter = new ReadChapter();
+
+        int lastIndex = chapterContent.lastIndexOf("\n");
+        if (lastIndex != 0){
+            chapterContent = chapterContent.substring(0, lastIndex);
+        }
         readChapter.setChapterName(chapterContent);
         readChapter.setType(ReadChapter.Type.NORMAL);
         readChapter.setCurPosition(seekStart);

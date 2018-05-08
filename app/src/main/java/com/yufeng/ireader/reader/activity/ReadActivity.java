@@ -34,7 +34,7 @@ import java.util.List;
  *
  */
 
-public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener, OnChapterSplitListener {
+public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener {
     private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
@@ -43,6 +43,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     private IReadSetting readSetting;
     private ReadMenuSetView readMenuSetView;
     private ReadMenuSettingView readMenuSettingView;
+    private ChapterService chapterService;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -91,6 +92,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
         Intent intent = new Intent(this, ChapterService.class);
         intent.putExtra(ChapterService.KEY_BOOK_PATH, path);
+        startService(intent);
         bindService(intent,chapterConn, BIND_AUTO_CREATE);
     }
 
@@ -98,14 +100,13 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             ChapterService.ChapterBinder chapterBinder = (ChapterService.ChapterBinder) service;
-            ChapterService chapterService = chapterBinder.getService();
-            chapterService.setOnChapterSplitListener(ReadActivity.this);
+            chapterService = chapterBinder.getService();
             chapterService.startSplitChapter();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            chapterService = null;
         }
     };
 
@@ -129,7 +130,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     /***************************OnReadMenuClickListener******************************************/
     @Override
     public void onCategoryClick(View view) {
-
+        startActivity(new Intent(this, CatalogActivity.class));
     }
 
     @Override
@@ -169,25 +170,6 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
 
 
-
-    /*************************OnChapterSplitListener**********************************/
-    @Override
-    public void onError(String msg) {
-
-    }
-
-    @Override
-    public void onCompleted(List<ReadChapter> readChapterList) {
-        for (int i = 0 ; i < readChapterList.size() ; i++){
-            Log.e(TAG,readChapterList.get(i).toString());
-        }
-    }
-
-    @Override
-    public void onSplitting(float percent) {
-        Log.i(TAG,"正在进行解析章节-进度"+percent);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -201,6 +183,10 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         if (chapterConn != null){
             unbindService(chapterConn);
             chapterConn = null;
+        }
+        if (chapterService != null){
+            chapterService.endSplitChapter();
+            chapterService = null;
         }
     }
 }

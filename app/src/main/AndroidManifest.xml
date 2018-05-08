@@ -28,6 +28,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".reader.activity.CatalogActivity"
+            android:theme="@style/mainTheme"/>
+
     </application>
 
 </manifest>
