@@ -8,8 +8,10 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.yufeng.ireader.reader.bean.Chapter;
 import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.db.ReadChapter;
+import com.yufeng.ireader.reader.utils.ChapterUtil;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
@@ -127,22 +129,14 @@ public class ChapterService extends Service{
                 byte[] tempBuf = new byte[MAX_TEMP_BYTE_SIZE];
                 readRandomAccessFile.read(tempBuf);
                 String curLine = TxtParagraph.getParagraphString(readRandomAccessFile , seekStart, tempBuf);
-//                Log.e(TAG,"point="+readRandomAccessFile.getCurPosition());
 
                 if (TextUtils.isEmpty(curLine)){
                     break;
                 }
-                if (BookHelper.isChapterParagraph(curLine)){
-                    ReadChapter readChapter = new ReadChapter();
-                    readChapter.setChapterName(curLine);
-                    readChapter.setCurPosition(readRandomAccessFile.getFilePointer());
-                    float percent = readRandomAccessFile.getFilePointer()*1.0f/maxLength;
-                    readChapter.setPercent(Float.valueOf(decimalFormat.format(percent)));
-                    readChapterList.add(readChapter);
-                    if (onChapterSplitListener != null){
-                        onChapterSplitListener.onSplitting(Float.valueOf(decimalFormat.format(readRandomAccessFile.getFilePointer() * 1.0f /maxLength)));
-                    }
-                }
+
+                ChapterUtil.prepareStartSplitChapter(readRandomAccessFile.getCurPosition(), curLine, maxLength, readChapterList, onChapterSplitListener);
+                ChapterUtil.startSplitChapter();
+
             }
             if (onChapterSplitListener != null){
                 onChapterSplitListener.onCompleted(readChapterList);

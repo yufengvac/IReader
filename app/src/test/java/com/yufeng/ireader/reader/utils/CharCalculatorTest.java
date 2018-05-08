@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class CharCalculatorTest {
     @Test
     public void getFirstIndexNotBlank() throws Exception {
-        int result = CharCalculator.getFirstIndexNotBlank("   你哈");
+        int result = CharCalculator.getFirstIndexNotBlank("      你哈");
         System.out.print(result);
     }
 
