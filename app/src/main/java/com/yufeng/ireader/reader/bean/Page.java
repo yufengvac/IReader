@@ -2,6 +2,7 @@ package com.yufeng.ireader.reader.bean;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.utils.CharCalculator;
@@ -77,6 +78,10 @@ public class Page {
             while (true){
                 if ( !needCalcNewTxtParagraph ){
                     txtParagraph = TxtParagraph.createTxtParagraphBySeekStart(readRandomAccessFile, displayWidth, readSetting, startSeek);
+                    if (TextUtils.isEmpty(txtParagraph.getParagraph().trim()) || txtParagraph.getParagraph().trim().equals("\n")){
+                        startSeek = txtParagraph.getSeekStart() + 1;
+                        continue;
+                    }
                 }
 
                 startSeek = txtParagraph.getSeekEnd() + 1;
@@ -154,6 +159,10 @@ public class Page {
             while (true){
                 if ( !needCalcNewTxtParagraph ){
                      txtParagraph = TxtParagraph.createTxtParagraphBySeekStart(readRandomAccessFile, displayWidth, readSetting, startSeek);
+                    if (TextUtils.isEmpty(txtParagraph.getParagraph().trim()) || txtParagraph.getParagraph().trim().equals("\n")){
+                        startSeek = txtParagraph.getSeekStart() + 1;
+                        continue;
+                    }
                 }
 
                 startSeek = txtParagraph.getSeekEnd() + 1;
@@ -224,6 +233,10 @@ public class Page {
             while (true){
                 if ( !needCalcNewTxtParagraph ){
                     txtParagraph = TxtParagraph.createTxtParagraphBySeekEnd(readRandomAccessFile, displayWidth, readSetting, endSeek);
+                    if (TextUtils.isEmpty(txtParagraph.getParagraph().trim()) || txtParagraph.getParagraph().trim().equals("\n")){
+                        endSeek = txtParagraph.getSeekStart() - 1 ;
+                        continue;
+                    }
                 }
 
                 endSeek = txtParagraph.getSeekStart() - 1 ;

@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.ui.view.LeafLoadingView;
+import com.yufeng.ireader.ui.view.SplitChapterProgressView;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -28,9 +30,9 @@ import java.util.List;
 public class CatalogActivity extends BaseActivity implements OnChapterSplitListener {
     private RecyclerView catalogRecyclerView;
     private ChapterService chapterService;
-    private LeafLoadingView leafLoadingView;
     private CatalogAdapter catalogAdapter;
     private DecimalFormat decimalFormat = new DecimalFormat("0.00");
+    private SplitChapterProgressView progressView;
     @Override
     public int getLayoutRes() {
         return R.layout.activity_catalog;
@@ -39,7 +41,8 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
     @Override
     public void initView() {
         catalogRecyclerView = findViewById(R.id.catalog_recycler_view);
-        leafLoadingView = findViewById(R.id.catalog_percent_tv);
+
+        progressView = new SplitChapterProgressView(this,"正在智能断章...",R.style.Theme_AppCompat_Dialog_Alert);
     }
 
     @Override
@@ -62,30 +65,25 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
 
     @Override
     public void onCompleted(final List<ReadChapter> readChapterList) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (leafLoadingView.getVisibility() == View.VISIBLE){
-                    leafLoadingView.setVisibility(View.GONE);
-                }
-                catalogAdapter.setData(readChapterList);
-            }
-        });
+
+        if (progressView != null && progressView.isShowing()){
+            progressView.hide();
+        }
+        catalogAdapter.setData(readChapterList);
+
     }
 
     @Override
     public void onSplitting(final float percent) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (leafLoadingView.getVisibility() != View.VISIBLE){
-                    leafLoadingView.setVisibility(View.VISIBLE);
-                }
-                String result = "正在解析章节-" + percent * 100 + "%";
-//                leafLoadingView.setText(result);
-                leafLoadingView.setProgress((int) percent * 100);
-            }
-        });
+
+        if (progressView != null && !progressView.isShowing()){
+            progressView.show();
+        }
+        String result = "正在解析章节-" + percent * 100 + "%";
+        Log.i("CatalogActivity",result);
+//        leafLoadingView.setProgress((int) (percent * 100));
+        progressView.setProgress((int) (percent * 100));
+
     }
 
     ServiceConnection chapterConn = new ServiceConnection() {

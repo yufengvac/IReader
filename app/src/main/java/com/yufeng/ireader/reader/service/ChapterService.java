@@ -131,7 +131,7 @@ public class ChapterService extends Service{
 
     public void setOnChapterSplitListener(OnChapterSplitListener listener){
         this.onChapterSplitListener = listener;
-        if (curPercent < 100){
+        if (curPercent == 100){
             onChapterSplitListener.onCompleted(readChapterList);
         }else {
             onChapterSplitListener.onSplitting(curPercent);
@@ -141,6 +141,7 @@ public class ChapterService extends Service{
     public void endSplitChapter(){
         isStopSplit = true;
         ChapterUtil.reset();
+        stopSelf();
     }
 
 
