@@ -8,25 +8,25 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.yufeng.ireader.reader.bean.Chapter;
 import com.yufeng.ireader.reader.bean.TxtParagraph;
 import com.yufeng.ireader.reader.db.ReadChapter;
 import com.yufeng.ireader.reader.utils.ChapterUtil;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
-import com.yufeng.ireader.utils.BookHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -44,7 +44,7 @@ public class ChapterService extends Service{
     private ReadRandomAccessFile readRandomAccessFile;
     private List<ReadChapter> readChapterList;
     private boolean isStopSplit = false;
-    private boolean isSplitComplted = false;
+    private float curPercent = 0f;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,20 +72,69 @@ public class ChapterService extends Service{
     }
 
     public void startSplitChapter(){
-        Single.create(new SingleOnSubscribe<Void>() {
+//        Single.create(new SingleOnSubscribe<Void>() {
+//            @Override
+//            public void subscribe(SingleEmitter<Void> singleEmitter) throws Exception {
+//
+//                boolean isPrepared = prepareWork();
+//                beginSplitChapter(isPrepared);
+//            }
+//        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).toFuture();
+
+        Observable.create(new ObservableOnSubscribe<Float>() {
             @Override
-            public void subscribe(SingleEmitter<Void> singleEmitter) throws Exception {
-                isSplitComplted = false;
+            public void subscribe(ObservableEmitter<Float> observableEmitter) throws Exception {
                 boolean isPrepared = prepareWork();
-                beginSplitChapter(isPrepared);
+                float percent = beginSplitChapter(isPrepared, observableEmitter);
+                if (percent == -1){
+                    observableEmitter.onError(null);
+                }else if (percent < 100){
+                    observableEmitter.onNext(percent);
+                }else if (percent == 100){
+                    observableEmitter.onComplete();
+                }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).toFuture();
+        }).subscribeOn(Schedulers.io()).doOnSubscribe(new Consumer<Disposable>() {
+            @Override
+            public void accept(Disposable disposable) throws Exception {
+                curPercent = 0f;
+            }
+        }).subscribeOn(AndroidSchedulers.mainThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Float>() {
+            @Override
+            public void onSubscribe(Disposable disposable) {
+
+            }
+
+            @Override
+            public void onNext(Float aFloat) {
+                curPercent = aFloat;
+                if (onChapterSplitListener != null){
+                    onChapterSplitListener.onSplitting(curPercent);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                curPercent = 0f;
+            }
+
+            @Override
+            public void onComplete() {
+                curPercent = 100f;
+                if (onChapterSplitListener != null){
+                    onChapterSplitListener.onCompleted(readChapterList);
+                }
+            }
+        });
+
     }
 
     public void setOnChapterSplitListener(OnChapterSplitListener listener){
         this.onChapterSplitListener = listener;
-        if (isSplitComplted){
+        if (curPercent < 100){
             onChapterSplitListener.onCompleted(readChapterList);
+        }else {
+            onChapterSplitListener.onSplitting(curPercent);
         }
     }
 
@@ -130,9 +179,9 @@ public class ChapterService extends Service{
         return false;
     }
 
-    private void beginSplitChapter(boolean isPrepared){
+    private float beginSplitChapter(boolean isPrepared, ObservableEmitter<Float> observableEmitter){
         if (!isPrepared){
-            return;
+            return -1;
         }
         try {
             long maxLength = readRandomAccessFile.getSize();
@@ -148,18 +197,15 @@ public class ChapterService extends Service{
                     break;
                 }
 
-                ChapterUtil.prepareStartSplitChapter(readRandomAccessFile.getCurPosition(), curLine, maxLength, readChapterList, onChapterSplitListener);
+                ChapterUtil.prepareStartSplitChapter(readRandomAccessFile.getCurPosition(), curLine, maxLength, readChapterList, observableEmitter);
                 ChapterUtil.startSplitChapter();
 
             }
-            if (onChapterSplitListener != null){
-                onChapterSplitListener.onCompleted(readChapterList);
-            }
             Log.e(TAG,"章节解析完成");
-            isSplitComplted = true;
+            return 100f;
         }catch (IOException e){
             e.printStackTrace();
-            isSplitComplted = true;
+            return  -1;
         }
     }
 

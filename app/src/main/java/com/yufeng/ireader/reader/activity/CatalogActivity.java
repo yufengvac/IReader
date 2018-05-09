@@ -15,6 +15,7 @@ import com.yufeng.ireader.reader.db.ReadChapter;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
+import com.yufeng.ireader.ui.view.LeafLoadingView;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
 public class CatalogActivity extends BaseActivity implements OnChapterSplitListener {
     private RecyclerView catalogRecyclerView;
     private ChapterService chapterService;
-    private TextView percentTv;
+    private LeafLoadingView leafLoadingView;
     private CatalogAdapter catalogAdapter;
     private DecimalFormat decimalFormat = new DecimalFormat("0.00");
     @Override
@@ -38,7 +39,7 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
     @Override
     public void initView() {
         catalogRecyclerView = findViewById(R.id.catalog_recycler_view);
-        percentTv = findViewById(R.id.catalog_percent_tv);
+        leafLoadingView = findViewById(R.id.catalog_percent_tv);
     }
 
     @Override
@@ -64,8 +65,8 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (percentTv.getVisibility() == View.VISIBLE){
-                    percentTv.setVisibility(View.GONE);
+                if (leafLoadingView.getVisibility() == View.VISIBLE){
+                    leafLoadingView.setVisibility(View.GONE);
                 }
                 catalogAdapter.setData(readChapterList);
             }
@@ -77,11 +78,12 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (percentTv.getVisibility() != View.VISIBLE){
-                    percentTv.setVisibility(View.VISIBLE);
+                if (leafLoadingView.getVisibility() != View.VISIBLE){
+                    leafLoadingView.setVisibility(View.VISIBLE);
                 }
                 String result = "正在解析章节-" + percent * 100 + "%";
-                percentTv.setText(result);
+//                leafLoadingView.setText(result);
+                leafLoadingView.setProgress((int) percent * 100);
             }
         });
     }
@@ -92,7 +94,6 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
             ChapterService.ChapterBinder chapterBinder = (ChapterService.ChapterBinder) service;
             chapterService = chapterBinder.getService();
             chapterService.setOnChapterSplitListener(CatalogActivity.this);
-            chapterService.startSplitChapter();
         }
 
         @Override

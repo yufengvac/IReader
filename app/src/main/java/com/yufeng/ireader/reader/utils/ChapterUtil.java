@@ -8,6 +8,8 @@ import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import io.reactivex.ObservableEmitter;
+
 /**
  * Created by yufeng on 2018/5/8-0008.
  *
@@ -35,14 +37,14 @@ public class ChapterUtil {
     private static String paragraph;
     private static long totalLength;
     private static List<ReadChapter> readChapterList;
-    private static OnChapterSplitListener onChapterSplitListener;
+    private static ObservableEmitter<Float> observableEmitter;
 
-    public static void prepareStartSplitChapter(long curSeek, String para, long totalSize, List<ReadChapter> readChapterLists, OnChapterSplitListener listener){
+    public static void prepareStartSplitChapter(long curSeek, String para, long totalSize, List<ReadChapter> readChapterLists, ObservableEmitter<Float> observableEmitter1){
         seekStart = curSeek;
         paragraph = para;
         totalLength = totalSize;
         readChapterList = readChapterLists;
-        onChapterSplitListener = listener;
+        observableEmitter = observableEmitter1;
     }
 
     public static void reset(){
@@ -50,7 +52,7 @@ public class ChapterUtil {
         paragraph = "";
         totalLength = 0;
         readChapterList = null;
-        onChapterSplitListener = null;
+        observableEmitter = null;
     }
 
     public static void startSplitChapter(){
@@ -170,8 +172,8 @@ public class ChapterUtil {
         readChapter.setCurPosition(0);
         readChapter.setPercent(0f);
         readChapterList.add(readChapter);
-        if (onChapterSplitListener != null){
-            onChapterSplitListener.onSplitting(0f);
+        if (observableEmitter != null){
+            observableEmitter.onNext(0f);
         }
     }
 
@@ -188,8 +190,8 @@ public class ChapterUtil {
         float percent = seekStart * 1.0f / totalLength;
         readChapter.setPercent(percent);
         readChapterList.add(readChapter);
-        if (onChapterSplitListener != null){
-            onChapterSplitListener.onSplitting(Float.valueOf(new DecimalFormat("0.00").format(percent)));
+        if (observableEmitter != null){
+            observableEmitter.onNext(Float.valueOf(new DecimalFormat("0.00").format(percent)));
         }
     }
 
