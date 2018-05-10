@@ -4,16 +4,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.db.book.Book;
 import com.yufeng.ireader.reader.activity.ReadActivity;
 import com.yufeng.ireader.ui.base.BaseActivity;
-import com.yufeng.ireader.ui.beans.Book;
 import com.yufeng.ireader.ui.home.adapter.BookShelfAdapter;
+import com.yufeng.ireader.ui.home.callback.OnBookQueryListener;
 import com.yufeng.ireader.ui.home.callback.onItemClickListener;
 import com.yufeng.ireader.utils.BookHelper;
 
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements onItemClickListener {
+public class MainActivity extends BaseActivity implements onItemClickListener , OnBookQueryListener{
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private RecyclerView bookRecyclerView;
@@ -40,7 +41,11 @@ public class MainActivity extends BaseActivity implements onItemClickListener {
 
     @Override
     public void initData() {
-        List<Book> bookList = BookHelper.getLocalBooksInDirectory();
+        BookHelper.getLocalBooksInDirectory(this);
+    }
+
+    @Override
+    public void onBookQuery(List<Book> bookList) {
         bookShelfAdapter.setData(bookList);
     }
 

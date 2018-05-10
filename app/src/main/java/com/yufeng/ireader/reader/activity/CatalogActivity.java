@@ -7,16 +7,13 @@ import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.adapter.CatalogAdapter;
-import com.yufeng.ireader.reader.db.ReadChapter;
+import com.yufeng.ireader.reader.bean.ReadChapter;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import com.yufeng.ireader.ui.base.BaseActivity;
-import com.yufeng.ireader.ui.view.LeafLoadingView;
 import com.yufeng.ireader.ui.view.SplitChapterProgressView;
 
 import java.text.DecimalFormat;
@@ -57,6 +54,11 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
         catalogRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         catalogRecyclerView.setAdapter(catalogAdapter);
     }
+
+    public int setEnterAnimation(){
+        return R.anim.left_in;
+    }
+
 
     @Override
     public void onError(String msg) {

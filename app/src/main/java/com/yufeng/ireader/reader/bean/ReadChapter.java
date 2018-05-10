@@ -1,4 +1,4 @@
-package com.yufeng.ireader.reader.db;
+package com.yufeng.ireader.reader.bean;
 
 /**
  * Created by yufeng on 2018/5/7-0007.

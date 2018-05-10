@@ -9,7 +9,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.TxtParagraph;
-import com.yufeng.ireader.reader.db.ReadChapter;
+import com.yufeng.ireader.reader.bean.ReadChapter;
 import com.yufeng.ireader.reader.utils.ChapterUtil;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;

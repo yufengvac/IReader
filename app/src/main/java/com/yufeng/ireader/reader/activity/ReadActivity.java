@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.reader.db.ReadChapter;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.utils.HardWareManager;
 import com.yufeng.ireader.reader.view.ReadView;
@@ -17,7 +15,6 @@ import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSettingView;
 import com.yufeng.ireader.reader.viewimpl.ReadSetting;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
-import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.reader.viewinterface.OnReadMenuClickListener;
 import com.yufeng.ireader.reader.viewinterface.OnReadViewChangeListener;
@@ -26,8 +23,6 @@ import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.PathHelper;
 import com.yufeng.ireader.utils.ReadPreferHelper;
-
-import java.util.List;
 
 /**
  * Created by yufeng on 2018/4/11.

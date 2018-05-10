@@ -6,8 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.yufeng.ireader.reader.bean.Chapter;
-import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
-import com.yufeng.ireader.ui.beans.Book;
+import com.yufeng.ireader.db.book.Book;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -127,7 +126,7 @@ public class PathHelper {
             });
             for (File bookFile : files) {
                 String bookName = getBookNameByPath(bookFile.getAbsolutePath());
-                Book book = Book.createBook(bookName, "", bookFile.getAbsolutePath());
+                Book book = Book.createBook(bookName, "", bookFile.getAbsolutePath(), bookFile.lastModified(), bookFile.length(), -1);
                 if (book != null) {
                     bookList.add(book);
                 }

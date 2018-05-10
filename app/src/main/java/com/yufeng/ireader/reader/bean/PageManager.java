@@ -8,8 +8,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
-import com.yufeng.ireader.reader.db.ReadTxtParagraph;
-import com.yufeng.ireader.reader.db.ReadTxtParagraphDatabase;
+import com.yufeng.ireader.db.readhistory.ReadTxtParagraph;
+import com.yufeng.ireader.db.readhistory.ReadTxtParagraphDatabase;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
@@ -115,6 +115,7 @@ public class PageManager {
                         initPageFromHistory(readTxtParagraphList);
                     }
                 });
+//        initPageFromHistory(null);
 
     }
 

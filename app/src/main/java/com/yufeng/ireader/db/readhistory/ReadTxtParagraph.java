@@ -1,4 +1,4 @@
-package com.yufeng.ireader.reader.db;
+package com.yufeng.ireader.db.readhistory;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;

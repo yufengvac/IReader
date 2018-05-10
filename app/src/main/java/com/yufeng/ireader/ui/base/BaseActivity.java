@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.yufeng.ireader.R;
 import com.yufeng.ireader.utils.PermissionHelper;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 public abstract class BaseActivity extends AppCompatActivity implements PermissionHelper.permissionCallback{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        overridePendingTransition(setEnterAnimation(),setExitAnimation());
         super.onCreate(savedInstanceState);
         setContentView(getLayoutRes());
         initView();
@@ -49,4 +51,12 @@ public abstract class BaseActivity extends AppCompatActivity implements Permissi
     public abstract void initView();
     public abstract void initData();
     public abstract void initListener();
+
+    public int setEnterAnimation(){
+        return R.anim.right_in;
+    }
+
+    public int setExitAnimation(){
+        return R.anim.hold;
+    }
 }

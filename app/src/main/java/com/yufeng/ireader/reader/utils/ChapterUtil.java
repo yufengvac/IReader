@@ -2,8 +2,7 @@ package com.yufeng.ireader.reader.utils;
 
 import android.text.TextUtils;
 
-import com.yufeng.ireader.reader.db.ReadChapter;
-import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
+import com.yufeng.ireader.reader.bean.ReadChapter;
 
 import java.text.DecimalFormat;
 import java.util.List;

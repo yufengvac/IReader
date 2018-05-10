@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.ui.beans.Book;
+import com.yufeng.ireader.db.book.Book;
 import com.yufeng.ireader.ui.home.callback.onItemClickListener;
 
 import java.util.ArrayList;

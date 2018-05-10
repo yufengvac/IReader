@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.reader.db.ReadChapter;
+import com.yufeng.ireader.reader.bean.ReadChapter;
 
 import java.util.ArrayList;
 import java.util.List;
