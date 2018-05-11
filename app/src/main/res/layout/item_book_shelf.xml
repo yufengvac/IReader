@@ -58,6 +58,28 @@
                 android:lines="2"
                 android:paddingTop="@dimen/common_padding"
                 android:text="雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/item_book_size_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4.3M"
+                    android:textSize="12sp"
+                    android:textColor="@color/read_menu_title_color_dark"/>
+                <TextView
+                    android:id="@+id/item_book_read_time_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="未阅读"
+                    android:textSize="12sp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@color/book_shelf_not_read"/>
+            </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
 

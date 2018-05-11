@@ -18,7 +18,7 @@ public abstract class BookDatabase extends RoomDatabase{
         private static BookDatabase instance = null;
         private static BookDatabase getInstance(){
             if (instance == null){
-                instance = Room.databaseBuilder(ReadApplication.baseApplication.getBaseContext(), BookDatabase.class, DBConstants.DB_NAME).fallbackToDestructiveMigration().build();
+                instance = Room.databaseBuilder(ReadApplication.baseApplication.getBaseContext(), BookDatabase.class, DBConstants.DB_NAME_BOOK).build();
             }
             return instance;
         }

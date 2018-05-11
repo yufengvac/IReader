@@ -9,4 +9,3 @@
 .externalNativeBuild
 .idea/
 gradle/
-app/schemas/com.yufeng.ireader.reader.db.ReadTxtParagraphDatabase/1.json

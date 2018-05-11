@@ -20,9 +20,12 @@ public interface BookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertBook(Book book);
 
-    @Query("SELECT * FROM book ORDER BY last_read_time")
+    @Query("SELECT * FROM book ORDER BY last_read_time DESC")
     Single<List<Book>> getAllBookList();
 
     @Query("UPDATE book SET last_read_time = :lastReadTime WHERE book_path = :bookPath")
     long updateBookLastReadTime(String bookPath, long lastReadTime);
+
+    @Query("UPDATe book SET read_percent = :readPercent WHERE book_path = :bookPath")
+    long updateBookReadPercent(String bookPath, float readPercent);
 }

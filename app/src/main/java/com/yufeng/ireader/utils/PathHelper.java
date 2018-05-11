@@ -126,7 +126,7 @@ public class PathHelper {
             });
             for (File bookFile : files) {
                 String bookName = getBookNameByPath(bookFile.getAbsolutePath());
-                Book book = Book.createBook(bookName, "", bookFile.getAbsolutePath(), bookFile.lastModified(), bookFile.length(), -1);
+                Book book = Book.createBook(bookName, "", bookFile.getAbsolutePath(), bookFile.lastModified(), bookFile.length(), -1, 0f);
                 if (book != null) {
                     bookList.add(book);
                 }

@@ -1,6 +1,7 @@
 package com.yufeng.ireader.ui.home.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.db.book.Book;
 import com.yufeng.ireader.ui.home.callback.onItemClickListener;
+import com.yufeng.ireader.utils.BookHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +51,23 @@ public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.View
 
     @Override
     public void onBindViewHolder(BookShelfAdapter.ViewHolder holder, int position) {
-        holder.bookNameTv.setText(mData.get(position).getBookName());
-        holder.bookDescTv.setText(mData.get(position).getBookDesc());
+        Book book = mData.get(position);
+        holder.bookNameTv.setText(book.getBookName());
+        holder.bookDescTv.setText(book.getBookDesc());
+
+        holder.sizeTv.setText(BookHelper.transFormFromByte(book.getSize()));
+
+        if (book.getLastReadTime() == -1){
+            holder.readTimeTv.setText("未阅读");
+        }else {
+            String percentStr = BookHelper.tranFormFromReadPercent(book.getPercent());
+            if (TextUtils.isEmpty(percentStr)){
+                holder.readTimeTv.setText("未阅读");
+            }else {
+                String str = "已阅读"+ percentStr;
+                holder.readTimeTv.setText(str);
+            }
+        }
     }
 
     @Override
@@ -61,10 +78,14 @@ public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.View
     class ViewHolder extends RecyclerView.ViewHolder{
         private TextView bookNameTv;
         private TextView bookDescTv;
+        private TextView sizeTv;
+        private TextView readTimeTv;
         private ViewHolder(View itemView) {
             super(itemView);
             bookNameTv = itemView.findViewById(R.id.item_book_shelf_book_name_tv);
             bookDescTv = itemView.findViewById(R.id.item_book_shelf_book_desc_tv);
+            sizeTv = itemView.findViewById(R.id.item_book_size_tv);
+            readTimeTv = itemView.findViewById(R.id.item_book_read_time_tv);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

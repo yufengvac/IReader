@@ -8,6 +8,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.yufeng.ireader.db.book.BookDatabase;
 import com.yufeng.ireader.db.readhistory.ReadTxtParagraph;
 import com.yufeng.ireader.db.readhistory.ReadTxtParagraphDatabase;
 import com.yufeng.ireader.reader.utils.CodeUtil;
@@ -356,6 +357,9 @@ public class PageManager {
                                     readRandomAccessFile.getSize(),percent,firstTxtParagraph);
                             long result = readBookHistoryDb.getReadTxtParagraphDao().insertReadBookHistory(readTxtParagraph);
                             Log.e(TAG,"保存第"+result+"次阅读历史记录");
+
+                            long result1 = BookDatabase.getInstance().getBookDao().updateBookReadPercent(readRandomAccessFile.getRealPath(), percent);
+                            Log.e(TAG,"更新书籍阅读进度percent="+percent);
                         }
                     }).subscribeOn(Schedulers.io()).toFuture();
 

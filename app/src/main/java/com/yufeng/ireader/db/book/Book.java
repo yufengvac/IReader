@@ -37,6 +37,9 @@ public class Book {
     @ColumnInfo(name = "last_read_time")
     private long lastReadTime;
 
+    @ColumnInfo(name = "read_percent")
+    private float percent;
+
     public String getBookDesc() {
         return bookDesc;
     }
@@ -85,7 +88,15 @@ public class Book {
         this.lastReadTime = lastReadTime;
     }
 
-    public static Book createBook(String bookName, String bookDesc, String path, long lastModifyTime, long size, long lastReadTime){
+    public float getPercent() {
+        return percent;
+    }
+
+    public void setPercent(float percent) {
+        this.percent = percent;
+    }
+
+    public static Book createBook(String bookName, String bookDesc, String path, long lastModifyTime, long size, long lastReadTime, float readPercent){
         if (TextUtils.isEmpty(bookName)||TextUtils.isEmpty(path)){
             return null;
         }
@@ -96,6 +107,7 @@ public class Book {
         book.setLastModifyTime(lastModifyTime);
         book.setSize(size);
         book.setLastReadTime(lastReadTime);
+        book.setPercent(readPercent);
         return book;
     }
 
@@ -108,6 +120,7 @@ public class Book {
                 ", lastModifyTime='" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(lastModifyTime)) + '\'' +
                 ", size='" + (size/1024f/1024f +"M") +
                 ", lastReadTime='" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(lastReadTime)) + '\'' +
+                ", percent='" + percent + '\'' +
                 '}';
     }
 }

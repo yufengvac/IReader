@@ -53,5 +53,12 @@ public class MainActivity extends BaseActivity implements onItemClickListener , 
     public void onItemClick(int position) {
         String path = bookShelfAdapter.getItem(position).getPath();
         ReadActivity.startActivity(this, path);
+        BookHelper.updateLastReadTime(path, System.currentTimeMillis());
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        BookHelper.getLocalBooksInDirectory(this);
     }
 }
