@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.adapter.CatalogAdapter;
@@ -101,6 +102,16 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
             chapterService = null;
         }
     };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && !progressView.isShowing()){
+            finish();
+//            overridePendingTransition(R.anim.hold, R.anim.left_out);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected void onStop() {

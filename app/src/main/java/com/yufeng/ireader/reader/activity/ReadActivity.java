@@ -24,6 +24,11 @@ import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.PathHelper;
 import com.yufeng.ireader.utils.ReadPreferHelper;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
+
 /**
  * Created by yufeng on 2018/4/11.
  *
@@ -125,7 +130,13 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     /***************************OnReadMenuClickListener******************************************/
     @Override
     public void onCategoryClick(View view) {
-        startActivity(new Intent(this, CatalogActivity.class));
+        Single.timer(200, TimeUnit.MILLISECONDS).subscribe(new Consumer<Long>() {
+            @Override
+            public void accept(Long aLong) throws Exception {
+                startActivity(new Intent(ReadActivity.this, CatalogActivity.class));
+//                overridePendingTransition(R.anim.left_in, R.anim.hold);
+            }
+        });
     }
 
     @Override

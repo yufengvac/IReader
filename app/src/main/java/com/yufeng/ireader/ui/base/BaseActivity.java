@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class BaseActivity extends AppCompatActivity implements PermissionHelper.permissionCallback{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        overridePendingTransition(setEnterAnimation(),setExitAnimation());
+//        overridePendingTransition(setEnterAnimation(),setExitAnimation());
         super.onCreate(savedInstanceState);
         setContentView(getLayoutRes());
         initView();

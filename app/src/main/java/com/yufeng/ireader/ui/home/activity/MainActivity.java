@@ -10,6 +10,7 @@ import com.yufeng.ireader.ui.base.BaseActivity;
 import com.yufeng.ireader.ui.home.adapter.BookShelfAdapter;
 import com.yufeng.ireader.ui.home.callback.OnBookQueryListener;
 import com.yufeng.ireader.ui.home.callback.onItemClickListener;
+import com.yufeng.ireader.ui.home.other.RecyclerViewDivider;
 import com.yufeng.ireader.utils.BookHelper;
 
 import java.util.List;
@@ -33,6 +34,10 @@ public class MainActivity extends BaseActivity implements onItemClickListener , 
     @Override
     public void initListener() {
         bookRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        RecyclerViewDivider recyclerViewDivider = new RecyclerViewDivider(this);
+        recyclerViewDivider.setOrientation(RecyclerViewDivider.LINEAR_LAYOUT);
+        bookRecyclerView.addItemDecoration(recyclerViewDivider);
 
         bookShelfAdapter = new BookShelfAdapter();
         bookRecyclerView.setAdapter(bookShelfAdapter);
