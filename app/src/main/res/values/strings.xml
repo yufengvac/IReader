@@ -31,4 +31,5 @@
     <string name="read_menu_setting_single_handed_reading">单手阅读</string>
 
     <string name="catalog_point">.</string>
+    <string name="catalog_local_book">本地书籍</string>
 </resources>

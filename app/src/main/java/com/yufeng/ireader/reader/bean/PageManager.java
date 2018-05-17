@@ -132,8 +132,8 @@ public class PageManager {
         }catch (Exception e){
             e.printStackTrace();
         }
-        Page currentPage = Page.createNextPager(firstTxtParagraph, firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
-                this.readSetting, readRandomAccessFile, true);
+        Page currentPage = Page.createCurPagerAgain(firstTxtParagraph, firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
+                this.readSetting, readRandomAccessFile, -1);
 
         pagerSparseArray.put(PageType.PAGE_CURRENT, currentPage);
         if (readView != null){
@@ -141,7 +141,7 @@ public class PageManager {
         }
     }
 
-    public void drawPager(final Canvas canvas, final Paint paint, boolean isForceCalc) {
+    public void drawPager(final Canvas canvas, final Paint paint, boolean isForceCalc, long fixedSeekStart) {
         if (pagerSparseArray == null) {
             return;
         }
@@ -153,7 +153,7 @@ public class PageManager {
                 if (isForceCalc){
                     TxtParagraph firstTxtParagraph = curPage.getFirstTxtParagraph();
                     curPage = Page.createCurPagerAgain(firstTxtParagraph , firstTxtParagraph != null ? firstTxtParagraph.getLastCanDrawLine():-1,
-                            this.readSetting, readRandomAccessFile);
+                            this.readSetting, readRandomAccessFile, fixedSeekStart);
                     pagerSparseArray.put(PageType.PAGE_CURRENT, curPage);
                 }
                 drawCanvasBg(canvas, paint);
@@ -200,7 +200,7 @@ public class PageManager {
                 TxtParagraph lastTxtParagraph = curPage.getLastTxtParagraph();
                 lastTxtParagraph = TxtParagraph.copyTxtParagraph(lastTxtParagraph);
 
-                Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile, false);
+                Page nextPage = Page.createNextPager(lastTxtParagraph, lastTxtParagraph.getLastCanDrawLine(), readSetting, readRandomAccessFile);
                 pagerSparseArray.put(PageType.PAGE_NEXT, nextPage);
 
                 if (nextCacheBitmap != null){
@@ -321,6 +321,10 @@ public class PageManager {
 
     public Bitmap getCurBitmap(){
         return curBitmap;
+    }
+
+    public long getCurPosition(){
+        return pagerSparseArray.get(PageType.PAGE_CURRENT).getFirstTxtParagraph().getSeekStart();
     }
 
     private void initReadRandomAccessFile(String path) {

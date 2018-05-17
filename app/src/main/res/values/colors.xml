@@ -19,4 +19,6 @@
     <color name="read_menu_theme_3">#F8E7E7</color>
 
     <color name="book_shelf_not_read">@color/orange</color>
+    <color name="title_big_text_color">@color/orange1</color>
+    <color name="catalog_text_color">@color/orange2</color>
 </resources>

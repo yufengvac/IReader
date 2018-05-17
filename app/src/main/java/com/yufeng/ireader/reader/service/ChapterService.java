@@ -8,11 +8,13 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.yufeng.ireader.db.readchapter.ReadChapterDatabase;
 import com.yufeng.ireader.reader.bean.TxtParagraph;
-import com.yufeng.ireader.reader.bean.ReadChapter;
+import com.yufeng.ireader.db.readchapter.ReadChapter;
 import com.yufeng.ireader.reader.utils.ChapterUtil;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
+import com.yufeng.ireader.reader.utils.YLog;
 import com.yufeng.ireader.reader.viewinterface.OnChapterSplitListener;
 
 import java.io.File;
@@ -86,12 +88,17 @@ public class ChapterService extends Service{
             public void subscribe(ObservableEmitter<Float> observableEmitter) throws Exception {
                 boolean isPrepared = prepareWork();
                 float percent = beginSplitChapter(isPrepared, observableEmitter);
-                if (percent == -1){
+                if (percent == -1) {
                     observableEmitter.onError(null);
-                }else if (percent < 100){
-                    observableEmitter.onNext(percent);
                 }else if (percent == 100){
-                    observableEmitter.onComplete();
+
+                    if (readChapterList != null && readChapterList.size() > 0 && !isStopSplit){
+                        for (int i = 0; i < readChapterList.size() ; i++){
+                            long result = ReadChapterDatabase.getInstance().getReadChapterDao().insertChapter(readChapterList.get(i));
+                            YLog.i(ChapterService.this,"result="+result+"目录插入->"+readChapterList.get(i).toString());
+                        }
+                        observableEmitter.onComplete();
+                    }
                 }
             }
         }).subscribeOn(Schedulers.io()).doOnSubscribe(new Consumer<Disposable>() {
@@ -198,7 +205,7 @@ public class ChapterService extends Service{
                     break;
                 }
 
-                ChapterUtil.prepareStartSplitChapter(readRandomAccessFile.getCurPosition(), curLine, maxLength, readChapterList, observableEmitter);
+                ChapterUtil.prepareStartSplitChapter(readRandomAccessFile.getRealPath() ,seekStart, curLine, maxLength, readChapterList, observableEmitter);
                 ChapterUtil.startSplitChapter();
 
             }

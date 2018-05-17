@@ -42,6 +42,7 @@ public class ReadView extends View implements OnPageTurnListener{
     private PageTurn pageTurn;
     private OnMenuListener onMenuListener;
     private boolean isForceCalc = false;//是否需要重新进行当前页的排版
+    private long fixedSeekStart = -1;
     private IReadSetting readSetting;
 
     public ReadView(Context context) {
@@ -156,7 +157,7 @@ public class ReadView extends View implements OnPageTurnListener{
     }
 
     private void drawCurrentContent(Canvas canvas){
-        PageManager.getInstance().drawPager(canvas, contentPaint, isForceCalc);
+        PageManager.getInstance().drawPager(canvas, contentPaint, isForceCalc , fixedSeekStart);
     }
 
 
@@ -187,8 +188,9 @@ public class ReadView extends View implements OnPageTurnListener{
         pageTurn.setContext(getContext());
     }
 
-    public void refreshReadView(boolean isForceCalc){
+    public void refreshReadView(boolean isForceCalc, long fixedSeekStart){
         this.isForceCalc = isForceCalc;
+        this.fixedSeekStart = fixedSeekStart;
         invalidate();
     }
 
@@ -201,6 +203,10 @@ public class ReadView extends View implements OnPageTurnListener{
 
     public void setOnMenuListener(OnMenuListener listener){
         onMenuListener = listener;
+    }
+
+    public long getCurPosition(){
+        return PageManager.getInstance().getCurPosition();
     }
 
     @Override

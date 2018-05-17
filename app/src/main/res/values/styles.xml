@@ -32,6 +32,20 @@
         <item name="android:textSize">@dimen/sub_big_title_size</item>
     </style>
 
+    <style name="read_menu_big_text_dark_style" parent="read_menu_big_text_style">
+        <item name="android:textColor">@color/title_big_text_color</item>
+    </style>
+
+    <style name="read_catalog_text_style">
+        <item name="android:textColor">@color/catalog_text_color</item>
+        <item name="android:textSize">@dimen/sub_big_title_size</item>
+    </style>
+
+    <style name="read_catalog_title_text_style">
+        <item name="android:textColor">@color/catalog_text_color</item>
+        <item name="android:textSize">@dimen/big_title_size</item>
+    </style>
+
     <!-- 全屏不需要显示 StateBar 的 PopupMenu 主题 -->
     <style name="Theme.PopupMenu.Fullscreen" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowFullscreen">false</item>

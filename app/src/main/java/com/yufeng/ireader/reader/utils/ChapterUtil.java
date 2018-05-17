@@ -2,7 +2,7 @@ package com.yufeng.ireader.reader.utils;
 
 import android.text.TextUtils;
 
-import com.yufeng.ireader.reader.bean.ReadChapter;
+import com.yufeng.ireader.db.readchapter.ReadChapter;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -32,13 +32,15 @@ public class ChapterUtil {
     private static char CS_PREFIX = '第';
 
 
+    private static String bookPath;
     private static long seekStart;
     private static String paragraph;
     private static long totalLength;
     private static List<ReadChapter> readChapterList;
     private static ObservableEmitter<Float> observableEmitter;
 
-    public static void prepareStartSplitChapter(long curSeek, String para, long totalSize, List<ReadChapter> readChapterLists, ObservableEmitter<Float> observableEmitter1){
+    public static void prepareStartSplitChapter(String bookPath_, long curSeek, String para, long totalSize, List<ReadChapter> readChapterLists, ObservableEmitter<Float> observableEmitter1){
+        bookPath = bookPath_;
         seekStart = curSeek;
         paragraph = para;
         totalLength = totalSize;
@@ -47,6 +49,7 @@ public class ChapterUtil {
     }
 
     public static void reset(){
+        bookPath = "";
         seekStart = 0;
         paragraph = "";
         totalLength = 0;
@@ -166,6 +169,7 @@ public class ChapterUtil {
 
     private static void createIntroduction(String introduction){
         ReadChapter readChapter = new ReadChapter();
+        readChapter.setBookPath(bookPath);
         readChapter.setChapterName(introduction);
         readChapter.setType(ReadChapter.Type.INTRODUCE);
         readChapter.setCurPosition(0);
@@ -183,6 +187,7 @@ public class ChapterUtil {
         if (lastIndex != 0){
             chapterContent = chapterContent.substring(0, lastIndex);
         }
+        readChapter.setBookPath(bookPath);
         readChapter.setChapterName(chapterContent);
         readChapter.setType(ReadChapter.Type.NORMAL);
         readChapter.setCurPosition(seekStart);

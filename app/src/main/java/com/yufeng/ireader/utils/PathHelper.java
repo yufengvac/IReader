@@ -153,9 +153,15 @@ public class PathHelper {
      * @return     文件名字 /和.之间的
      */
     public static String getBookNameByPath(String path) {
-        int firstIndex = path.lastIndexOf("/");
-        int lastIndex = path.lastIndexOf(".");
-        return path.substring(firstIndex + 1, lastIndex);
+        try {
+
+            int firstIndex = path.lastIndexOf("/");
+            int lastIndex = path.lastIndexOf(".");
+            return path.substring(firstIndex + 1, lastIndex);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
     }
 
     /**

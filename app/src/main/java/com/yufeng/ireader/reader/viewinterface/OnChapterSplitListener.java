@@ -1,6 +1,6 @@
 package com.yufeng.ireader.reader.viewinterface;
 
-import com.yufeng.ireader.reader.bean.ReadChapter;
+import com.yufeng.ireader.db.readchapter.ReadChapter;
 
 import java.util.List;
 

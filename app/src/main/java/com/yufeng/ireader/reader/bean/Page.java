@@ -46,7 +46,16 @@ public class Page {
         }
     }
 
-    static Page createCurPagerAgain(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
+    /**
+     * 重新从文件中读取当前页面的Page内容
+     * @param lastPagerTxtParagraph  该页面的最上面的一个段落
+     * @param lastCanDrawLine        该页面的最上面的一个段落的最后可以绘制的行
+     * @param readSetting            设置信息
+     * @param readRandomAccessFile   读取文件流
+     * @param fixedStartSeek         固定的要从该位置开始往后读取（体现在直接更换章节）
+     * @return                       Page
+     */
+    static Page createCurPagerAgain(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile, long fixedStartSeek){
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
@@ -72,6 +81,12 @@ public class Page {
             }
             if (lastPagerTxtParagraph != null){
                 needCalcNewTxtParagraph = true;
+            }
+
+            //如果有固定的跳转的位置，那么需要重新读取文件
+            if (fixedStartSeek > 0){
+                startSeek = fixedStartSeek;
+                needCalcNewTxtParagraph = false;
             }
 
             TxtParagraph txtParagraph = lastPagerTxtParagraph;
@@ -124,10 +139,9 @@ public class Page {
      * @param lastCanDrawLine          当前页面的最后一段的可绘制的最后一行
      * @param readSetting              设置选项
      * @param readRandomAccessFile     读取书籍流
-     * @param forcedAdd                是否强制加入，在读取历史记录的时候，无论最后一段有没有绘制完，都需要加入
      * @return                         下一页的page内容
      */
-    static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile, boolean forcedAdd){
+    static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
         Page pager = new Page();
         int displayWidth = DisplayConstant.DISPLAY_WIDTH;
         int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
@@ -150,9 +164,6 @@ public class Page {
                 }else {
                     startSeek = lastPagerTxtParagraph.getSeekEnd() + 1;
                 }
-            }
-            if (forcedAdd && lastPagerTxtParagraph != null){
-                needCalcNewTxtParagraph = true;
             }
 
             TxtParagraph txtParagraph = lastPagerTxtParagraph;

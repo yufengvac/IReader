@@ -25,7 +25,7 @@
 
         <TextView
             android:id="@+id/item_catalog_chapter_tv"
-            style="@style/sub_title_black_text_style"
+            style="@style/read_catalog_text_style"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/common_padding"

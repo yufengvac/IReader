@@ -8,8 +8,10 @@ import android.os.IBinder;
 import android.view.View;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.db.readchapter.ReadChapterDatabase;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.utils.HardWareManager;
+import com.yufeng.ireader.reader.utils.YLog;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSettingView;
@@ -27,7 +29,9 @@ import com.yufeng.ireader.utils.ReadPreferHelper;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -35,15 +39,17 @@ import io.reactivex.functions.Consumer;
  */
 
 public class ReadActivity extends BaseActivity implements OnMenuListener, OnReadMenuClickListener, OnReadViewChangeListener {
-    private static final String TAG = ReadActivity.class.getSimpleName();
     private String path;
     private static final String KEY_PATH = "path";
+    public static final int REQUEST_CODE = 1000;
 
     private ReadView readView;
     private IReadSetting readSetting;
     private ReadMenuSetView readMenuSetView;
     private ReadMenuSettingView readMenuSettingView;
     private ChapterService chapterService;
+    private boolean hasCatalog = false;
+    private ServiceConnection chapterConn ;
 
     public static void startActivity(Context context, String path){
         Intent intent = new Intent(context, ReadActivity.class);
@@ -90,27 +96,54 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
         readMenuSettingView = new ReadMenuSettingView(this,readSetting);
 
+
+        ReadChapterDatabase.getInstance().getReadChapterDao().getChapterCount(path)
+        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                YLog.i(ReadActivity.this,"目录条数->"+integer);
+                if (integer <= 0){
+                    hasCatalog = false;
+                    startChapterSplitService();
+                }else {
+                    hasCatalog = true;
+                }
+            }
+        });
+
+    }
+
+    private void startChapterSplitService(){
+
+        chapterConn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                ChapterService.ChapterBinder chapterBinder = (ChapterService.ChapterBinder) service;
+                chapterService = chapterBinder.getService();
+                chapterService.startSplitChapter();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                chapterService = null;
+            }
+        };
+
         Intent intent = new Intent(this, ChapterService.class);
         intent.putExtra(ChapterService.KEY_BOOK_PATH, path);
         startService(intent);
         bindService(intent,chapterConn, BIND_AUTO_CREATE);
     }
 
-    ServiceConnection chapterConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            ChapterService.ChapterBinder chapterBinder = (ChapterService.ChapterBinder) service;
-            chapterService = chapterBinder.getService();
-            chapterService.startSplitChapter();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null){
+            long curSeekStart = data.getLongExtra(CatalogActivity.KEY_CUR_POSITION, -1);
+            readView.refreshReadView(true, curSeekStart);
         }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            chapterService = null;
-        }
-    };
-
-
+    }
 
     /***************************OnMenuListener**********************************************/
     @Override
@@ -133,7 +166,11 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         Single.timer(200, TimeUnit.MILLISECONDS).subscribe(new Consumer<Long>() {
             @Override
             public void accept(Long aLong) throws Exception {
-                startActivity(new Intent(ReadActivity.this, CatalogActivity.class));
+                Intent intent = new Intent(ReadActivity.this, CatalogActivity.class);
+                intent.putExtra(CatalogActivity.KEY_HAS_CATALOG,hasCatalog);
+                intent.putExtra(CatalogActivity.KEY_BOOK_PATH,path);
+                intent.putExtra(CatalogActivity.KEY_CUR_POSITION,readView.getCurPosition());
+                startActivityForResult(intent,REQUEST_CODE);
 //                overridePendingTransition(R.anim.left_in, R.anim.hold);
             }
         });
@@ -166,7 +203,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
     /*************************OnReadViewChangeListener*******************************************/
     @Override
     public void onReadViewChange(boolean isForcedCalc) {
-        readView.refreshReadView(isForcedCalc);
+        readView.refreshReadView(isForcedCalc, -1);
     }
 
     @Override

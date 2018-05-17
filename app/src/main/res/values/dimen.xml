@@ -7,6 +7,7 @@
     <dimen name="title_size">16sp</dimen>
     <dimen name="sub_title_size">14sp</dimen>
     <dimen name="sub_big_title_size">18sp</dimen>
+    <dimen name="big_title_size">22sp</dimen>
 
     <dimen name="read_menu_setting_theme_width">40dp</dimen>
 </resources>

@@ -9,7 +9,7 @@ import com.yufeng.ireader.db.base.DBConstants;
 
 /**
  * Created by yufeng on 2018/5/10-0010.
- *
+ * 书架书籍数据库
  */
 @Database(entities = Book.class, version = DBConstants.DB_VERSION_BOOK)
 public abstract class BookDatabase extends RoomDatabase{

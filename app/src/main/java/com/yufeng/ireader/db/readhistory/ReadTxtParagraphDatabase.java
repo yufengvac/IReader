@@ -11,7 +11,7 @@ import static com.yufeng.ireader.db.base.DBConstants.DB_VERSION_READ_TEXT_PARAGR
 
 /**
  * Created by yufeng on 2018/4/24-0024.
- *
+ * 书籍阅读历史记录数据库
  */
 @Database(entities = {ReadTxtParagraph.class}, version = DB_VERSION_READ_TEXT_PARAGRAPH )
 public abstract class ReadTxtParagraphDatabase extends RoomDatabase{
