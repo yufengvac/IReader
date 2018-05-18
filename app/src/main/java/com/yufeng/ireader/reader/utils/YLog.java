@@ -41,6 +41,12 @@ public class YLog {
         }
     }
 
+    public static void i(String TAG, String msg){
+        if (debug){
+            android.util.Log.i(TAG, msg);
+        }
+    }
+
     public static void w(Activity activity,String msg) {
         if (debug) {
             android.util.Log.w(activity.getClass().getSimpleName(), buildMessage(msg));
@@ -50,6 +56,12 @@ public class YLog {
     public static void e(Activity activity,String msg) {
         if (debug) {
             android.util.Log.e(activity.getClass().getSimpleName(), buildMessage(msg));
+        }
+    }
+
+    public static void e(String TAG, String msg){
+        if (debug){
+            android.util.Log.e(TAG, msg);
         }
     }
     

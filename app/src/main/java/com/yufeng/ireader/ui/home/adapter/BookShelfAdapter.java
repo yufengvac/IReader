@@ -53,7 +53,8 @@ public class BookShelfAdapter extends RecyclerView.Adapter<BookShelfAdapter.View
     public void onBindViewHolder(BookShelfAdapter.ViewHolder holder, int position) {
         Book book = mData.get(position);
         holder.bookNameTv.setText(book.getBookName());
-        holder.bookDescTv.setText(book.getBookDesc());
+        String desc = "\u3000\u3000"+book.getBookDesc();
+        holder.bookDescTv.setText(desc);
 
         holder.sizeTv.setText(BookHelper.transFormFromByte(book.getSize()));
 

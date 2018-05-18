@@ -2,7 +2,9 @@ package com.yufeng.ireader.reader.utils;
 
 import android.text.TextUtils;
 
+import com.yufeng.ireader.db.book.BookDatabase;
 import com.yufeng.ireader.db.readchapter.ReadChapter;
+import com.yufeng.ireader.utils.BookHelper;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -38,6 +40,7 @@ public class ChapterUtil {
     private static long totalLength;
     private static List<ReadChapter> readChapterList;
     private static ObservableEmitter<Float> observableEmitter;
+    private static long hasFoundIntroSeekStart = -1;
 
     public static void prepareStartSplitChapter(String bookPath_, long curSeek, String para, long totalSize, List<ReadChapter> readChapterLists, ObservableEmitter<Float> observableEmitter1){
         bookPath = bookPath_;
@@ -55,6 +58,7 @@ public class ChapterUtil {
         totalLength = 0;
         readChapterList = null;
         observableEmitter = null;
+        hasFoundIntroSeekStart = -1;
     }
 
     public static void startSplitChapter(){
@@ -68,6 +72,12 @@ public class ChapterUtil {
 
 
     public static void splitChapter(String paragraph){
+        if (hasFoundIntroSeekStart < seekStart && hasFoundIntroSeekStart > 0){
+            YLog.i("ChapterUtil","插入书籍介绍->"+paragraph);
+            if (BookHelper.updateBookDesc(bookPath, paragraph)){
+                hasFoundIntroSeekStart = -1;
+            }
+        }
         if (paragraph.length() >= 35){//多于35个字符长度一律不视作标题
             return;
         }
@@ -161,6 +171,7 @@ public class ChapterUtil {
             for (String external: CS_EXTERNAL){
                 if (paragraph.contains(external)){
                     createIntroduction(external);
+                    hasFoundIntroSeekStart = seekStart;
                 }
             }
         }

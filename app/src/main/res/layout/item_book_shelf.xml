@@ -56,7 +56,9 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:lines="2"
-                android:paddingTop="@dimen/common_padding"
+                android:paddingTop="@dimen/common_padding_small"
+                android:paddingBottom="@dimen/common_padding_small"
+                android:lineSpacingExtra="3dp"
                 android:text="雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行雪中悍刀行" />
 
             <RelativeLayout

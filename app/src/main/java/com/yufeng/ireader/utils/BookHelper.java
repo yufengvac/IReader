@@ -87,6 +87,24 @@ public class BookHelper {
         }
     }
 
+    /**
+     * 更新书籍介绍，该方法需要在子线程中调用
+     * @param bookPath  书籍路径
+     * @param bookDesc  书籍介绍
+     * @return          true成功；false失败
+     */
+    public static boolean updateBookDesc(String bookPath, String bookDesc){
+        if (isEmptyLine(bookDesc) || isEmptyLine(bookPath)){
+            return false;
+        }
+        BookDatabase.getInstance().getBookDao().updateBookDesc(bookPath, bookDesc);
+        return true;
+    }
+
+    public static boolean isEmptyLine(String txtParagraph){
+        return TextUtils.isEmpty(txtParagraph.trim()) || txtParagraph.trim().equals("\n");
+    }
+
 
     public static String tranFormFromTimeMillis(long timeMillis){
         String timeStr;

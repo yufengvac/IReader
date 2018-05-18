@@ -9,6 +9,7 @@ import com.yufeng.ireader.reader.utils.CharCalculator;
 import com.yufeng.ireader.reader.utils.CodeUtil;
 import com.yufeng.ireader.reader.utils.ReadRandomAccessFile;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
+import com.yufeng.ireader.utils.BookHelper;
 import com.yufeng.ireader.utils.DisplayConstant;
 
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ public class Page {
             while (true){
                 if ( !needCalcNewTxtParagraph ){
                     txtParagraph = TxtParagraph.createTxtParagraphBySeekStart(readRandomAccessFile, displayWidth, readSetting, startSeek);
-                    if (TextUtils.isEmpty(txtParagraph.getParagraph().trim()) || txtParagraph.getParagraph().trim().equals("\n")){
+                    if (BookHelper.isEmptyLine(txtParagraph.getParagraph())){
                         startSeek = txtParagraph.getSeekStart() + 1;
                         continue;
                     }

@@ -28,4 +28,7 @@ public interface BookDao {
 
     @Query("UPDATe book SET read_percent = :readPercent WHERE book_path = :bookPath")
     long updateBookReadPercent(String bookPath, float readPercent);
+
+    @Query("UPDATE book SET book_desc = :desc WHERE book_path = :bookPath")
+    long updateBookDesc(String bookPath, String desc);
 }
