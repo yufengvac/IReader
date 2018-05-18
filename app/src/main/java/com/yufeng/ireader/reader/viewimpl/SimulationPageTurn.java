@@ -11,6 +11,8 @@ import com.yufeng.ireader.reader.viewinterface.PageTurn;
  */
 
 public class SimulationPageTurn extends PageTurn{
+    private float touchX, touchY ;
+    private boolean hasDirection = false;
     @Override
     public void turnNext() {
 
@@ -23,7 +25,34 @@ public class SimulationPageTurn extends PageTurn{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return event.getAction() != MotionEvent.ACTION_UP;
+
+        if (event.getAction() == MotionEvent.ACTION_UP){
+            touchX = event.getX();
+            touchY = event.getY();
+            hasDirection = false;
+        }else if (event.getAction() == MotionEvent.ACTION_MOVE){
+            if (!hasDirection){
+                if (event.getX() > touchX){
+                    setPageTurnDirection(PageTurnDirection.DIRECTION_PREVIOUS);
+                    hasDirection = true;
+                }else if (event.getX() < touchX){
+                    setPageTurnDirection(PageTurnDirection.DIRECTION_NEXT);
+                    hasDirection = true;
+                }
+            }
+
+            if (hasDirection){
+                calcPoint(event.getX(), event.getY());
+            }
+
+        }else if (event.getAction() == MotionEvent.ACTION_DOWN){
+            return true;
+        }
+        return false;
+    }
+
+    private void calcPoint(float touchX, float touchY){
+
     }
 
     @Override
