@@ -94,6 +94,7 @@ public class CharCalculator {
 
                 char newLineChar = paragrah.charAt(i);
                 if (index == -1 || newLineChar != NEW_LINE_CHAR && newLineChar != RETURN_CHAR && newLineChar!= 0){
+                    desCharWidth = getOneCharWidth(baseChineseCharWidth, contentPaint, newLineChar);
                     headIndexList.add(i);
                 }else if (newLineChar == NEW_LINE_CHAR){
                     handleHeadIndexList(headIndexList, paragrah);

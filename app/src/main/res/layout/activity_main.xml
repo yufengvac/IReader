@@ -3,48 +3,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.yufeng.ireader.ui.home.activity.MainActivity"
     android:background="@color/gray_background"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context="com.yufeng.ireader.ui.home.activity.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:orientation="horizontal"
-        android:padding="@dimen/common_padding"
-        android:background="@color/white">
-        <TextView
+        android:padding="@dimen/common_padding">
+
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/main_book_shelf"
-            style="@style/title_text_style"/>
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/icon_shelf"
+                android:layout_gravity="center_vertical"/>
+
+            <TextView
+                style="@style/title_text_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/main_book_shelf"
+                android:layout_marginLeft="@dimen/common_padding_small"
+                android:layout_marginStart="@dimen/common_padding_small"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical">
+
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/icon_search"
-                android:contentDescription="@string/app_name"/>
+                android:contentDescription="@string/app_name" />
+
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/icon_option"
-                android:contentDescription="@string/app_name"
                 android:layout_marginLeft="@dimen/common_padding"
-                android:layout_marginStart="@dimen/common_padding"/>
+                android:layout_marginStart="@dimen/common_padding"
+                android:background="@drawable/icon_option"
+                android:contentDescription="@string/app_name" />
         </LinearLayout>
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/divider_line"/>
+        android:background="@color/divider_line" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/book_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 </LinearLayout>
