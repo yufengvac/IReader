@@ -8,10 +8,9 @@ import android.os.IBinder;
 import android.view.View;
 
 import com.yufeng.ireader.R;
-import com.yufeng.ireader.db.readchapter.ReadChapterDatabase;
+import com.yufeng.ireader.db.readchapter.ReadChapterHelper;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.utils.HardWareManager;
-import com.yufeng.ireader.reader.utils.YLog;
 import com.yufeng.ireader.reader.view.ReadView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSetView;
 import com.yufeng.ireader.reader.viewimpl.ReadMenuSettingView;
@@ -29,9 +28,7 @@ import com.yufeng.ireader.utils.ReadPreferHelper;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by yufeng on 2018/4/11.
@@ -96,13 +93,9 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
         readMenuSettingView = new ReadMenuSettingView(this,readSetting);
 
-
-        ReadChapterDatabase.getInstance().getReadChapterDao().getChapterCount(path)
-        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Consumer<Integer>() {
+        ReadChapterHelper.getChapterCountAync(path, new ReadChapterHelper.Callback<Integer>() {
             @Override
-            public void accept(Integer integer) throws Exception {
-                YLog.i(ReadActivity.this,"目录条数->"+integer);
+            public void onCallback(Integer integer) {
                 if (integer <= 0){
                     hasCatalog = false;
                     startChapterSplitService();
@@ -178,12 +171,10 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
     @Override
     public void onBrightnessClick(View view) {
-
     }
 
     @Override
     public void onListenClick(View view) {
-
     }
 
     @Override
@@ -198,7 +189,15 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
         }
     }
 
+    @Override
+    public void onTurnPreChapter(View view) {
+        readView.refreshReadView(true, ReadChapterHelper.getPreChapterPosition(path, readView.getCurPosition()));
+    }
 
+    @Override
+    public void onTurnNextChapter(View view) {
+        readView.refreshReadView(true, ReadChapterHelper.getNextChapterPosition(path, readView.getCurPosition()));
+    }
 
     /*************************OnReadViewChangeListener*******************************************/
     @Override

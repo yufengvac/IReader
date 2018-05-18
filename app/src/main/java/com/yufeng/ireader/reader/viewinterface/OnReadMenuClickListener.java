@@ -12,4 +12,6 @@ public interface OnReadMenuClickListener {
     void onBrightnessClick(View view);
     void onListenClick(View view);
     void onSettingClick(View view);
+    void onTurnPreChapter(View view);
+    void onTurnNextChapter(View view);
 }

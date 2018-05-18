@@ -55,14 +55,16 @@
             android:layout_marginRight="@dimen/common_padding"
             android:layout_marginEnd="@dimen/common_padding">
             <TextView
+                android:id="@+id/read_menu_prev_chapter_tv"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:text="@string/read_menu_pre_chapter"
+                android:gravity="center"
                 android:layout_gravity="center_vertical"
                 style="@style/read_menu_text_style"/>
 
             <SeekBar
-                android:id="@+id/chapter_progress_online"
+                android:id="@+id/read_menu_chapter_progress_seek_bar"
                 style="@style/read_seek_bar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -71,9 +73,11 @@
                 android:progress="0" />
 
             <TextView
+                android:id="@+id/read_menu_next_chapter_tv"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:text="@string/read_menu_next_chapter"
+                android:gravity="center"
                 android:layout_gravity="center_vertical"
                 style="@style/read_menu_text_style"/>
         </LinearLayout>

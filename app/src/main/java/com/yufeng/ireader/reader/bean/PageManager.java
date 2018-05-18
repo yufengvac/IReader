@@ -327,6 +327,10 @@ public class PageManager {
         return pagerSparseArray.get(PageType.PAGE_CURRENT).getFirstTxtParagraph().getSeekStart();
     }
 
+    public float getCurPercent(){
+        return getCurPosition() * 1.0f / readRandomAccessFile.getSize();
+    }
+
     private void initReadRandomAccessFile(String path) {
         try {
             if (readRandomAccessFile == null) {

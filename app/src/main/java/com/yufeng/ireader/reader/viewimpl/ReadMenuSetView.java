@@ -9,9 +9,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.yufeng.ireader.R;
+import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
 import com.yufeng.ireader.reader.view.MenuSetView;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
@@ -38,6 +40,9 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
 
     private LinearLayout categoryLayout, brightnessLayout, listenLayout, settingLayout;
     private ImageView dayNightModeIv;
+
+    private TextView prevChapterTv, nextChapterTv;
+    private SeekBar progressSeekbar;
 
     private OnReadMenuClickListener onReadMenuClickListener;
 
@@ -79,6 +84,11 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
 
         dayNightModeIv = (ImageView) findViewById(R.id.read_menu_day_night_mode);
 
+        prevChapterTv = (TextView) findViewById(R.id.read_menu_prev_chapter_tv);
+        nextChapterTv = (TextView) findViewById(R.id.read_menu_next_chapter_tv);
+        progressSeekbar = (SeekBar) findViewById(R.id.read_menu_chapter_progress_seek_bar);
+        progressSeekbar.setMax(1000);
+
         setDayNightImageView();
     }
 
@@ -112,11 +122,18 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
         changeModeAppearAnim = AnimationUtils.loadAnimation(mContext, R.anim.rotate_spit);
         changeModeAppearAnim.setDuration(DURATION);
         changeModeAppearAnim.setAnimationListener(this);
+
+        prevChapterTv.setOnClickListener(this);
+        nextChapterTv.setOnClickListener(this);
     }
 
     @Override
     public void show() {
         super.show();
+
+        if (progressSeekbar != null){
+            progressSeekbar.setProgress((int)(PageManager.getInstance().getCurPercent() * 1000));
+        }
     }
 
     @Override
@@ -284,6 +301,16 @@ public class ReadMenuSetView extends MenuSetView implements View.OnClickListener
                 dayNightModeIv.startAnimation(changeModeDismissAnim);
                 if (onReadViewChangeListener != null){
                     onReadViewChangeListener.onReadViewChange(false);
+                }
+                break;
+            case R.id.read_menu_prev_chapter_tv:
+                if (onReadMenuClickListener != null){
+                    onReadMenuClickListener.onTurnPreChapter(prevChapterTv);
+                }
+                break;
+            case R.id.read_menu_next_chapter_tv:
+                if (onReadMenuClickListener != null){
+                    onReadMenuClickListener.onTurnNextChapter(nextChapterTv);
                 }
                 break;
         }

@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.db.readchapter.ReadChapter;
-import com.yufeng.ireader.db.readchapter.ReadChapterDatabase;
+import com.yufeng.ireader.db.readchapter.ReadChapterHelper;
 import com.yufeng.ireader.reader.adapter.CatalogAdapter;
 import com.yufeng.ireader.reader.service.ChapterService;
 import com.yufeng.ireader.reader.utils.YLog;
@@ -25,10 +25,6 @@ import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.PathHelper;
 
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by yufeng on 2018/5/8.
@@ -75,22 +71,12 @@ public class CatalogActivity extends BaseActivity implements OnChapterSplitListe
         bookNameTv.setText(PathHelper.getBookNameByPath(bookPath));
 
         if (hasCatalog && !TextUtils.isEmpty(bookPath)){
-            try {
-                ReadChapterDatabase.getInstance().getReadChapterDao().getCatalogList(bookPath)
-                        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<List<ReadChapter>>() {
-                            @Override
-                            public void accept(List<ReadChapter> readChapters) throws Exception {
-                                if (readChapters != null && readChapters.size() > 0){
-                                    YLog.i(CatalogActivity.this, "路径"+bookPath+",目录条数为"+readChapters.size());
+            List<ReadChapter> readChapterList = ReadChapterHelper.getAllReadChapterList(bookPath);
+            if (readChapterList != null && readChapterList.size() > 0){
+                YLog.i(CatalogActivity.this, "路径"+bookPath+",目录条数为"+readChapterList.size());
 
-                                    setSelectedPosition(readChapters);
-                                    catalogAdapter.setData(readChapters);
-                                }
-                            }
-                        });
-            }catch (Exception e){
-                e.printStackTrace();
+                setSelectedPosition(readChapterList);
+                catalogAdapter.setData(readChapterList);
             }
         }else {
 
