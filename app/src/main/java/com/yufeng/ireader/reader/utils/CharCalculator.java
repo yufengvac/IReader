@@ -95,6 +95,11 @@ public class CharCalculator {
                 char newLineChar = paragrah.charAt(i);
                 if (index == -1 || newLineChar != NEW_LINE_CHAR && newLineChar != RETURN_CHAR && newLineChar!= 0){
                     headIndexList.add(i);
+                }else if (newLineChar == NEW_LINE_CHAR){
+                    handleHeadIndexList(headIndexList, paragrah);
+                    txtParagraph.setHeadIndexList(headIndexList);
+                    txtParagraph.setOffsetX(offsetXArr);
+                    return;
                 }
             }
 
