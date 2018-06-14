@@ -92,12 +92,12 @@ public class ReadChapterHelper {
         return -2;
     }
 
-    /**
+    /**y
      * 获取某本书的数据库下的目录总数，异步
      * @param path      书的路径
      * @param callback  回调
      */
-    public static void getChapterCountAync(String path, final Callback<Integer> callback){
+    public static void getChapterCountAnyc(String path, final Callback<Integer> callback){
         ReadChapterDatabase.getInstance().getReadChapterDao().getChapterCount(path)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Integer>() {

@@ -16,6 +16,7 @@ import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.utils.PageTurnFactory;
 import com.yufeng.ireader.reader.utils.ReadExteriorConstants;
 import com.yufeng.ireader.reader.utils.ReadExteriorHelper;
+import com.yufeng.ireader.reader.viewimpl.SimulationPageTurn;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.reader.viewinterface.OnMenuListener;
 import com.yufeng.ireader.reader.viewinterface.OnPageTurnListener;
@@ -183,6 +184,9 @@ public class ReadView extends View implements OnPageTurnListener{
 
 
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
+        if (pageTurn instanceof SimulationPageTurn){
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());
@@ -196,6 +200,11 @@ public class ReadView extends View implements OnPageTurnListener{
 
     public void recreatePageTurn(IReadSetting readSetting){
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
+        if (pageTurn instanceof SimulationPageTurn){
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }else {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
         pageTurn.setContext(getContext());

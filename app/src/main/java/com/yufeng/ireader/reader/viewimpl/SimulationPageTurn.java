@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisplayConstant;
+import com.yufeng.ireader.utils.ReadPreferHelper;
 
 /**
  * Created by yufeng on 2018/4/25-0025.
@@ -21,12 +22,14 @@ public class SimulationPageTurn extends PageTurn{
     private float touchX, touchY ;
     private boolean hasDirection = false;
     private float mValueAdded;// 精度附减值
+    private float mBuffArea;
 
     private int viewHeight;
     private int viewWidth;
 
     private static final float CURVATURE = 1 / 4F;// 曲度值
     private static final float VALUE_ADDED = 1 / 400F;// 精度附加值占比
+    private static final float BUFF_AREA = 1 / 50F;// 底部缓冲区域占比
 
     private Path mPath ;
     private Path mPathTrap ;
@@ -48,6 +51,10 @@ public class SimulationPageTurn extends PageTurn{
         viewWidth = DisplayConstant.DISPLAY_WIDTH;
         viewHeight = DisplayConstant.DISPLAY_HEIGHT;
 
+//        if (!ReadPreferHelper.getInstance().getImmersiveRead()){
+//            viewHeight -= DisplayConstant.STATUS_BAR_HEIGHT;
+//        }
+
         mPath = new Path();
         mPathTrap = new Path();
         mPathSemicircleBtm = new Path();
@@ -62,17 +69,19 @@ public class SimulationPageTurn extends PageTurn{
         mRegionSemicircle = new Region();
 
         mValueAdded = viewHeight * VALUE_ADDED;
+        mBuffArea = viewHeight * BUFF_AREA;
 
         initPaint();
+        computeShortSizeRegion();
     }
 
     private void initPaint(){
         contentPaint = new Paint();
         contentPaint.setAntiAlias(true);
         contentPaint.setColor(Color.parseColor("#000000"));
-        contentPaint.setTextSize(16f);
-        contentPaint.setStyle(Paint.Style.FILL);
-        contentPaint.setStrokeWidth(10f);
+        contentPaint.setTextSize(5f);
+        contentPaint.setStyle(Paint.Style.STROKE);
+        contentPaint.setStrokeWidth(4f);
     }
     @Override
     public void turnNext() {
@@ -103,7 +112,17 @@ public class SimulationPageTurn extends PageTurn{
             }
 
             if (hasDirection){
-                calcPoint1(event.getX(), event.getY());
+                if (!mRegionShortSize.contains((int)event.getX(), (int)event.getY())){
+                    float touchY = (float)(Math.sqrt((Math.pow(viewWidth, 2) - Math.pow(event.getX(), 2))) - viewHeight);
+                    touchY = Math.abs(touchY) + mValueAdded;
+                    float area = viewHeight - mBuffArea;
+                    if (touchY >= area){
+                        touchY = area;
+                    }
+                    calcPoint1(event.getX(), touchY);
+                }else {
+                    calcPoint1(event.getX(), event.getY());
+                }
             }
 
         }else if (event.getAction() == MotionEvent.ACTION_DOWN){
@@ -123,13 +142,33 @@ public class SimulationPageTurn extends PageTurn{
         float sizeLong = temp / (2f * ml);
 
         mPath.moveTo(touchX, touchY);
-        mPath.lineTo(viewWidth, viewHeight- sizeLong);
-        mPath.lineTo(viewWidth- sizeShort, viewHeight);
+        mPath.lineTo(viewWidth, viewHeight - sizeLong);
+        mPath.lineTo(viewWidth - sizeShort, viewHeight);
         mPath.close();
 
         this.touchX = touchX;
         this.touchY = touchY;
         onPageTurnListener.onAnimationInvalidate();
+    }
+
+    /**
+     * 计算短边的有效区域
+     */
+    private void computeShortSizeRegion() {
+        // 短边圆形路径对象
+        Path pathShortSize = new Path();
+
+        // 用来装载Path边界值的RectF对象
+        RectF rectShortSize = new RectF();
+
+        // 添加圆形到Path
+        pathShortSize.addCircle(0, viewHeight, viewWidth, Path.Direction.CCW);
+
+        // 计算边界
+        pathShortSize.computeBounds(rectShortSize, true);
+
+        // 将Path转化为Region
+        mRegionShortSize.setPath(pathShortSize, new Region((int) rectShortSize.left, (int) rectShortSize.top, (int) rectShortSize.right, (int) rectShortSize.bottom));
     }
 
     private void calcPoint(float touchX, float touchY){
@@ -398,11 +437,11 @@ public class SimulationPageTurn extends PageTurn{
         }
 
 //        canvas.save();
-//        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-//            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
-//        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
-//            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-//        }
+        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
+        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        }
         canvas.drawPath(mPath, contentPaint);
 //        canvas.restore();
 

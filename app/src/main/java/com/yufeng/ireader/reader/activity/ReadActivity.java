@@ -93,7 +93,7 @@ public class ReadActivity extends BaseActivity implements OnMenuListener, OnRead
 
         readMenuSettingView = new ReadMenuSettingView(this,readSetting);
 
-        ReadChapterHelper.getChapterCountAync(path, new ReadChapterHelper.Callback<Integer>() {
+        ReadChapterHelper.getChapterCountAnyc(path, new ReadChapterHelper.Callback<Integer>() {
             @Override
             public void onCallback(Integer integer) {
                 if (integer <= 0){
