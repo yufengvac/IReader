@@ -54,16 +54,13 @@ public class SimulationPageTurn extends PageTurn{
     }
 
     private Region mRegionShortSize;// 短边的有效区域
-    private Region mRegionCurrent;// 当前页区域，其实就是控件的大小
 
-
-    private Region mRegionNext;// 当前页区域，其实就是控件的大小
-    private Region mRegionFold;// 当前页区域，其实就是控件的大小
-    private Region mRegionSemicircle;// 两月半圆区域
-
-    private RectF foldRectf;
-    private RectF nextRectf;
     private RectF currentRectf;
+
+    private RectF mRectFSemicircle;
+    private RectF mRectFFold;
+    private RectF mRectFNextAndFold;
+    private RectF mRectFTrap;
 
     private Paint contentPaint;
     private Animator animator;
@@ -82,13 +79,17 @@ public class SimulationPageTurn extends PageTurn{
 		 * 实例化区域对象
 		 */
         mRegionShortSize = new Region();
-        mRegionCurrent = new Region();
-        mRegionSemicircle = new Region();
 
         mValueAdded = viewHeight * VALUE_ADDED;
         mBuffArea = viewHeight * BUFF_AREA;
 
         currentRectf = new RectF(0, 0 , viewWidth, viewHeight);
+
+        mRectFSemicircle = new RectF();
+        mRectFFold = new RectF();
+        mRectFNextAndFold = new RectF();
+        mRectFTrap = new RectF();
+
         initPaint();
         computeShortSizeRegion();
     }
@@ -125,6 +126,7 @@ public class SimulationPageTurn extends PageTurn{
 
     @SuppressWarnings("unused")
     private void setShiftX(float x){
+        touchX = x;
         if (isPageTurn){
             touchY = startY + ((x - startX) * (viewHeight - startY)) / (-viewWidth - startX);
         }else {
@@ -194,6 +196,9 @@ public class SimulationPageTurn extends PageTurn{
     private void calcPoint1(float touchX, float touchY){
         mPath.reset();
         mPathFoldAndNext.reset();
+        mPathTrap.reset();
+        mPathSemicircleBtm.reset();
+        mPathSemicircleLeft.reset();
 
         viewHeight = DisplayConstant.DISPLAY_HEIGHT_SIMULATION;
 
@@ -205,12 +210,14 @@ public class SimulationPageTurn extends PageTurn{
         float sizeShort = temp / (2f * mk);
         float sizeLong = temp / (2f * ml);
 
-        mPath.moveTo(touchX, touchY);
-        mPathFoldAndNext.moveTo(touchX, touchY);
+        float tempAM = mk - sizeShort;
+
+//        mPath.moveTo(touchX, touchY);
+//        mPathFoldAndNext.moveTo(touchX, touchY);
 
         if (sizeShort < sizeLong){
             mRatio = Ratio.SHORT;
-            float sin = (mk - sizeShort) / sizeShort;
+            float sin = tempAM / sizeShort;
             mDegree = (float)(Math.asin(sin) / Math.PI * 180);
         }else {
             mRatio = Ratio.LONG;
@@ -228,30 +235,151 @@ public class SimulationPageTurn extends PageTurn{
             float topX2 = viewWidth - smallTriangleShortSize;
             float btmX2 = viewWidth - sizeShort;
 
+            //计算曲线起点
+            float startXBtm = btmX2 - CURVATURE * sizeShort;
+            float startYBtm = viewHeight;
+
+            //计算曲线终点
+            float endXBtm = touchX + (1 - CURVATURE) * tempAM;
+            float endYBtm = touchY + (1 - CURVATURE) * ml;
+
+            //计算曲线控制点
+            float controlXBtm = btmX2 * 1.0f;
+            float controlYBtm = viewHeight;
+
+            //计算曲线顶点
+            float bezierPeakXBtm = 0.25f * startXBtm + 0.5f * controlXBtm + 0.25f * endXBtm;
+            float bezierPeakYBtm = 0.25f * startYBtm + 0.5f * controlYBtm + 0.25f * endYBtm;
+
+            mPath.moveTo(startXBtm, startYBtm);
+            mPath.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPath.lineTo(touchX, touchY);
             mPath.lineTo(topX1, 0);
             mPath.lineTo(topX2, 0);
-            mPath.lineTo(btmX2, viewHeight);
-            mPath.close();
+//            mPath.lineTo(btmX2, viewHeight);
+//            mPath.lineTo(bezierPeakXBtm, bezierPeakYBtm);
+//            mPath.close();
 
+
+            mPathTrap.moveTo(startXBtm, startYBtm);
+            mPathTrap.lineTo(topX2, 0);
+            mPathTrap.lineTo(bezierPeakXBtm, bezierPeakYBtm);
+            mPathTrap.close();
+
+            mPathSemicircleBtm.moveTo(startXBtm, startYBtm);
+            mPathSemicircleBtm.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPathSemicircleBtm.close();
+
+            mPathFoldAndNext.moveTo(startXBtm, startYBtm);
+            mPathFoldAndNext.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPathFoldAndNext.lineTo(touchX, touchY);
             mPathFoldAndNext.lineTo(topX1, 0);
             mPathFoldAndNext.lineTo(viewWidth, 0);
             mPathFoldAndNext.lineTo(viewWidth, viewHeight);
-            mPathFoldAndNext.lineTo(btmX2, viewHeight);
             mPathFoldAndNext.close();
+
+            mPathSemicircleBtm.computeBounds(mRectFSemicircle, false);
         }else {
 
             float leftY = viewHeight - sizeLong;
             float btmX = viewWidth - sizeShort;
 
-            mPath.lineTo(viewWidth, leftY);
-            mPath.lineTo(btmX, viewHeight);
-            mPath.close();
+            //计算曲线起点
+            float startXBtm = btmX - CURVATURE * sizeShort;
+            float startYBtm = viewHeight;
+            float startXLeft = viewWidth;
+            float startYLeft = leftY - CURVATURE * sizeLong;
 
-            mPathFoldAndNext.lineTo(viewWidth, leftY);
+            //计算曲线终点
+            float endXBtm = touchX + (1 - CURVATURE) * tempAM;
+            float endYBtm = touchY + (1 - CURVATURE) * ml;
+            float endXLeft = touchX + (1 - CURVATURE) * mk;
+            float endYLeft = touchY - (1 - CURVATURE) * (sizeLong - ml);
+
+            //计算曲线控制点
+            float controlXBtm = btmX * 1.0f;
+            float controlYBtm = viewHeight;
+            float controlXLeft = viewWidth;
+            float controlYLeft = leftY * 1.0f;
+
+            //计算曲线顶点
+            float bezierPeakXBtm = 0.25f * startXBtm + 0.5f * controlXBtm + 0.25f * endXBtm;
+            float bezierPeakYBtm = 0.25f * startYBtm + 0.5f * controlYBtm + 0.25f * endYBtm;
+            float bezierPeakXLeft = 0.25f * startXLeft + 0.5f * controlXLeft + 0.25f * endXLeft;
+            float bezierPeakYLeft = 0.25f * startXLeft + 0.5f * controlYLeft + 0.25f * endYLeft;
+
+            if (startYLeft <= 0 ){
+                startYLeft = 0;
+            }
+
+            if (startXBtm <= 0){
+                startXBtm = 0;
+            }
+
+            float partOfShortLength = CURVATURE * sizeShort;
+            if (btmX >= -mValueAdded && btmX <= partOfShortLength - mValueAdded){
+                float f = btmX / partOfShortLength;
+                float t = 0.5f * f;
+
+                float bezierPeakTemp = 1 - t;
+                float bezierPeakTemp1 = bezierPeakTemp * bezierPeakTemp;
+                float bezierPeakTemp2 = 2 * t * bezierPeakTemp;
+                float bezierPeakTemp3 = t * t;
+
+                bezierPeakXBtm = bezierPeakTemp1 * startXBtm + bezierPeakTemp2 * controlXBtm + bezierPeakTemp3 * endXBtm;
+                bezierPeakYBtm = bezierPeakTemp1 * startYBtm + bezierPeakTemp2 * controlYBtm + bezierPeakTemp3 * endYBtm;
+            }
+
+            float partOfLongLength = CURVATURE * sizeLong;
+            if (leftY >= -mValueAdded && leftY <= partOfLongLength - mValueAdded){
+                float f = leftY / partOfLongLength;
+                float t = 0.5f * f;
+
+                float bezierPeakTemp = 1- t;
+                float bezierPeakTemp1 = bezierPeakTemp * bezierPeakTemp;
+                float bezierPeakTemp2 = 2 * t * bezierPeakTemp;
+                float bezierPeakTemp3 = t * t;
+
+                bezierPeakXLeft = bezierPeakTemp1 * startXLeft + bezierPeakTemp2 * controlXLeft + bezierPeakTemp3 * endXLeft;
+                bezierPeakYLeft = bezierPeakTemp1 * startXLeft + bezierPeakTemp2 * controlYLeft + bezierPeakTemp3 * endYLeft;
+            }
+
+            mPathTrap.moveTo(startXBtm, startYBtm);
+            mPathTrap.lineTo(startXLeft, startYLeft);
+            mPathTrap.lineTo(bezierPeakXLeft, bezierPeakYLeft);
+            mPathTrap.lineTo(bezierPeakXBtm, bezierPeakYBtm);
+            mPathTrap.close();
+
+            mPathSemicircleBtm.moveTo(startXBtm, startYBtm);
+            mPathSemicircleBtm.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPathSemicircleBtm.close();
+
+            mPathSemicircleLeft.moveTo(endXLeft, endYLeft);
+            mPathSemicircleLeft.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
+            mPathSemicircleLeft.close();
+
+            mPath.moveTo(startXBtm, startYBtm);
+            mPath.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPath.lineTo(touchX, touchY);
+            mPath.lineTo(endXLeft, endYLeft);
+            mPath.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
+
+//            mPath.lineTo(viewWidth, leftY);
+//            mPath.lineTo(btmX, viewHeight);
+//            mPath.close();
+            mPathFoldAndNext.moveTo(startXBtm, startYBtm);
+            mPathFoldAndNext.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
+            mPathFoldAndNext.lineTo(touchX, touchY);
+            mPathFoldAndNext.lineTo(endXLeft, endYLeft);
+            mPathFoldAndNext.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
             mPathFoldAndNext.lineTo(viewWidth, viewHeight);
-            mPathFoldAndNext.lineTo(btmX, viewHeight);
             mPathFoldAndNext.close();
+
         }
+
+//        mPath.computeBounds(mRectFFold, false);
+//        mPathFoldAndNext.computeBounds(mRectFNextAndFold, false);
+//        mPathTrap.computeBounds(mRectFTrap, false);
 
         this.touchX = touchX;
         this.touchY = touchY;
@@ -278,262 +406,6 @@ public class SimulationPageTurn extends PageTurn{
         mRegionShortSize.setPath(pathShortSize, new Region((int) rectShortSize.left, (int) rectShortSize.top, (int) rectShortSize.right, (int) rectShortSize.bottom));
     }
 
-    private void calcPoint(float touchX, float touchY){
-
-        mPath.reset();
-        mPathFoldAndNext.reset();
-        mPathTrap.reset();
-        mPathSemicircleBtm.reset();
-        mPathSemicircleLeft.reset();
-
-        //计算sizeLong
-        float mK = viewWidth - touchX;
-        float mL = viewHeight - touchY;
-        float temp = (float)(Math.pow(mL, 2) + Math.pow(mK, 2));
-
-        float sizeShort = temp / (2f * mK);
-        float sizeLong = temp / (2f * mL);
-
-        if (sizeLong > viewHeight){//右侧滑到最顶端，右侧不显示曲线
-            calcPointWithoutRight(touchX, touchY,mK, mL, sizeShort, sizeLong);
-        }else {
-            calcPointWithRight(touchX, touchY, mK, mL, sizeShort, sizeLong);
-        }
-
-        //根据Path生成的折叠区域
-        mRegionFold = computeRegion(mPath);
-
-        //替补区域
-        Region regionTrap = computeRegion(mPathTrap);
-
-        //令折叠区域与替补区域相加
-        mRegionFold.op(regionTrap, Region.Op.UNION);
-
-        //从相加后的区域中剔除月半圆的区域或得最终折叠区域
-        mRegionFold.op(mRegionSemicircle, Region.Op.DIFFERENCE);
-
-        //计算下一页区域
-        mRegionNext = computeRegion(mPathFoldAndNext);
-        mRegionNext.op(mRegionFold, Region.Op.DIFFERENCE);
-
-
-        this.touchX = touchX;
-        this.touchY = touchY;
-        onPageTurnListener.onAnimationInvalidate();
-    }
-
-    private void calcPointWithoutRight(float touchX, float touchY,float mk,float mL, float sizeShort, float sizeLong){
-
-        float an = sizeLong - viewHeight;
-
-        float largerTrianShortSize  = an / ( sizeLong - (viewHeight - touchY)) * (viewWidth - touchX);
-        float smallTrianShortSize = an / sizeLong * sizeShort;
-
-        float topX1 = viewWidth - viewWidth - largerTrianShortSize;
-        float topX2 = viewWidth - smallTrianShortSize;
-        float btmX2 = viewWidth - sizeShort;
-
-        //计算曲线起点
-        float startXBtm = btmX2 - CURVATURE * sizeShort;
-        float startYBtm = viewHeight;
-
-        //计算曲线终点
-        float endXBtm = touchX + (1 - CURVATURE) * (mk - sizeShort);
-        float endYBtm = touchY + (1 - CURVATURE) * mL;
-
-        //计算曲线控制点
-        float controlXBtm = btmX2;
-        float controlYBtm = viewHeight;
-
-        //计算曲线顶点
-        float bezierPeakXBtm = 0.25f * startXBtm + 0.5f * controlXBtm + 0.25f * endXBtm;
-        float bezierPeakYBtm = 0.25f * startYBtm + 0.5f * controlYBtm + 0.25f * endYBtm;
-
-        //生成带曲线的四边形路径
-        mPath.moveTo(startXBtm, startYBtm);
-        mPath.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPath.lineTo(touchX, touchY);
-        mPath.lineTo(topX1, 0);
-        mPath.lineTo(topX2, 0);
-
-        //替补区域Path
-        mPathTrap.moveTo(startXBtm, startYBtm);
-        mPathTrap.lineTo(topX2, 0);
-        mPathTrap.lineTo(bezierPeakXBtm, bezierPeakYBtm);
-        mPathTrap.close();
-
-        //底部月半圆path
-        mPathSemicircleBtm.moveTo(startXBtm, startYBtm);
-        mPathSemicircleBtm.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPathSemicircleBtm.close();
-
-        //生成包含折叠和下一页的路径
-        mPathFoldAndNext.moveTo(startXBtm, startYBtm);
-        mPathFoldAndNext.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPathFoldAndNext.lineTo(touchX, touchY);
-        mPathFoldAndNext.lineTo(topX1, 0);
-        mPathFoldAndNext.lineTo(viewWidth, 0);
-        mPathFoldAndNext.lineTo(viewWidth, viewHeight);
-        mPathFoldAndNext.close();
-
-        // 计算月半圆区域
-        mRegionSemicircle = computeRegion(mPathSemicircleBtm);
-
-    }
-
-    private void calcPointWithRight(float touchX, float touchY, float mk, float mL, float sizeShort, float sizeLong) {
-            /*
-             * 计算参数
-			 */
-        float leftY = viewHeight - sizeLong;
-        float btmX = viewWidth - sizeShort;
-
-        // 计算曲线起点
-        float startXBtm = btmX - CURVATURE * sizeShort;
-        float startYBtm = viewHeight;
-        float startXLeft = viewWidth;
-        float startYLeft = leftY - CURVATURE * sizeLong;
-
-        // 计算曲线终点
-        float endXBtm = touchX + (1 - CURVATURE) * (mk - sizeShort);
-        float endYBtm = touchY + (1 - CURVATURE) * mL;
-        float endXLeft = touchX + (1 - CURVATURE) * mk;
-        float endYLeft = touchY - (1 - CURVATURE) * (sizeLong - mL);
-
-        // 计算曲线控制点
-        float controlXBtm = btmX;
-        float controlYBtm = viewHeight;
-        float controlXLeft = viewWidth;
-        float controlYLeft = leftY;
-
-        // 计算曲线顶点
-        float bezierPeakXBtm = 0.25F * startXBtm + 0.5F * controlXBtm + 0.25F * endXBtm;
-        float bezierPeakYBtm = 0.25F * startYBtm + 0.5F * controlYBtm + 0.25F * endYBtm;
-        float bezierPeakXLeft = 0.25F * startXLeft + 0.5F * controlXLeft + 0.25F * endXLeft;
-        float bezierPeakYLeft = 0.25F * startYLeft + 0.5F * controlYLeft + 0.25F * endYLeft;
-
-			/*
-             * 限制右侧曲线起点
-			 */
-        if (startYLeft <= 0) {
-            startYLeft = 0;
-        }
-
-			/*
-             * 限制底部左侧曲线起点
-			 */
-        if (startXBtm <= 0) {
-            startXBtm = 0;
-        }
-
-			/*
-			 * 根据底部左侧限制点重新计算贝塞尔曲线顶点坐标
-			 */
-        float partOfShortLength = CURVATURE * sizeShort;
-        if (btmX >= -mValueAdded && btmX <= partOfShortLength - mValueAdded) {
-            float f = btmX / partOfShortLength;
-            float t = 0.5F * f;
-
-            float bezierPeakTemp = 1 - t;
-            float bezierPeakTemp1 = bezierPeakTemp * bezierPeakTemp;
-            float bezierPeakTemp2 = 2 * t * bezierPeakTemp;
-            float bezierPeakTemp3 = t * t;
-
-            bezierPeakXBtm = bezierPeakTemp1 * startXBtm + bezierPeakTemp2 * controlXBtm + bezierPeakTemp3 * endXBtm;
-            bezierPeakYBtm = bezierPeakTemp1 * startYBtm + bezierPeakTemp2 * controlYBtm + bezierPeakTemp3 * endYBtm;
-        }
-
-			/*
-			 * 根据右侧限制点重新计算贝塞尔曲线顶点坐标
-			 */
-        float partOfLongLength = CURVATURE * sizeLong;
-        if (leftY >= -mValueAdded && leftY <= partOfLongLength - mValueAdded) {
-            float f = leftY / partOfLongLength;
-            float t = 0.5F * f;
-
-            float bezierPeakTemp = 1 - t;
-            float bezierPeakTemp1 = bezierPeakTemp * bezierPeakTemp;
-            float bezierPeakTemp2 = 2 * t * bezierPeakTemp;
-            float bezierPeakTemp3 = t * t;
-
-            bezierPeakXLeft = bezierPeakTemp1 * startXLeft + bezierPeakTemp2 * controlXLeft + bezierPeakTemp3 * endXLeft;
-            bezierPeakYLeft = bezierPeakTemp1 * startYLeft + bezierPeakTemp2 * controlYLeft + bezierPeakTemp3 * endYLeft;
-        }
-
-			/*
-			 * 替补区域Path
-			 */
-        mPathTrap.moveTo(startXBtm, startYBtm);
-        mPathTrap.lineTo(startXLeft, startYLeft);
-        mPathTrap.lineTo(bezierPeakXLeft, bezierPeakYLeft);
-        mPathTrap.lineTo(bezierPeakXBtm, bezierPeakYBtm);
-        mPathTrap.close();
-
-			/*
-			 * 生成带曲线的三角形路径
-			 */
-        mPath.moveTo(startXBtm, startYBtm);
-        mPath.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPath.lineTo(touchX, touchY);
-        mPath.lineTo(endXLeft, endYLeft);
-        mPath.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
-
-			/*
-			 * 生成底部月半圆的Path
-			 */
-        mPathSemicircleBtm.moveTo(startXBtm, startYBtm);
-        mPathSemicircleBtm.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPathSemicircleBtm.close();
-
-			/*
-			 * 生成右侧月半圆的Path
-			 */
-        mPathSemicircleLeft.moveTo(endXLeft, endYLeft);
-        mPathSemicircleLeft.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
-        mPathSemicircleLeft.close();
-
-			/*
-			 * 生成包含折叠和下一页的路径
-			 */
-        mPathFoldAndNext.moveTo(startXBtm, startYBtm);
-        mPathFoldAndNext.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
-        mPathFoldAndNext.lineTo(touchX, touchY);
-        mPathFoldAndNext.lineTo(endXLeft, endYLeft);
-        mPathFoldAndNext.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
-        mPathFoldAndNext.lineTo(viewWidth, viewHeight);
-        mPathFoldAndNext.close();
-
-			/*
-			 * 计算底部和右侧两月半圆区域
-			 */
-        Region regionSemicircleBtm = computeRegion(mPathSemicircleBtm);
-        Region regionSemicircleLeft = computeRegion(mPathSemicircleLeft);
-
-        // 合并两月半圆区域
-        mRegionSemicircle.op(regionSemicircleBtm, regionSemicircleLeft, Region.Op.UNION);
-    }
-
-    /**
-     * 通过路径计算区域
-     *
-     * @param path
-     *            路径对象
-     * @return 路径的Region
-     */
-    private Region computeRegion(Path path) {
-        Region region = new Region();
-        RectF f = new RectF();
-        path.computeBounds(f, true);
-        region.setPath(path, new Region((int) f.left, (int) f.top, (int) f.right, (int) f.bottom));
-        return region;
-    }
-
-    private RectF computeRectF(Path path){
-        RectF rectF = new RectF();
-        path.computeBounds(rectF, true);
-        return rectF;
-    }
-
 
     @Override
     public boolean draw(Canvas canvas) {
@@ -543,42 +415,51 @@ public class SimulationPageTurn extends PageTurn{
             return true;
         }
 
-//        canvas.save();
-//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-//        canvas.drawPath(mPath, contentPaint);
-//        canvas.restore();
+        canvas.save();
+        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        canvas.drawPath(mPath, contentPaint);
+        canvas.restore();
 
 //        foldRectf = computeRectF(mPath);
 //        nextRectf = computeRectF(mPathFoldAndNext);
 
-        canvas.save();
-        canvas.clipRect(currentRectf);
-        canvas.clipPath(mPathFoldAndNext, Region.Op.DIFFERENCE);
-        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-        canvas.restore();
+//        canvas.save();
+////        canvas.clipRect(currentRectf);
+////        canvas.clipPath(mPathFoldAndNext, Region.Op.DIFFERENCE);
+////        canvas.clipRect(mRectFNextAndFold, Region.Op.DIFFERENCE);
+////        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
 //
-        canvas.save();
-        canvas.clipPath(mPath);
-        canvas.translate(touchX, touchY);
-        if (mRatio == Ratio.SHORT){
-            canvas.rotate(90 - mDegree);
-            canvas.translate(0, - viewHeight);
-            canvas.scale(-1, 1);
-            canvas.translate(-viewWidth, 0);
-        }else {
-            canvas.rotate(-(90-mDegree));
-            canvas.translate(-viewWidth, 0);
-            canvas.scale(1,-1);
-            canvas.translate(0, -viewHeight);
-        }
-        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-        canvas.restore();
+//        canvas.restore();
 //
-        canvas.save();
-        canvas.clipPath(mPathFoldAndNext);
-        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
-        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
-        canvas.restore();
+//        canvas.save();
+////        canvas.drawColor(Color.parseColor("#ff0000"));
+//        canvas.clipPath(mPath);
+////        canvas.clipRect(mRectFFold);
+////        canvas.clipRect(mRectFTrap, Region.Op.UNION);
+////        canvas.clipRect(mRectFSemicircle , Region.Op.DIFFERENCE);
+//
+//        canvas.translate(touchX, touchY);
+//        if (mRatio == Ratio.SHORT){
+//            canvas.rotate(90 - mDegree);
+//            canvas.translate(0, - viewHeight);
+//            canvas.scale(-1, 1);
+//            canvas.translate(-viewWidth, 0);
+//        }else {
+//            canvas.rotate(-(90-mDegree));
+//            canvas.translate(-viewWidth, 0);
+//            canvas.scale(1,-1);
+//            canvas.translate(0, -viewHeight);
+//        }
+//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+//        canvas.restore();
+//
+//        canvas.save();
+//        canvas.clipPath(mPathFoldAndNext);
+//        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
+////        canvas.clipRect(mRectFNextAndFold);
+////        canvas.clipRect(mRectFFold, Region.Op.DIFFERENCE);
+//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
+//        canvas.restore();
 
 
         return false;
