@@ -1,17 +1,22 @@
 package com.yufeng.ireader.reader.viewimpl;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.ReadPreferHelper;
+
+import javax.xml.datatype.Duration;
 
 /**
  * Created by yufeng on 2018/4/25-0025.
@@ -20,6 +25,7 @@ import com.yufeng.ireader.utils.ReadPreferHelper;
 
 public class SimulationPageTurn extends PageTurn{
     private float touchX, touchY ;
+    private float startX, startY;
     private boolean hasDirection = false;
     private float mValueAdded;// 精度附减值
     private float mBuffArea;
@@ -36,6 +42,15 @@ public class SimulationPageTurn extends PageTurn{
     private Path mPathSemicircleBtm ;
     private Path mPathFoldAndNext ;
     private Path mPathSemicircleLeft;
+    private Ratio mRatio;// 定义当前折叠边长
+    private float mDegree;
+
+    /**
+     * 枚举类定义长边短边
+     */
+    private enum Ratio {
+        LONG, SHORT
+    }
 
     private Region mRegionShortSize;// 短边的有效区域
     private Region mRegionCurrent;// 当前页区域，其实就是控件的大小
@@ -45,15 +60,16 @@ public class SimulationPageTurn extends PageTurn{
     private Region mRegionFold;// 当前页区域，其实就是控件的大小
     private Region mRegionSemicircle;// 两月半圆区域
 
+    private RectF foldRectf;
+    private RectF nextRectf;
+    private RectF currentRectf;
+
     private Paint contentPaint;
+    private Animator animator;
 
     public SimulationPageTurn(){
         viewWidth = DisplayConstant.DISPLAY_WIDTH;
-        viewHeight = DisplayConstant.DISPLAY_HEIGHT;
-
-//        if (!ReadPreferHelper.getInstance().getImmersiveRead()){
-//            viewHeight -= DisplayConstant.STATUS_BAR_HEIGHT;
-//        }
+        viewHeight = DisplayConstant.DISPLAY_HEIGHT_SIMULATION;
 
         mPath = new Path();
         mPathTrap = new Path();
@@ -71,6 +87,7 @@ public class SimulationPageTurn extends PageTurn{
         mValueAdded = viewHeight * VALUE_ADDED;
         mBuffArea = viewHeight * BUFF_AREA;
 
+        currentRectf = new RectF(0, 0 , viewWidth, viewHeight);
         initPaint();
         computeShortSizeRegion();
     }
@@ -85,7 +102,7 @@ public class SimulationPageTurn extends PageTurn{
     }
     @Override
     public void turnNext() {
-
+        startAnimation(viewWidth, 0, ANIMATION_DURATION);
     }
 
     @Override
@@ -93,14 +110,36 @@ public class SimulationPageTurn extends PageTurn{
 
     }
 
+    private void startAnimation(float startX, float endX, int duration){
+        if (animator != null && animator.isRunning()){
+            animator.cancel();
+            animator = null;
+        }
+        animator = ObjectAnimator.ofFloat(this,"shiftX",startX, endX);
+        animator.setDuration(duration);
+        animator.setInterpolator(interpolator);
+        animator.addListener(animatorListener);
+        animator.start();
+    }
+
+    @SuppressWarnings("unused")
+    private void setShiftX(float x){
+        touchX -= 10;
+        touchY = startY + ((touchX - startX) * (viewHeight - startY)) / (viewWidth - startX);
+        calcPoint1(touchX, touchY);
+        onPageTurnListener.onAnimationInvalidate();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if (event.getAction() == MotionEvent.ACTION_UP){
+        if (event.getAction() == MotionEvent.ACTION_DOWN){
             touchX = event.getX();
             touchY = event.getY();
             hasDirection = false;
+            onTouchEvent = true;
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){
+            onTouchEvent = true;
             if (!hasDirection){
                 if (event.getX() > touchX){
                     setPageTurnDirection(PageTurnDirection.DIRECTION_PREVIOUS);
@@ -125,14 +164,28 @@ public class SimulationPageTurn extends PageTurn{
                 }
             }
 
-        }else if (event.getAction() == MotionEvent.ACTION_DOWN){
-            return true;
+        }else if (event.getAction() == MotionEvent.ACTION_UP){
+            onTouchEvent = false;
+            startX = event.getX();
+            startY = event.getY();
+            if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+                startAnimation(event.getX(),0, ANIMATION_DURATION);
+            }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+
+            }else if (event.getX() == touchX){
+                return false;
+            }
+
         }
-        return false;
+        return true;
     }
 
     private void calcPoint1(float touchX, float touchY){
         mPath.reset();
+        mPathFoldAndNext.reset();
+
+        viewHeight = DisplayConstant.DISPLAY_HEIGHT_SIMULATION;
+
         float mk = viewWidth - touchX;
         float ml = viewHeight - touchY;
 
@@ -142,9 +195,52 @@ public class SimulationPageTurn extends PageTurn{
         float sizeLong = temp / (2f * ml);
 
         mPath.moveTo(touchX, touchY);
-        mPath.lineTo(viewWidth, viewHeight - sizeLong);
-        mPath.lineTo(viewWidth - sizeShort, viewHeight);
-        mPath.close();
+        mPathFoldAndNext.moveTo(touchX, touchY);
+
+        if (sizeShort < sizeLong){
+            mRatio = Ratio.SHORT;
+            float sin = (mk - sizeShort) / sizeShort;
+            mDegree = (float)(Math.asin(sin) / Math.PI * 180);
+        }else {
+            mRatio = Ratio.LONG;
+            float cos = mk / sizeLong;
+            mDegree = (float) (Math.acos(cos)/ Math.PI * 180);
+        }
+
+        if (sizeLong > viewHeight){
+
+            float an = sizeLong - viewHeight;
+            float largerTriangleShortSize = an / (sizeLong - (viewHeight - touchY)) * (viewWidth - touchX);
+            float smallTriangleShortSize = an / sizeLong * sizeShort;
+
+            float topX1 = viewWidth - largerTriangleShortSize;
+            float topX2 = viewWidth - smallTriangleShortSize;
+            float btmX2 = viewWidth - sizeShort;
+
+            mPath.lineTo(topX1, 0);
+            mPath.lineTo(topX2, 0);
+            mPath.lineTo(btmX2, viewHeight);
+            mPath.close();
+
+            mPathFoldAndNext.lineTo(topX1, 0);
+            mPathFoldAndNext.lineTo(viewWidth, 0);
+            mPathFoldAndNext.lineTo(viewWidth, viewHeight);
+            mPathFoldAndNext.lineTo(btmX2, viewHeight);
+            mPathFoldAndNext.close();
+        }else {
+
+            float leftY = viewHeight - sizeLong;
+            float btmX = viewWidth - sizeShort;
+
+            mPath.lineTo(viewWidth, leftY);
+            mPath.lineTo(btmX, viewHeight);
+            mPath.close();
+
+            mPathFoldAndNext.lineTo(viewWidth, leftY);
+            mPathFoldAndNext.lineTo(viewWidth, viewHeight);
+            mPathFoldAndNext.lineTo(btmX, viewHeight);
+            mPathFoldAndNext.close();
+        }
 
         this.touchX = touchX;
         this.touchY = touchY;
@@ -437,13 +533,42 @@ public class SimulationPageTurn extends PageTurn{
         }
 
 //        canvas.save();
-        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
-        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
-            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-        }
-        canvas.drawPath(mPath, contentPaint);
+//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+//        canvas.drawPath(mPath, contentPaint);
 //        canvas.restore();
+
+//        foldRectf = computeRectF(mPath);
+//        nextRectf = computeRectF(mPathFoldAndNext);
+
+        canvas.save();
+        canvas.clipRect(currentRectf);
+        canvas.clipPath(mPathFoldAndNext, Region.Op.DIFFERENCE);
+        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        canvas.restore();
+//
+        canvas.save();
+        canvas.clipPath(mPath);
+        canvas.translate(touchX, touchY);
+        if (mRatio == Ratio.SHORT){
+            canvas.rotate(90 - mDegree);
+            canvas.translate(0, - viewHeight);
+            canvas.scale(-1, 1);
+            canvas.translate(-viewWidth, 0);
+        }else {
+            canvas.rotate(-(90-mDegree));
+            canvas.translate(-viewWidth, 0);
+            canvas.scale(1,-1);
+            canvas.translate(0, -viewHeight);
+        }
+        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        canvas.restore();
+//
+        canvas.save();
+        canvas.clipPath(mPathFoldAndNext);
+        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
+        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
+        canvas.restore();
+
 
         return false;
     }

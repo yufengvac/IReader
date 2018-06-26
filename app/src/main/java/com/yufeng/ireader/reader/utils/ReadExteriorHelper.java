@@ -246,10 +246,13 @@ public class ReadExteriorHelper {
         if (isImmersiveRead){
             setFullScreen(activity, false);
             ReadPreferHelper.getInstance().setIsImmersiveRead(false);
+            DisplayConstant.setDisplayHeightSimulation(DisplayConstant.DISPLAY_HEIGHT - DisplayConstant.STATUS_BAR_HEIGHT);
         }else {
             setFullScreen(activity, true);
             ReadPreferHelper.getInstance().setIsImmersiveRead(true);
+            DisplayConstant.setDisplayHeightSimulation(DisplayConstant.DISPLAY_HEIGHT);
         }
+
     }
 
     public void changeSingleHandedRead(){
@@ -274,6 +277,7 @@ public class ReadExteriorHelper {
                 params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
                 window.setAttributes(params);
             }
+            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         } else {
             WindowManager.LayoutParams params = window.getAttributes();
@@ -282,6 +286,7 @@ public class ReadExteriorHelper {
                 params.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 window.setAttributes(params);
             }
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
     }
@@ -298,6 +303,11 @@ public class ReadExteriorHelper {
         }
     }
 
+    /**
+     * 沉浸状态栏
+     * @param activity Activity
+     * @param isFull   是否沉浸
+     */
     public void setFullScreen2(Activity activity, boolean isFull){
         Window window = activity.getWindow();
         int systemUiVisibility = window.getDecorView().getSystemUiVisibility();
@@ -322,6 +332,7 @@ public class ReadExteriorHelper {
         }
         window.getDecorView().setSystemUiVisibility(systemUiVisibility);
     }
+
 
     /**
      * 回收资源

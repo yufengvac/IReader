@@ -1,12 +1,15 @@
 package com.yufeng.ireader.reader.view;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.yufeng.ireader.R;
 import com.yufeng.ireader.reader.viewinterface.IMenuSetView;
@@ -83,6 +86,7 @@ public abstract class MenuSetView implements IMenuSetView{
 
         decorView = (ViewGroup) mWindow.getDecorView();
 //        addSimulatedStatusBarView();
+        setupStatusBarView();
 
         WindowManager.LayoutParams params = mWindow.getAttributes();
         if ((params.softInputMode & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
@@ -116,6 +120,39 @@ public abstract class MenuSetView implements IMenuSetView{
         }
     }
 
+    private void setupStatusBarView() {
+
+        if (mContext != null && mContext instanceof Activity) {
+            Activity activity = (Activity) mContext;
+            if (activity.isFinishing()) {
+                return;
+            }
+            statusBarView = new View(mContext);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, DisplayConstant.STATUS_BAR_HEIGHT);
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.gravity = Gravity.TOP;
+            statusBarView.setLayoutParams(params);
+            statusBarView.setBackgroundColor(0xF5333333);
+            statusBarView.setVisibility(View.VISIBLE);
+            ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+            decorView.addView(statusBarView);
+        }
+    }
+
+    private void destroyStatusBarView() {
+        if (statusBarView != null) {
+            if (mContext != null && mContext instanceof Activity) {
+                Activity activity = (Activity) mContext;
+                if (activity.isFinishing()) {
+                    return;
+                }
+                ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+                decorView.removeView(statusBarView);
+                statusBarView = null;
+            }
+        }
+    }
+
     @Override
     public void hide() {
         if (!isShow) {
@@ -128,6 +165,7 @@ public abstract class MenuSetView implements IMenuSetView{
                     @Override
                     public void accept(Long aLong) throws Exception {
 //                        removeSimulatedStatusBarView();
+                        destroyStatusBarView();
                         windowManager.removeView(decorView);
                         decorView = null;
                         mWindow.closeAllPanels();

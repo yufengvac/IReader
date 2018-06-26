@@ -58,12 +58,12 @@ public class Page {
      */
     static Page createCurPagerAgain(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile, long fixedStartSeek){
         Page pager = new Page();
-        int displayWidth = DisplayConstant.DISPLAY_WIDTH;
-        int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
-        if (readSetting.isImmersiveRead()){
-            displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
-        }
         try {
+            int displayWidth = DisplayConstant.DISPLAY_WIDTH;
+            int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+            if (readSetting.isImmersiveRead()){
+                displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
+            }
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() +  (fontMetrics.descent - fontMetrics.ascent);
             Log.e(TAG,"startOffsetY="+startOffsetY);
@@ -144,12 +144,12 @@ public class Page {
      */
     static Page createNextPager(TxtParagraph lastPagerTxtParagraph, int lastCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
         Page pager = new Page();
-        int displayWidth = DisplayConstant.DISPLAY_WIDTH;
-        int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
-        if (readSetting.isImmersiveRead()){
-            displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
-        }
         try {
+            int displayWidth = DisplayConstant.DISPLAY_WIDTH;
+            int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+            if (readSetting.isImmersiveRead()){
+                displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
+            }
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = readSetting.getPaddingTop() +  (fontMetrics.descent - fontMetrics.ascent);
             Log.e(TAG,"startOffsetY="+startOffsetY);
@@ -208,15 +208,15 @@ public class Page {
     static Page createPrePager(TxtParagraph startPagerTxtParagraph, int startCanDrawLine, IReadSetting readSetting, ReadRandomAccessFile readRandomAccessFile){
         Page page = new Page();
 
-        int displayWidth = DisplayConstant.DISPLAY_WIDTH;
-        int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
-        int statusBarHeight = DisplayConstant.STATUS_BAR_HEIGHT;
         try {
+            int displayWidth = DisplayConstant.DISPLAY_WIDTH;
+            int displayHeight= DisplayConstant.DISPLAY_HEIGHT;
+            int statusBarHeight = DisplayConstant.STATUS_BAR_HEIGHT;
+            if (readSetting.isImmersiveRead()){
+                displayHeight += DisplayConstant.STATUS_BAR_HEIGHT;
+            }
             Paint.FontMetrics fontMetrics = readSetting.getContentPaint().getFontMetrics();
             float startOffsetY = displayHeight - readSetting.getPaddingBottom() - (fontMetrics.descent - fontMetrics.ascent) - readSetting.getLineSpaceExtra();
-            if (readSetting.isImmersiveRead()){
-                startOffsetY += statusBarHeight;
-            }
             Log.e(TAG,"startOffsetY="+startOffsetY);
 
             List<TxtParagraph> drawTxtParaList = new ArrayList<>();
