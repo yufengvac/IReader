@@ -27,6 +27,7 @@ public class SimulationPageTurn extends PageTurn{
     private float touchX, touchY ;
     private float startX, startY;
     private boolean hasDirection = false;
+    private boolean isPageTurn = true;
     private float mValueAdded;// 精度附减值
     private float mBuffArea;
 
@@ -124,9 +125,12 @@ public class SimulationPageTurn extends PageTurn{
 
     @SuppressWarnings("unused")
     private void setShiftX(float x){
-        touchX -= 10;
-        touchY = startY + ((touchX - startX) * (viewHeight - startY)) / (viewWidth - startX);
-        calcPoint1(touchX, touchY);
+        if (isPageTurn){
+            touchY = startY + ((x - startX) * (viewHeight - startY)) / (-viewWidth - startX);
+        }else {
+            touchY = startY + ((x - startX) * (viewHeight - startY)) / (viewWidth - startX);
+        }
+        calcPoint1(x, touchY);
         onPageTurnListener.onAnimationInvalidate();
     }
 
@@ -138,6 +142,7 @@ public class SimulationPageTurn extends PageTurn{
             touchY = event.getY();
             hasDirection = false;
             onTouchEvent = true;
+            isPageTurn = true;
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){
             onTouchEvent = true;
             if (!hasDirection){
@@ -169,7 +174,13 @@ public class SimulationPageTurn extends PageTurn{
             startX = event.getX();
             startY = event.getY();
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-                startAnimation(event.getX(),0, ANIMATION_DURATION);
+                if (startX < viewWidth * 0.75){ //如果滑动到左侧小于屏幕3/4处认为是翻开下一页
+                    isPageTurn = true;
+                    startAnimation(event.getX(),-viewWidth, ANIMATION_DURATION);
+                }else {
+                    isPageTurn = false;
+                    startAnimation(event.getX(),viewWidth, ANIMATION_DURATION);
+                }
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
 
             }else if (event.getX() == touchX){
@@ -527,7 +538,7 @@ public class SimulationPageTurn extends PageTurn{
     @Override
     public boolean draw(Canvas canvas) {
         if (isAnimationEnd()){//动画结束
-            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection(), true);
+            onPageTurnListener.onPageTurnAnimationEnd(canvas, getPageTurnDirection(), isPageTurn);
             setAnimationEnd(false);
             return true;
         }
