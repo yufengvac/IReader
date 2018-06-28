@@ -70,6 +70,7 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             hasEnsureDirection = false;
             onTouchEvent = true;
             isPageTurn = true;
+            isDayMode = ReadPreferHelper.getInstance().isDayMode();
             lastMoveX[0] = 0;
             lastMoveX[1] = 0;
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){

@@ -6,8 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -43,8 +45,15 @@ public class SimulationPageTurn extends PageTurn{
     private Path mPathSemicircleBtm ;
     private Path mPathFoldAndNext ;
     private Path mPathSemicircleLeft;
+
+    private Path mPathShadowDiagonally;//斜对角阴影path
+    private float x1,y1,x2,y2;
+    private RectF lineShadowRectF;//直线的阴影区域
     private Ratio mRatio;// 定义当前折叠边长
     private float mDegree;
+
+    private Shadow shadow;
+    private boolean isDayMode = true;
 
     /**
      * 枚举类定义长边短边
@@ -74,6 +83,7 @@ public class SimulationPageTurn extends PageTurn{
         mPathSemicircleBtm = new Path();
         mPathFoldAndNext = new Path();
         mPathSemicircleLeft = new Path();
+        mPathShadowDiagonally = new Path();
 
         /*
 		 * 实例化区域对象
@@ -89,6 +99,7 @@ public class SimulationPageTurn extends PageTurn{
         mRectFFold = new RectF();
         mRectFNextAndFold = new RectF();
         mRectFTrap = new RectF();
+        lineShadowRectF = new RectF();
 
         initPaint();
         computeShortSizeRegion();
@@ -97,14 +108,14 @@ public class SimulationPageTurn extends PageTurn{
     private void initPaint(){
         contentPaint = new Paint();
         contentPaint.setAntiAlias(true);
-        contentPaint.setColor(Color.parseColor("#000000"));
-        contentPaint.setTextSize(5f);
+        contentPaint.setColor(Color.parseColor("#A4A19E"));
+        contentPaint.setTextSize(2f);
         contentPaint.setStyle(Paint.Style.STROKE);
-        contentPaint.setStrokeWidth(4f);
+        contentPaint.setStrokeWidth(2f);
     }
     @Override
     public void turnNext() {
-        startAnimation(viewWidth, 0, ANIMATION_DURATION);
+        startAnimation(viewWidth, -viewWidth, ANIMATION_DURATION);
     }
 
     @Override
@@ -132,7 +143,7 @@ public class SimulationPageTurn extends PageTurn{
         }else {
             touchY = startY + ((x - startX) * (viewHeight - startY)) / (viewWidth - startX);
         }
-        calcPoint1(x, touchY);
+        calcPoint1(x, touchY, true);
         onPageTurnListener.onAnimationInvalidate();
     }
 
@@ -145,6 +156,7 @@ public class SimulationPageTurn extends PageTurn{
             hasDirection = false;
             onTouchEvent = true;
             isPageTurn = true;
+            isDayMode = ReadPreferHelper.getInstance().isDayMode();
         }else if (event.getAction() == MotionEvent.ACTION_MOVE){
             onTouchEvent = true;
             if (!hasDirection){
@@ -157,18 +169,10 @@ public class SimulationPageTurn extends PageTurn{
                 }
             }
 
-            if (hasDirection){
-                if (!mRegionShortSize.contains((int)event.getX(), (int)event.getY())){
-                    float touchY = (float)(Math.sqrt((Math.pow(viewWidth, 2) - Math.pow(event.getX(), 2))) - viewHeight);
-                    touchY = Math.abs(touchY) + mValueAdded;
-                    float area = viewHeight - mBuffArea;
-                    if (touchY >= area){
-                        touchY = area;
-                    }
-                    calcPoint1(event.getX(), touchY);
-                }else {
-                    calcPoint1(event.getX(), event.getY());
-                }
+            if (hasDirection && getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+
+                calcPoint1(event.getX(), event.getY(), false);
+
             }
 
         }else if (event.getAction() == MotionEvent.ACTION_UP){
@@ -184,7 +188,7 @@ public class SimulationPageTurn extends PageTurn{
                     startAnimation(event.getX(),viewWidth, ANIMATION_DURATION);
                 }
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
-
+                startAnimation(-viewWidth, 0 , ANIMATION_DURATION);
             }else if (event.getX() == touchX){
                 return false;
             }
@@ -193,14 +197,24 @@ public class SimulationPageTurn extends PageTurn{
         return true;
     }
 
-    private void calcPoint1(float touchX, float touchY){
+    private void calcPoint1(float touchX, float touchY, boolean canScrollBottom){
         mPath.reset();
         mPathFoldAndNext.reset();
         mPathTrap.reset();
         mPathSemicircleBtm.reset();
         mPathSemicircleLeft.reset();
+        mPathShadowDiagonally.reset();
 
         viewHeight = DisplayConstant.DISPLAY_HEIGHT_SIMULATION;
+
+        if (!mRegionShortSize.contains((int)touchX, (int)touchY)){
+            touchY = (float)(Math.sqrt((Math.pow(viewWidth, 2) - Math.pow(touchX, 2))) - viewHeight);
+            touchY = Math.abs(touchY) + mValueAdded;
+            float area = viewHeight - mBuffArea;
+            if (touchY >= area && !canScrollBottom){
+                touchY = area;
+            }
+        }
 
         float mk = viewWidth - touchX;
         float ml = viewHeight - touchY;
@@ -278,6 +292,11 @@ public class SimulationPageTurn extends PageTurn{
             mPathFoldAndNext.lineTo(viewWidth, viewHeight);
             mPathFoldAndNext.close();
 
+            x1 = bezierPeakXBtm;
+            y1 = bezierPeakYBtm;
+            x2 = topX2;
+            y2 = 0;
+
             mPathSemicircleBtm.computeBounds(mRectFSemicircle, false);
         }else {
 
@@ -306,7 +325,7 @@ public class SimulationPageTurn extends PageTurn{
             float bezierPeakXBtm = 0.25f * startXBtm + 0.5f * controlXBtm + 0.25f * endXBtm;
             float bezierPeakYBtm = 0.25f * startYBtm + 0.5f * controlYBtm + 0.25f * endYBtm;
             float bezierPeakXLeft = 0.25f * startXLeft + 0.5f * controlXLeft + 0.25f * endXLeft;
-            float bezierPeakYLeft = 0.25f * startXLeft + 0.5f * controlYLeft + 0.25f * endYLeft;
+            float bezierPeakYLeft = 0.25f * startYLeft + 0.5f * controlYLeft + 0.25f * endYLeft;
 
             if (startYLeft <= 0 ){
                 startYLeft = 0;
@@ -341,7 +360,7 @@ public class SimulationPageTurn extends PageTurn{
                 float bezierPeakTemp3 = t * t;
 
                 bezierPeakXLeft = bezierPeakTemp1 * startXLeft + bezierPeakTemp2 * controlXLeft + bezierPeakTemp3 * endXLeft;
-                bezierPeakYLeft = bezierPeakTemp1 * startXLeft + bezierPeakTemp2 * controlYLeft + bezierPeakTemp3 * endYLeft;
+                bezierPeakYLeft = bezierPeakTemp1 * startYLeft + bezierPeakTemp2 * controlYLeft + bezierPeakTemp3 * endYLeft;
             }
 
             mPathTrap.moveTo(startXBtm, startYBtm);
@@ -375,11 +394,26 @@ public class SimulationPageTurn extends PageTurn{
             mPathFoldAndNext.lineTo(viewWidth, viewHeight);
             mPathFoldAndNext.close();
 
+            mPathShadowDiagonally.moveTo(bezierPeakXBtm, bezierPeakYBtm);
+            mPathShadowDiagonally.moveTo(bezierPeakXLeft, bezierPeakYLeft);
+//            mPathShadowDiagonally.close();
+            x1 = bezierPeakXBtm;
+            y1 = bezierPeakYBtm;
+            x2 = bezierPeakXLeft;
+            y2 = bezierPeakYLeft;
+
+            mPathShadowDiagonally.moveTo(x1,y1);
+            mPathShadowDiagonally.lineTo(x2,y2);
+            mPathShadowDiagonally.lineTo(viewWidth,leftY);
+            mPathShadowDiagonally.lineTo(btmX,viewHeight);
+            mPathShadowDiagonally.close();
+
         }
 
 //        mPath.computeBounds(mRectFFold, false);
 //        mPathFoldAndNext.computeBounds(mRectFNextAndFold, false);
 //        mPathTrap.computeBounds(mRectFTrap, false);
+
 
         this.touchX = touchX;
         this.touchY = touchY;
@@ -416,52 +450,113 @@ public class SimulationPageTurn extends PageTurn{
         }
 
         canvas.save();
-        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-        canvas.drawPath(mPath, contentPaint);
+        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
+        canvas.clipPath(mPathSemicircleBtm, Region.Op.UNION);
+        canvas.clipPath(mPathSemicircleLeft, Region.Op.UNION);
+
+        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
+        }
         canvas.restore();
 
-//        foldRectf = computeRectF(mPath);
-//        nextRectf = computeRectF(mPathFoldAndNext);
+        canvas.save();
+        canvas.clipPath(mPath);
+        canvas.clipPath(mPathTrap, Region.Op.UNION);
+        canvas.clipPath(mPathSemicircleBtm, Region.Op.DIFFERENCE);
+        canvas.clipPath(mPathSemicircleLeft, Region.Op.DIFFERENCE);
 
-//        canvas.save();
-////        canvas.clipRect(currentRectf);
-////        canvas.clipPath(mPathFoldAndNext, Region.Op.DIFFERENCE);
-////        canvas.clipRect(mRectFNextAndFold, Region.Op.DIFFERENCE);
-////        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-//
-//        canvas.restore();
-//
-//        canvas.save();
-////        canvas.drawColor(Color.parseColor("#ff0000"));
-//        canvas.clipPath(mPath);
-////        canvas.clipRect(mRectFFold);
-////        canvas.clipRect(mRectFTrap, Region.Op.UNION);
-////        canvas.clipRect(mRectFSemicircle , Region.Op.DIFFERENCE);
-//
-//        canvas.translate(touchX, touchY);
-//        if (mRatio == Ratio.SHORT){
-//            canvas.rotate(90 - mDegree);
-//            canvas.translate(0, - viewHeight);
-//            canvas.scale(-1, 1);
-//            canvas.translate(-viewWidth, 0);
-//        }else {
-//            canvas.rotate(-(90-mDegree));
-//            canvas.translate(-viewWidth, 0);
-//            canvas.scale(1,-1);
-//            canvas.translate(0, -viewHeight);
-//        }
-//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
-//        canvas.restore();
-//
-//        canvas.save();
-//        canvas.clipPath(mPathFoldAndNext);
-//        canvas.clipPath(mPath, Region.Op.DIFFERENCE);
-////        canvas.clipRect(mRectFNextAndFold);
-////        canvas.clipRect(mRectFFold, Region.Op.DIFFERENCE);
-//        PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
-//        canvas.restore();
+        canvas.translate(touchX, touchY);
+        if (mRatio == Ratio.SHORT){
+            canvas.rotate(90 - mDegree);
+            canvas.translate(0, - viewHeight);
+            canvas.scale(-1, 1);
+            canvas.translate(-viewWidth, 0);
+        }else {
+            canvas.rotate(-(90-mDegree));
+            canvas.translate(-viewWidth, 0);
+            canvas.scale(1,-1);
+            canvas.translate(0, -viewHeight);
+        }
+        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
+        }
 
+        canvas.restore();
+
+        canvas.save();
+        canvas.clipPath(mPath);
+        canvas.clipPath(mPathTrap, Region.Op.UNION);
+        canvas.clipPath(mPathSemicircleBtm, Region.Op.DIFFERENCE);
+        canvas.clipPath(mPathSemicircleLeft, Region.Op.DIFFERENCE);
+
+        canvas.clipPath(mPathFoldAndNext, Region.Op.REVERSE_DIFFERENCE);
+        if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
+        }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+            PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+        }
+
+//        canvas.drawColor(Color.parseColor("#ff0000"));
+        canvas.restore();
+
+
+        canvas.save();
+        canvas.drawPath(mPath , contentPaint);
+        canvas.drawLine(x1, y1, x2, y2, contentPaint);
+
+
+        mPathShadowDiagonally.computeBounds(lineShadowRectF,false);
+//        canvas.drawPath(mPathShadowDiagonally, contentPaint);
+        canvas.clipPath(mPathShadowDiagonally, Region.Op.XOR);
+        canvas.drawColor(Color.parseColor("#ff0000"));
+
+//        Rect rect = new Rect();
+//        lineShadowRectF.round(rect);
+//
+//        Shadow shadow = getShadow(isDayMode ? 0 : 1);
+//
+//        shadow.edgeFoldShadow.setBounds(rect);
+//        shadow.edgeFoldShadow.draw(canvas);
+        float gradient = (x1 - x2)/(y1 - y2);
+
+        canvas.restore();
 
         return false;
+    }
+
+    private Shadow getShadow(int mode) {
+        if (shadow == null) {
+            shadow = new Shadow(mode);
+        }
+        return shadow;
+    }
+
+    private static class Shadow {
+
+        // 边上的阴影
+        private static final int[][] EDGE_SHADOW = {{0x00454545, 0x80454545}, {0x00151515, 0x80151515}};
+        // 折边直线上的阴影
+        private static final int[][] EDGEFOLD_SHADOW_COLORS = {{0x00454545, 0x80454545, 0x00454545}, {0x00151515, 0x80151515, 0x00151515}};
+        //三角区
+        private static final int[][] CORNER_SHADOW_COLORS = {{0x80454545, 0x00454545}, {0x80151515, 0x00151515}};
+
+        private GradientDrawable edgeShadow;//边上的阴影
+        private GradientDrawable edgeFoldShadow;//折边阴影
+        private GradientDrawable cornerShadow;//三角区阴影
+
+        private Shadow(int mode) {
+            edgeShadow = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, EDGE_SHADOW[mode]);
+            edgeShadow.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+
+            edgeFoldShadow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, EDGEFOLD_SHADOW_COLORS[mode]);
+            edgeFoldShadow.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+
+            cornerShadow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, CORNER_SHADOW_COLORS[mode]);
+            cornerShadow.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+        }
     }
 }
