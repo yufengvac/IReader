@@ -47,7 +47,10 @@ public class SimulationPageTurn extends PageTurn{
     private Path mPathSemicircleLeft;
 
     private Path mPathShadowDiagonally;//斜对角阴影path
+    private float hypotenuseDegree;//折线边的斜率，折角的左边斜线
+    private Path mPathHypotenuse;//折线边
     private float x1,y1,x2,y2;
+    private float shadowStartY;
     private RectF lineShadowRectF;//直线的阴影区域
     private Ratio mRatio;// 定义当前折叠边长
     private float mDegree;
@@ -84,6 +87,7 @@ public class SimulationPageTurn extends PageTurn{
         mPathFoldAndNext = new Path();
         mPathSemicircleLeft = new Path();
         mPathShadowDiagonally = new Path();
+        mPathHypotenuse = new Path();
 
         /*
 		 * 实例化区域对象
@@ -297,6 +301,8 @@ public class SimulationPageTurn extends PageTurn{
             x2 = topX2;
             y2 = 0;
 
+            hypotenuseDegree = (touchX - controlXBtm)/(touchY - controlYBtm);
+
             mPathSemicircleBtm.computeBounds(mRectFSemicircle, false);
         }else {
 
@@ -408,6 +414,9 @@ public class SimulationPageTurn extends PageTurn{
             mPathShadowDiagonally.lineTo(btmX,viewHeight);
             mPathShadowDiagonally.close();
 
+            hypotenuseDegree = (touchX - controlXBtm)/(touchY - controlYBtm);
+            shadowStartY = bezierPeakYLeft;
+
         }
 
 //        mPath.computeBounds(mRectFFold, false);
@@ -459,6 +468,7 @@ public class SimulationPageTurn extends PageTurn{
         }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
             PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
         }
+        drawHypotenuseShadow(canvas);
         canvas.restore();
 
         canvas.save();
@@ -503,29 +513,117 @@ public class SimulationPageTurn extends PageTurn{
 //        canvas.drawColor(Color.parseColor("#ff0000"));
         canvas.restore();
 
-
         canvas.save();
-        canvas.drawPath(mPath , contentPaint);
-        canvas.drawLine(x1, y1, x2, y2, contentPaint);
-
-
-        mPathShadowDiagonally.computeBounds(lineShadowRectF,false);
-//        canvas.drawPath(mPathShadowDiagonally, contentPaint);
-        canvas.clipPath(mPathShadowDiagonally, Region.Op.XOR);
-        canvas.drawColor(Color.parseColor("#ff0000"));
-
-//        Rect rect = new Rect();
-//        lineShadowRectF.round(rect);
-//
-//        Shadow shadow = getShadow(isDayMode ? 0 : 1);
-//
-//        shadow.edgeFoldShadow.setBounds(rect);
-//        shadow.edgeFoldShadow.draw(canvas);
-        float gradient = (x1 - x2)/(y1 - y2);
+//        canvas.drawPath(mPath , contentPaint);
+//        canvas.drawLine(x1, y1, x2, y2, contentPaint);
 
         canvas.restore();
 
+        drawDiagonallyShadow(canvas);
+
         return false;
+    }
+
+    /**
+     * 绘画翻页的直角两条线的上部阴影
+     * @param canvas 画步
+     */
+    private void drawHypotenuseShadow(Canvas canvas){
+        Shadow shadow = getShadow(isDayMode ? 0 : 1);
+        hypotenuseDegree = -hypotenuseDegree;
+        float rotate = (float) (Math.atan(hypotenuseDegree) / Math.PI * 180);
+
+        canvas.translate(touchX, touchY);
+        canvas.rotate(rotate);
+        canvas.translate(-18, -18);
+
+        int edgeShadowMaxLen = 18;
+        int maxLen = edgeShadowMaxLen + Math.max(viewWidth, viewHeight);
+        mPathHypotenuse.reset();
+        mPathHypotenuse.lineTo(0, 0);
+        mPathHypotenuse.lineTo(maxLen, 0);
+        mPathHypotenuse.lineTo(maxLen, edgeShadowMaxLen);
+        mPathHypotenuse.lineTo(edgeShadowMaxLen, edgeShadowMaxLen);
+        mPathHypotenuse.close();
+        if (-hypotenuseDegree > 0) {
+            if (rotate < -5) {
+                canvas.save();
+                canvas.clipPath(mPathHypotenuse);
+                shadow.edgeShadow.setBounds(0, 0, viewHeight, edgeShadowMaxLen);
+                shadow.edgeShadow.draw(canvas);
+                canvas.restore();
+            }
+
+            canvas.rotate(90);
+            canvas.scale(1, -1);
+            canvas.clipPath(mPathHypotenuse);
+            shadow.edgeShadow.setBounds(0, 0, edgeShadowMaxLen + viewHeight, edgeShadowMaxLen);
+            shadow.edgeShadow.draw(canvas);
+        } else {
+            if (rotate > -85) {
+                canvas.save();
+                canvas.rotate(90);
+                canvas.scale(1, -1);
+                canvas.clipPath(mPathHypotenuse);
+                shadow.edgeShadow.setBounds(0, 0, viewHeight, edgeShadowMaxLen);
+                shadow.edgeShadow.draw(canvas);
+                canvas.restore();
+            }
+
+            canvas.clipPath(mPathHypotenuse);
+            shadow.edgeShadow.setBounds(0, 0, edgeShadowMaxLen + viewHeight, edgeShadowMaxLen);
+            shadow.edgeShadow.draw(canvas);
+
+        }
+    }
+
+    /**
+     * 绘画翻页的折线两边的阴影
+     * @param canvas 画步
+     */
+    private void drawDiagonallyShadow(Canvas canvas) {
+
+        int shadowWidth;
+        int shadowHeight;
+
+        int lineShadowMaxLen = 90;
+
+        canvas.save();
+//        canvas.clipPath(mPath);
+        canvas.clipPath(mPathFoldAndNext);
+
+        float hypotenuseDegree = (x1 - x2) / (y1 - y2);
+        hypotenuseDegree = -hypotenuseDegree;
+
+        float degree = (float)(Math.atan(hypotenuseDegree) / Math.PI * 180);
+        float radian = (float) Math.atan(hypotenuseDegree);
+        shadowWidth = 90;
+
+//        float startY = (float) (shadowStartY - Math.signum(degree) * shadowWidth * Math.cos(radian));
+//        float startX = line.getX(startY);
+//        float endX = (float) (viewWidth + shadowWidth * Math.sin(Math.abs(radian)));
+//        float endY = hypotenuseDegree * endX
+
+        float conditionA = y2 - y1;
+        float conditionB = x1 - x2;
+        float conditionC = x2 * y1 - x1 * y2;
+
+        float calcStartX = 0;
+        float calcStartY = conditionC / (-conditionB);
+        float calcEndX =  conditionC / (-conditionA);
+        float calcEndY = 0;
+
+        shadowHeight = (int) Math.hypot(calcStartX - calcEndX, calcStartY - calcEndY);
+
+        canvas.translate(calcEndX, calcEndY);
+        canvas.rotate(degree);
+
+
+        Shadow shadow = getShadow(isDayMode ? 0 : 1);
+        shadow.edgeFoldShadow.setBounds(-shadowWidth, 0, shadowWidth, shadowHeight);
+        shadow.edgeFoldShadow.draw(canvas);
+
+        canvas.restore();
     }
 
     private Shadow getShadow(int mode) {
