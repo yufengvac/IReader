@@ -238,7 +238,7 @@ public class PageManager {
     }
 
 
-    public void turnNextPage(final Canvas canvas, final Paint paint) {
+    public void turnNextPage() {
         if (nextCacheBitmap != null) {
 
             Single.create(new SingleOnSubscribe<Void>() {
@@ -263,7 +263,7 @@ public class PageManager {
         }
     }
 
-    public void turnPrePage(final Canvas canvas, Paint paint, Context context) {
+    public void turnPrePage(Context context) {
         if (preCacheBitmap != null) {
             final Page prePage = pagerSparseArray.get(PageType.PAGE_PREVIOUS);
 
@@ -289,11 +289,6 @@ public class PageManager {
 
                 }
             } else {
-                Canvas cacheCanvas = new Canvas(preCacheBitmap);
-                drawCanvasBg(cacheCanvas, paint);
-                Page curPage = pagerSparseArray.get(PageType.PAGE_CURRENT);
-                curPage.drawTxtParagraph(cacheCanvas, paint);
-                canvas.drawBitmap(preCacheBitmap, 0, 0, paint);
 
                 Toast.makeText(context, "已经是第一章了~", Toast.LENGTH_SHORT).show();
             }
@@ -301,6 +296,10 @@ public class PageManager {
         } else {
             Log.e(TAG, "cacheBitmap == null");
         }
+    }
+
+    public boolean isFirstPage(){
+        return pagerSparseArray == null || pagerSparseArray.get(PageType.PAGE_PREVIOUS) == null;
     }
 
     public void drawCanvasBg(Canvas canvas, Paint paint){

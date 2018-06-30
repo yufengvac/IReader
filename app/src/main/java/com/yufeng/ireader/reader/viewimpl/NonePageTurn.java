@@ -32,10 +32,10 @@ public class NonePageTurn extends PageTurn {
     public boolean draw(Canvas canvas) {
         if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
             PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
-            PageManager.getInstance().turnNextPage(canvas, contentPaint);
+            PageManager.getInstance().turnNextPage();
         }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
             PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
-            PageManager.getInstance().turnPrePage(canvas, contentPaint, context);
+            PageManager.getInstance().turnPrePage(context);
         }
 
         return true;

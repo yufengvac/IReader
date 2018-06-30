@@ -90,6 +90,9 @@ public class LeftRightCoveragePageTurn extends PageTurn{
                         setShiftX(event.getX() - touchX);
                     }
                 }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+                    if (PageManager.getInstance().isFirstPage()){
+                        return false;
+                    }
                     setShiftX(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX);
                 }
 
@@ -111,7 +114,6 @@ public class LeftRightCoveragePageTurn extends PageTurn{
             long duration = (long)(ANIMATION_DURATION*1.0 / DisplayConstant.DISPLAY_WIDTH * (DisplayConstant.DISPLAY_WIDTH - Math.abs(event.getX() - touchX)));
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
 
-//                if (touchX - event.getX() <= CRITICAL_VALUE){
                 if ( lastMoveX[1] > lastMoveX[0] || Math.abs(touchX - event.getX()) <= CRITICAL_VALUE){
                     isPageTurn = false;
                     startAnimation( event.getX() - touchX, 0, ANIMATION_DURATION - duration);
@@ -121,11 +123,15 @@ public class LeftRightCoveragePageTurn extends PageTurn{
 
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
 
-                if (lastMoveX[1] < lastMoveX[0]){
-                    isPageTurn = false;
-                    startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH, ANIMATION_DURATION - duration);
+                if (PageManager.getInstance().isFirstPage()){
+                    PageManager.getInstance().turnPrePage(context);
                 }else {
-                    startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
+                    if (lastMoveX[1] < lastMoveX[0]){
+                        isPageTurn = false;
+                        startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX, -DisplayConstant.DISPLAY_WIDTH, ANIMATION_DURATION - duration);
+                    }else {
+                        startAnimation(-DisplayConstant.DISPLAY_WIDTH + event.getX() - touchX,0, duration);
+                    }
                 }
 
             }else if (event.getX() == touchX){

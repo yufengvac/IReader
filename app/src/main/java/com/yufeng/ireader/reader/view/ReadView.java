@@ -134,8 +134,12 @@ public class ReadView extends View implements OnPageTurnListener{
                     pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_NEXT);
                     pageTurn.turnNext();
                 }else {
-                    pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
-                    pageTurn.turnPrevious();
+                    if (!PageManager.getInstance().isFirstPage()){
+                        pageTurn.setPageTurnDirection(PageTurn.PageTurnDirection.DIRECTION_PREVIOUS);
+                        pageTurn.turnPrevious();
+                    }else {
+                        PageManager.getInstance().turnPrePage(context);
+                    }
                 }
 
             }else {
@@ -162,12 +166,12 @@ public class ReadView extends View implements OnPageTurnListener{
     }
 
 
-    private void turnNextPage(Canvas canvas){
-        PageManager.getInstance().turnNextPage(canvas,contentPaint);
+    private void turnNextPage(){
+        PageManager.getInstance().turnNextPage();
     }
 
-    private void turnPrePage(Canvas canvas){
-        PageManager.getInstance().turnPrePage(canvas, contentPaint, context);
+    private void turnPrePage(){
+        PageManager.getInstance().turnPrePage(context);
     }
 
 
@@ -253,10 +257,10 @@ public class ReadView extends View implements OnPageTurnListener{
         }
         if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_NEXT){
             PageManager.getInstance().drawCanvasBitmap(canvas, getNextBitmap(),contentPaint);
-            turnNextPage(canvas);
+            turnNextPage();
         }else if (pageTurnDirection == PageTurn.PageTurnDirection.DIRECTION_PREVIOUS){
             PageManager.getInstance().drawCanvasBitmap(canvas, getPreviousBitmap(),contentPaint);
-            turnPrePage(canvas);
+            turnPrePage();
         }
     }
 

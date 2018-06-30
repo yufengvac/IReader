@@ -67,12 +67,8 @@ public class SimulationPageTurn extends PageTurn{
 
     private Region mRegionShortSize;// 短边的有效区域
 
-    private RectF currentRectf;
 
     private RectF mRectFSemicircle;
-    private RectF mRectFFold;
-    private RectF mRectFNextAndFold;
-    private RectF mRectFTrap;
 
     private Paint contentPaint;
     private Animator animator;
@@ -97,12 +93,9 @@ public class SimulationPageTurn extends PageTurn{
         mValueAdded = viewHeight * VALUE_ADDED;
         mBuffArea = viewHeight * BUFF_AREA;
 
-        currentRectf = new RectF(0, 0 , viewWidth, viewHeight);
 
         mRectFSemicircle = new RectF();
-        mRectFFold = new RectF();
-        mRectFNextAndFold = new RectF();
-        mRectFTrap = new RectF();
+
         lineShadowRectF = new RectF();
 
         initPaint();
@@ -119,12 +112,12 @@ public class SimulationPageTurn extends PageTurn{
     }
     @Override
     public void turnNext() {
-        startAnimation(viewWidth, -viewWidth, ANIMATION_DURATION);
+        startAnimation(viewWidth-200, -viewWidth, ANIMATION_DURATION);
     }
 
     @Override
     public void turnPrevious() {
-
+        startAnimation(-viewWidth, viewWidth, ANIMATION_DURATION);
     }
 
     private void startAnimation(float startX, float endX, int duration){
@@ -153,7 +146,6 @@ public class SimulationPageTurn extends PageTurn{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         if (event.getAction() == MotionEvent.ACTION_DOWN){
             touchX = event.getX();
             touchY = event.getY();
@@ -173,9 +165,12 @@ public class SimulationPageTurn extends PageTurn{
                 }
             }
 
-            if (hasDirection && getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
-
-                calcPoint1(event.getX(), event.getY(), false);
+            if (hasDirection){
+                if (PageManager.getInstance().isFirstPage() && getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+                    return false;
+                }else {
+                    calcPoint1(event.getX(), event.getY(), false);
+                }
 
             }
 
@@ -192,8 +187,14 @@ public class SimulationPageTurn extends PageTurn{
                     startAnimation(event.getX(),viewWidth, ANIMATION_DURATION);
                 }
             }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
-                startAnimation(-viewWidth, 0 , ANIMATION_DURATION);
+                if (!PageManager.getInstance().isFirstPage()){
+                    startAnimation(event.getX(), viewWidth , ANIMATION_DURATION);
+                }else {
+                    PageManager.getInstance().turnPrePage(context);
+                }
             }else if (event.getX() == touchX){
+                startX = viewWidth - 200;
+                startY = viewHeight;
                 return false;
             }
 
@@ -476,7 +477,7 @@ public class SimulationPageTurn extends PageTurn{
         canvas.clipPath(mPathTrap, Region.Op.UNION);
         canvas.clipPath(mPathSemicircleBtm, Region.Op.DIFFERENCE);
         canvas.clipPath(mPathSemicircleLeft, Region.Op.DIFFERENCE);
-
+        PageManager.getInstance().drawCanvasBg(canvas,null);
         canvas.translate(touchX, touchY);
         if (mRatio == Ratio.SHORT){
             canvas.rotate(90 - mDegree);
@@ -489,11 +490,13 @@ public class SimulationPageTurn extends PageTurn{
             canvas.scale(1,-1);
             canvas.translate(0, -viewHeight);
         }
+
         if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
             PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
         }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
             PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
         }
+//        canvas.drawColor(Color.parseColor("#ff0000"));
 
         canvas.restore();
 
