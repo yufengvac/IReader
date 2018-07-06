@@ -194,7 +194,7 @@ public class ReadView extends View implements OnPageTurnListener{
 
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
         if (pageTurn instanceof SimulationPageTurn){
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
         pageTurn.setOnPageTurnListener(this);
         pageTurn.setPaint(contentPaint);
@@ -210,7 +210,7 @@ public class ReadView extends View implements OnPageTurnListener{
     public void recreatePageTurn(IReadSetting readSetting){
         pageTurn = PageTurnFactory.createPageTurn(readSetting);
         if (pageTurn instanceof SimulationPageTurn){
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }else {
             setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }

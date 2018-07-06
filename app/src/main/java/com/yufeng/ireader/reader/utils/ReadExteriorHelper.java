@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.IReadSetting;
 import com.yufeng.ireader.utils.DisPlayUtil;
 import com.yufeng.ireader.utils.DisplayConstant;
@@ -121,7 +123,7 @@ public class ReadExteriorHelper {
                     }
                     createBgBitmap(bgPath);
                 }
-                canvas.drawBitmap(bgBitmap,null,bgRectF,paint);
+                PageManager.getInstance().drawCanvasBitmap(canvas, bgBitmap, null);
                 lastCanvaBgImgOption = readSetting.getCanvasImgOptions();
             }
         }
@@ -135,7 +137,17 @@ public class ReadExteriorHelper {
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inJustDecodeBounds = true;
             bgBitmap = BitmapFactory.decodeFile(filePath, options);
+            int outWidth = options.outWidth;
+            int outHeight = options.outHeight;
+            float widthRatio = DisplayConstant.DISPLAY_WIDTH * 1.0f / outWidth;
+            float heightRatio = DisplayConstant.DISPLAY_HEIGHT * 1.0f / outHeight;
+            Matrix matrix = new Matrix();
+            matrix.postScale(widthRatio, heightRatio);
+            options.inJustDecodeBounds = false;
+            bgBitmap = BitmapFactory.decodeFile(filePath, options);
+            bgBitmap = Bitmap.createBitmap(bgBitmap , 0 , 0 , outWidth, outHeight, matrix, true);
         }catch (Exception e){
             e.printStackTrace();
         }
