@@ -6,19 +6,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.yufeng.ireader.reader.bean.PageManager;
 import com.yufeng.ireader.reader.viewinterface.PageTurn;
 import com.yufeng.ireader.utils.DisplayConstant;
 import com.yufeng.ireader.utils.ReadPreferHelper;
-
-import javax.xml.datatype.Duration;
 
 /**
  * Created by yufeng on 2018/4/25-0025.
@@ -55,7 +51,8 @@ public class SimulationPageTurn extends PageTurn{
 
     private Shadow shadow;
     private boolean isDayMode = true;
-    private boolean isVeticalPage = false;//是否是垂直翻页，不是折角翻页
+    private boolean isVerticalPage = false;//是否是垂直翻页，不是折角翻页
+    private int verticalEndX;
 
     /**
      * 枚举类定义长边短边
@@ -138,7 +135,7 @@ public class SimulationPageTurn extends PageTurn{
         }else {
             touchY = startY + ((x - startX) * (viewHeight - startY)) / (viewWidth - startX);
         }
-        if (isVeticalPage){
+        if (isVerticalPage){
             calcPoint(x, touchY);
         }else {
             calcPoint1(x, touchY, true);
@@ -166,7 +163,7 @@ public class SimulationPageTurn extends PageTurn{
                     hasDirection = true;
                 }
                 if (hasDirection){
-                    isVeticalPage = (event.getY() < viewHeight -  viewWidth * 0.25f);
+                    isVerticalPage = (event.getY() < viewHeight -  viewWidth * 0.25f);
                 }
             }
 
@@ -174,7 +171,7 @@ public class SimulationPageTurn extends PageTurn{
                 if (PageManager.getInstance().isFirstPage() && getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
                     return false;
                 }else {
-                    if (isVeticalPage){
+                    if (isVerticalPage){
                         calcPoint(event.getX(), event.getY());
                     }else {
                         calcPoint1(event.getX(), event.getY(), false);
@@ -202,7 +199,7 @@ public class SimulationPageTurn extends PageTurn{
                     PageManager.getInstance().turnPrePage(context);
                 }
             }else if (event.getX() == touchX){
-                isVeticalPage  = true;
+                isVerticalPage  = true;
                 startX = viewWidth - 200;
                 startY = viewHeight;
                 return false;
@@ -216,8 +213,7 @@ public class SimulationPageTurn extends PageTurn{
         mPath.reset();
         mPathFoldAndNext.reset();
 
-        float middle = (touchX + viewWidth) / 2f;
-        float endX = middle - (viewWidth - middle) / 2;
+        float endX = 0.6f * touchX + 0.4f * viewWidth;
 
         mPath.moveTo(touchX, viewHeight);
         mPath.lineTo(touchX, 0);
@@ -231,6 +227,7 @@ public class SimulationPageTurn extends PageTurn{
         mPathFoldAndNext.lineTo(viewWidth, viewHeight);
         mPathFoldAndNext.close();
 
+        verticalEndX = (int) endX;
         this.touchX = touchX;
         this.touchY = touchY;
         onPageTurnListener.onAnimationInvalidate();
@@ -246,7 +243,7 @@ public class SimulationPageTurn extends PageTurn{
 
         viewHeight = DisplayConstant.DISPLAY_HEIGHT_SIMULATION;
 
-        if (!mRegionShortSize.contains((int)touchX, (int)touchY) && !isVeticalPage){
+        if (!mRegionShortSize.contains((int)touchX, (int)touchY) && !isVerticalPage){
             touchY = (float)(Math.sqrt((Math.pow(viewWidth, 2) - Math.pow(touchX, 2))) - viewHeight);
             touchY = Math.abs(touchY) + mValueAdded;
             float area = viewHeight - mBuffArea;
@@ -265,8 +262,6 @@ public class SimulationPageTurn extends PageTurn{
 
         float tempAM = mk - sizeShort;
 
-//        mPath.moveTo(touchX, touchY);
-//        mPathFoldAndNext.moveTo(touchX, touchY);
 
         if (sizeShort < sizeLong){
             mRatio = Ratio.SHORT;
@@ -309,9 +304,6 @@ public class SimulationPageTurn extends PageTurn{
             mPath.lineTo(touchX, touchY);
             mPath.lineTo(topX1, 0);
             mPath.lineTo(topX2, 0);
-//            mPath.lineTo(btmX2, viewHeight);
-//            mPath.lineTo(bezierPeakXBtm, bezierPeakYBtm);
-//            mPath.close();
 
 
             mPathTrap.moveTo(startXBtm, startYBtm);
@@ -424,9 +416,7 @@ public class SimulationPageTurn extends PageTurn{
             mPath.lineTo(endXLeft, endYLeft);
             mPath.quadTo(controlXLeft, controlYLeft, startXLeft, startYLeft);
 
-//            mPath.lineTo(viewWidth, leftY);
-//            mPath.lineTo(btmX, viewHeight);
-//            mPath.close();
+
             mPathFoldAndNext.moveTo(startXBtm, startYBtm);
             mPathFoldAndNext.quadTo(controlXBtm, controlYBtm, endXBtm, endYBtm);
             mPathFoldAndNext.lineTo(touchX, touchY);
@@ -437,7 +427,7 @@ public class SimulationPageTurn extends PageTurn{
 
             mPathShadowDiagonally.moveTo(bezierPeakXBtm, bezierPeakYBtm);
             mPathShadowDiagonally.moveTo(bezierPeakXLeft, bezierPeakYLeft);
-//            mPathShadowDiagonally.close();
+
             x1 = bezierPeakXBtm;
             y1 = bezierPeakYBtm;
             x2 = bezierPeakXLeft;
@@ -492,7 +482,7 @@ public class SimulationPageTurn extends PageTurn{
             return true;
         }
 
-        if (isVeticalPage){
+        if (isVerticalPage){
 
             canvas.save();
             canvas.clipPath(mPath, Region.Op.DIFFERENCE);
@@ -506,6 +496,18 @@ public class SimulationPageTurn extends PageTurn{
 
             canvas.save();
             canvas.clipPath(mPath);
+            canvas.translate(touchX, 0);
+            canvas.scale(-1,1);
+            canvas.translate(-viewWidth, 0);
+            if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
+                PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
+            }else if (getPageTurnDirection() == PageTurnDirection.DIRECTION_PREVIOUS){
+                PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getPreviousBitmap(), null);
+            }
+            canvas.restore();
+
+            canvas.save();
+            canvas.clipPath(mPath);
             canvas.clipPath(mPathFoldAndNext, Region.Op.XOR);
             if (getPageTurnDirection() == PageTurnDirection.DIRECTION_NEXT){
                 PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getNextBitmap(), null);
@@ -513,7 +515,7 @@ public class SimulationPageTurn extends PageTurn{
                 PageManager.getInstance().drawCanvasBitmap(canvas, onPageTurnListener.getCurrentBitmap(), null);
             }
             canvas.restore();
-
+            drawVerticalShadowInRight(canvas);
             return false;
         }
 
@@ -590,6 +592,7 @@ public class SimulationPageTurn extends PageTurn{
      * @param canvas 画步
      */
     private void drawHypotenuseShadow(Canvas canvas){
+        int right = (int)(viewHeight * 1f);
         Shadow shadow = getShadow(isDayMode ? 0 : 1);
         hypotenuseDegree = -hypotenuseDegree;
         float rotate = (float) (Math.atan(hypotenuseDegree) / Math.PI * 180);
@@ -610,7 +613,7 @@ public class SimulationPageTurn extends PageTurn{
             if (rotate < -5) {
                 canvas.save();
                 canvas.clipPath(mPathHypotenuse);
-                shadow.edgeShadow.setBounds(0, 0, viewHeight, edgeShadowMaxLen);
+                shadow.edgeShadow.setBounds(0, 0, right, edgeShadowMaxLen);
                 shadow.edgeShadow.draw(canvas);
                 canvas.restore();
             }
@@ -626,7 +629,7 @@ public class SimulationPageTurn extends PageTurn{
                 canvas.rotate(90);
                 canvas.scale(1, -1);
                 canvas.clipPath(mPathHypotenuse);
-                shadow.edgeShadow.setBounds(0, 0, viewHeight, edgeShadowMaxLen);
+                shadow.edgeShadow.setBounds(0, 0, right, edgeShadowMaxLen);
                 shadow.edgeShadow.draw(canvas);
                 canvas.restore();
             }
@@ -639,21 +642,6 @@ public class SimulationPageTurn extends PageTurn{
     }
 
     /**
-     * 绘画垂直翻页的左边直线的阴影
-     * @param canvas 画步
-     */
-    private void drawVerticalShadow(Canvas canvas){
-        Shadow shadow = getShadow(isDayMode ? 0 : 1);
-
-        int edgeShadowMaxLen = 18;
-        canvas.translate(touchX - edgeShadowMaxLen, 0);
-
-        shadow.verticalShadow.setBounds(0, 0 , edgeShadowMaxLen, viewHeight);
-        shadow.verticalShadow.draw(canvas);
-
-    }
-
-    /**
      * 绘画翻页的折线两边的阴影
      * @param canvas 画步
      */
@@ -662,23 +650,14 @@ public class SimulationPageTurn extends PageTurn{
         int shadowWidth;
         int shadowHeight;
 
-        int lineShadowMaxLen = 90;
-
         canvas.save();
-//        canvas.clipPath(mPath);
         canvas.clipPath(mPathFoldAndNext);
 
         float hypotenuseDegree = (x1 - x2) / (y1 - y2);
         hypotenuseDegree = -hypotenuseDegree;
 
         float degree = (float)(Math.atan(hypotenuseDegree) / Math.PI * 180);
-        float radian = (float) Math.atan(hypotenuseDegree);
         shadowWidth = 90;
-
-//        float startY = (float) (shadowStartY - Math.signum(degree) * shadowWidth * Math.cos(radian));
-//        float startX = line.getX(startY);
-//        float endX = (float) (viewWidth + shadowWidth * Math.sin(Math.abs(radian)));
-//        float endY = hypotenuseDegree * endX
 
         float conditionA = y2 - y1;
         float conditionB = x1 - x2;
@@ -701,6 +680,43 @@ public class SimulationPageTurn extends PageTurn{
 
         canvas.restore();
     }
+
+    /**
+     * 绘画垂直翻页的左边直线的阴影
+     * @param canvas 画步
+     */
+    private void drawVerticalShadow(Canvas canvas){
+        Shadow shadow = getShadow(isDayMode ? 0 : 1);
+
+        int edgeShadowMaxLen = 18;
+        canvas.translate(touchX - edgeShadowMaxLen, 0);
+
+        shadow.verticalShadow.setBounds(0, 0 , edgeShadowMaxLen, viewHeight);
+        shadow.verticalShadow.draw(canvas);
+
+    }
+
+
+    /**
+     * 绘画垂直翻页的右边的阴影
+     * @param canvas 画步
+     */
+    private void drawVerticalShadowInRight(Canvas canvas) {
+
+        canvas.save();
+        int shadowWidth = 90;
+        int shadowHeight = viewHeight;
+        if (verticalEndX - touchX < shadowWidth){
+            shadowWidth = (int)(verticalEndX - touchX);
+        }
+        canvas.translate(verticalEndX, 0);
+        Shadow shadow = getShadow(isDayMode ? 0 : 1);
+        shadow.edgeFoldShadow.setBounds(-shadowWidth, 0, shadowWidth, shadowHeight);
+        shadow.edgeFoldShadow.draw(canvas);
+
+        canvas.restore();
+    }
+
 
     private Shadow getShadow(int mode) {
         if (shadow == null) {
